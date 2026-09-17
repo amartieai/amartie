@@ -62,6 +62,10 @@ class GateReceipt:
         }, sort_keys=True)
         return hashlib.sha256(content.encode()).hexdigest()
     
+    def verify(self) -> bool:
+        """Verify this receipt's hash is correct."""
+        return self.hash == self._compute_hash()
+    
     def to_dict(self) -> dict:
         return {
             "action_id": self.action_id,
