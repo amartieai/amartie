@@ -1,0 +1,13 @@
+# .github/FUNDING.yml
+# AMARTIE — R&D Funding Model
+# Contributors donate → Pool reinvested → Profits shared back
+
+github: [amartieai]           # GitHub Sponsors (monthly or one-time)
+custom:                      # Custom donation methods
+  - "https://amartie.com/donate"  # Stripe donations (coming soon)
+  - "https://amartie.com/crypto"  # Crypto donations (coming soon)
+
+# R&D Pool Structure
+# R = Research (new features, judges, plugins)
+# D = Defense (security audits, hardening, forensics)
+# All contributions pooled → reinvested → profits shared to contributors
