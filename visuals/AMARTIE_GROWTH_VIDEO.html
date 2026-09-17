@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AMARTIE — Growth of a Living System</title>
+<style>
+  html,body{margin:0;padding:0;background:#04060d;overflow:hidden;height:100%}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{background:#04060d;box-shadow:0 0 80px rgba(0,180,255,.12)}
+  #hud{position:fixed;left:10px;bottom:8px;color:#4a6a8a;font:12px monospace;z-index:5;user-select:none}
+  #bar{position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,#0af,#0fa);width:0;z-index:5}
+  body.clean #hud,body.clean #bar{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1280" height="720"></canvas></div>
+<div id="hud">AMARTIE GROWTH — space: play/pause · ←/→: scrub · R: restart</div>
+<div id="bar"></div>
+<script>
+"use strict";
+// ============ AMARTIE GROWTH VIDEO — deterministic timeline ============
+// render(T) is a pure function of time T (seconds, 0..DUR). No wall-clock
+// dependence: window.seek(t) sets T, so frames can be captured exactly.
+const cv = document.getElementById('c'), cx = cv.getContext('2d');
+const W = 1280, H = 720, DUR = 80, FPS = 30;
+let T = 0, playing = true, lastMs = null;
+
+// ---- helpers ---------------------------------------------------------
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const sat=v=>clamp(v,0,1);
+// deterministic pseudo-random from an index
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);}
+const ease=t=>t<=0?0:t>=1?1:t*t*(3-2*t);                 // smoothstep
+const easeOut=t=>1-Math.pow(1-sat(t),3);
+const easeIn=t=>Math.pow(sat(t),3);
+function phase(t,a,b){return sat((t-a)/(b-a));}           // 0..1 within window
+function fadeInOut(t,a,b,hold=0){                          // label envelope
+  const fi=ease(phase(t,a,a+1)), fo=1-ease(phase(t,b-hold-1,b-hold));
+  return Math.min(fi, sat(fo));
+}
+function ghost(t,from,drop){ return t<from?1:1-(1-drop)*ease(phase(t,from,from+2)); }
+
+// ---- palette ---------------------------------------------------------
+const INK='#9fd8ff', DNA1='#37e6ff', DNA2='#7affc7', GOLD='#ffd76a',
+      RED='#ff5566', GRN='#4dffa0', DIM='rgba(120,170,210,';
+
+// ---- shared scene state computed from T ------------------------------
+let DNA_H=0, groundY=H-110, coreX=W/2, coreY=0, ringR=0;
+
+function starfield(t,alpha){
+  cx.save();
+  for(let i=0;i<140;i++){
+    const x=rnd(i)*W, y=rnd(i+500)*H, tw=.4+.6*Math.abs(Math.sin(t*.7+i));
+    cx.globalAlpha=alpha*tw*.7;
+    cx.fillStyle= i%9? '#8fb8dd':'#cfeaff';
+    const s=rnd(i+900)<.92?1:2;
+    cx.fillRect(x,y,s,s);
+  }
+  cx.restore();
+}
+
+function label(t,txt,sub,a,y){
+  if(a<=0.01)return;
+  cx.save();
+  cx.textAlign='center';
+  cx.globalAlpha=a;
+  cx.font='600 30px Georgia,serif';
+  cx.fillStyle='#eaf6ff';
+  cx.shadowColor=DNA1; cx.shadowBlur=18*a;
+  cx.fillText(txt,W/2,y);
+  if(sub){
+    cx.font='italic 17px Georgia,serif';
+    cx.shadowBlur=0; cx.fillStyle=DIM+(0.85*a)+')';
+    cx.fillText(sub,W/2,y+30);
+  }
+  cx.restore();
+}
+
+// phase 1: THE SPARK / SEED --------------------------------------------
+function drawSpark(t){
+  const a=ghost(t,7,.85);
+  if(a<=0.01)return;
+  cx.save(); cx.globalAlpha=a;
+  // ground
+  const g=cx.createLinearGradient(0,groundY-20,0,H);
+  g.addColorStop(0,'rgba(30,60,90,.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.fillRect(0,groundY-20,W,H-groundY+20);
+  cx.strokeStyle='rgba(90,150,200,.35)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(0,groundY); cx.lineTo(W,groundY); cx.stroke();
+  // spark descends and plants
+  const d=ease(phase(t,0.5,3.5));
+  const sy=40+(groundY-40)*d, sx=W/2+Math.sin(t*2)*8*(1-d);
+  const glow= t<3.5? .6+.4*Math.sin(t*14) : .8+.2*Math.sin(t*6);
+  const rr= t<3.5? 5 : 8+2*Math.sin(t*5);
+  const rg=cx.createRadialGradient(sx,sy,0,sx,sy,60);
+  rg.addColorStop(0,'rgba(255,255,255,'+(.95*glow*a)+')');
+  rg.addColorStop(.25,'rgba(120,230,255,'+(.7*a)+')');
+  rg.addColorStop(1,'rgba(40,120,255,0)');
+  cx.fillStyle=rg; cx.beginPath(); cx.arc(sx,sy,60,0,7); cx.fill();
+  cx.fillStyle='#fff'; cx.beginPath(); cx.arc(sx,sy,rr,0,7); cx.fill();
+  // roots once planted
+  if(t>3.5){
+    const r=ease(phase(t,3.5,6.5));
+    cx.strokeStyle='rgba(122,255,199,'+(.5*a)+')'; cx.lineWidth=2;
+    for(let i=0;i<7;i++){
+      const ang=Math.PI/2+(i-3)*.32;
+      cx.beginPath(); cx.moveTo(sx,groundY);
+      cx.quadraticCurveTo(sx+Math.cos(ang)*30*r,groundY+18, sx+Math.cos(ang)*60*r, groundY+40*r);
+      cx.stroke();
+    }
+  }
+  cx.restore();
+}
+
+// phase 2: DNA SPIRAL ---------------------------------------------------
+function helixPoint(hgt,fr){ // hgt: 0..1 along spine
+  const y=groundY-hgt*hgt;
+  const rot=fr+hgt*10.5;
+  return {x:W/2, y, rot};
+}
+function drawDNA(t,h,extraRot=0,alpha=1,stretch=1){
+  if(alpha<=0.01||h<=0)return;
+  cx.save(); cx.globalAlpha=alpha;
+  const turns=6, steps=90;
+  let prevA=null,prevB=null;
+  for(let i=0;i<=steps;i++){
+    const f=i/steps; if(f>h)break;
+    const p=helixPoint(f*stretch, t*.9+extraRot);
+    const ang=p.rot, R=46*(0.5+0.5*Math.sin(f*Math.PI)); // taper
+    const ax=p.x+Math.cos(ang)*R, ay=p.y+Math.sin(ang)*R*.28;
+    const bx=p.x+Math.cos(ang+Math.PI)*R, by=p.y+Math.sin(ang+Math.PI)*R*.28;
+    if(prevA){
+      // strands
+      cx.strokeStyle=DNA1; cx.lineWidth=2.5;
+      cx.beginPath(); cx.moveTo(prevA[0],prevA[1]); cx.lineTo(ax,ay); cx.stroke();
+      cx.strokeStyle=DNA2;
+      cx.beginPath(); cx.moveTo(prevB[0],prevB[1]); cx.lineTo(bx,by); cx.stroke();
+      // rungs
+      if(i%6===0){
+        cx.strokeStyle='rgba(150,220,255,.35)'; cx.lineWidth=1;
+        cx.beginPath(); cx.moveTo(ax,ay); cx.lineTo(bx,by); cx.stroke();
+      }
+    }
+    // nodes
+    const g=.55+.45*Math.sin(t*4+i);
+    cx.fillStyle=DNA1; cx.shadowColor=DNA1; cx.shadowBlur=10*g;
+    cx.beginPath(); cx.arc(ax,ay,3.2,0,7); cx.fill();
+    cx.fillStyle=DNA2; cx.shadowColor=DNA2;
+    cx.beginPath(); cx.arc(bx,by,3.2,0,7); cx.fill();
+    cx.shadowBlur=0;
+    prevA=[ax,ay]; prevB=[bx,by];
+  }
+  cx.restore();
+}
+
+// phase 3: HARNESS NODES plugging into DNA ------------------------------
+function drawHarnesses(t,alpha){
+  if(alpha<=0.01)return;
+  cx.save();
+  const N=14;
+  for(let i=0;i<N;i++){
+    const cyc=6, per=rnd(i)*cyc;                 // each cycles every 6s
+    const ph=((t-15+per%cyc)%cyc+cyc)%cyc;       // local phase time
+    const hf=0.15+rnd(i+50)*0.65;                // attach height on spine
+    const p=helixPoint(hf,t*.9);
+    const R=46*(0.5+0.5*Math.sin(hf*Math.PI));
+    const ax=p.x+Math.cos(p.rot)*R, ay=p.y+Math.sin(p.rot)*R*.28;
+    const bx=p.x+Math.cos(p.rot+Math.PI)*R, by=p.y+Math.sin(p.rot+Math.PI)*R*.28;
+    const anchor= i%2? [ax,ay]:[bx,by];
+    // fly in (0-1.6), work (1.6-4.4), fly out (4.4-6)
+    let x,y,glow=1;
+    if(ph<1.6){const d=ease(ph/1.6);
+      const sx=W/2+(rnd(i+7)<.5?-1:1)*(300+rnd(i+11)*260);
+      const sy=120+rnd(i+13)*480;
+      x=sx+(anchor[0]-sx)*d; y=sy+(anchor[1]-sy)*d; glow=.3+.7*d;
+    } else if(ph<4.4){x=anchor[0];y=anchor[1]; glow=.7+.3*Math.sin(t*7+i);}
+    else {const d=ease((ph-4.4)/1.6);
+      const ex=W/2+(rnd(i+17)<.5?-1:1)*(320+rnd(i+19)*240);
+      const ey=100+rnd(i+23)*500;
+      x=anchor[0]+(ex-anchor[0])*d; y=anchor[1]+(ey-anchor[1])*d; glow=.9*(1-d);}
+    // tether
+    cx.strokeStyle='rgba(255,215,106,'+(0.5*alpha*glow)+')'; cx.lineWidth=1.2;
+    cx.beginPath(); cx.moveTo(x,y);
+    cx.quadraticCurveTo((x+anchor[0])/2+14,(y+anchor[1])/2-10,anchor[0],anchor[1]); cx.stroke();
+    // node
+    cx.fillStyle=GOLD; cx.shadowColor=GOLD; cx.shadowBlur=14*glow*alpha;
+    cx.beginPath(); cx.arc(x,y,4.5,0,7); cx.fill(); cx.shadowBlur=0;
+  }
+  cx.restore();
+}
+
+// phase 4: THE NINE JUDGES + gatekeeping --------------------------------
+function judgePos(i,t,r){
+  const a=i/9*Math.PI*2 + t*0.12;
+  coreY=groundY-DNA_H*0.42*DNA_H? groundY-DNA_H*0.42 : H/2;
+  return [W/2+Math.cos(a)*r, coreY+Math.sin(a)*r*0.34];
+}
+function drawJudges(t,alpha){
+  if(alpha<=0.01)return;
+  coreY=groundY-DNA_H*0.42;
+  ringR=210;
+  cx.save();
+  // faint ring
+  cx.strokeStyle='rgba(255,215,106,'+(.18*alpha)+')'; cx.lineWidth=1;
+  cx.beginPath(); cx.ellipse(W/2,coreY,ringR,ringR*0.34,0,0,7); cx.stroke();
+  for(let i=0;i<9;i++){
+    const app=ease(phase(t,22+i*0.35,23.6+i*0.35));
+    const [x,y]=judgePos(i,t,ringR*(0.4+0.6*app));
+    const pulse=.7+.3*Math.sin(t*2.2+i*1.3);
+    const rg=cx.createRadialGradient(x,y,0,x,y,26);
+    rg.addColorStop(0,'rgba(255,235,180,'+(.9*alpha*app)+')');
+    rg.addColorStop(.35,'rgba(255,200,90,'+(.45*alpha*app*pulse)+')');
+    rg.addColorStop(1,'rgba(255,180,60,0)');
+    cx.fillStyle=rg; cx.beginPath(); cx.arc(x,y,26,0,7); cx.fill();
+    cx.fillStyle='#fff2cf'; cx.shadowColor=GOLD; cx.shadowBlur=12*alpha;
+    cx.beginPath(); cx.arc(x,y,5,0,7); cx.fill(); cx.shadowBlur=0;
+  }
+  cx.restore();
+}
+function drawGatekeeping(t,alpha){
+  if(alpha<=0.01)return;
+  cx.save();
+  // seekers: approach the ring; green pass, red rejected
+  for(let i=0;i<10;i++){
+    const t0=25+i*1.15, tt=t-t0;
+    if(tt<0||tt>4.2)continue;
+    const allowed= rnd(i+300)>0.4;
+    const fromAng=rnd(i+301)*Math.PI*2;
+    const [gx,gy]=judgePos(Math.floor(rnd(i+302)*9),t,ringR);
+    const sx=W/2+Math.cos(fromAng)*520, sy=coreY+Math.sin(fromAng)*180-140;
+    const d=ease(phase(tt,0,2.4));
+    let x=sx+(gx-sx)*d, y=sy+(gy-sy)*d, a=1;
+    if(tt>2.4){
+      if(allowed){ // absorbed into core
+        const d2=ease(phase(tt,2.4,3.2));
+        x+=(W/2-x)*d2; y+=(coreY-y)*d2; a=1-d2;
+        cx.strokeStyle='rgba(77,255,160,'+(.5*alpha*d2)+')';
+        cx.beginPath(); cx.moveTo(gx,gy); cx.lineTo(W/2,coreY); cx.stroke();
+      } else {     // bounced away, fades
+        const d2=ease(phase(tt,2.4,4.2));
+        x+=(sx-x)*d2*.8; y+=(sy-y)*d2*.8-40*d2; a=1-d2;
+        if(tt<2.8){cx.strokeStyle='rgba(255,85,102,'+(.6*alpha)+')';
+          cx.beginPath(); cx.moveTo(gx,gy); cx.lineTo(x,y); cx.stroke();}
+      }
+    }
+    const col= allowed?GRN:RED;
+    cx.fillStyle=col; cx.globalAlpha=alpha*a;
+    cx.shadowColor=col; cx.shadowBlur=10;
+    cx.beginPath(); cx.arc(x,y,4,0,7); cx.fill(); cx.shadowBlur=0;
+  }
+  cx.restore();
+}
+
+// phase 5: PILLARS + COCKPIT SHELL --------------------------------------
+function drawPillars(t,alpha){
+  if(alpha<=0.01)return;
+  cx.save();
+  const px=[W/2-330,W/2-150,W/2+150,W/2+330];
+  for(let i=0;i<4;i++){
+    const h=ease(phase(t,36+i*0.7,40+i*0.7))*(groundY-90);
+    const x=px[i];
+    const g=cx.createLinearGradient(x,groundY,x,groundY-h);
+    g.addColorStop(0,'rgba(20,60,100,0)'); g.addColorStop(1,'rgba(80,170,255,'+(.75*alpha)+')');
+    cx.fillStyle=g;
+    cx.fillRect(x-7,groundY-h,14,h);
+    cx.strokeStyle='rgba(140,210,255,'+(.8*alpha)+')'; cx.lineWidth=1.5;
+    cx.strokeRect(x-7,groundY-h,14,h);
+    // capital light
+    cx.fillStyle='rgba(200,240,255,'+alpha+')';
+    cx.shadowColor=INK; cx.shadowBlur=12*alpha;
+    cx.beginPath(); cx.arc(x,groundY-h,3.5,0,7); cx.fill(); cx.shadowBlur=0;
+  }
+  cx.restore();
+}
+function drawCockpit(t,alpha){
+  if(alpha<=0.01)return;
+  cx.save();
+  const f=ease(phase(t,42,48));
+  // wireframe dome over the core
+  cx.translate(W/2,groundY-10); cx.scale(1,0.42);
+  cx.strokeStyle='rgba(120,200,255,'+(.5*alpha)+')'; cx.lineWidth=1.2;
+  for(let k=0;k<5;k++){
+    const r=(140+k*48)*f;
+    if(r<2)continue;
+    cx.globalAlpha=alpha*(1-k*.13);
+    cx.beginPath(); cx.arc(0,-190, r, Math.PI*1.05, Math.PI*1.95); cx.stroke();
+  }
+  for(let k=0;k<6;k++){
+    const hh=190+((k%3)*70)*f;
+    cx.globalAlpha=alpha*.5;
+    cx.beginPath(); cx.moveTo(-260*f,-40-k*18); cx.quadraticCurveTo(0,-hh-140,260*f,-40-k*18); cx.stroke();
+  }
+  cx.restore();
+}
+
+// phase 6: THE ABYSS + PULLED NODES -------------------------------------
+function drawAbyss(t,alpha){
+  if(alpha<=0.01)return;
+  starfield(t,alpha*(t>46?sat(phase(t,46,50)):1));
+}
+const NODES=[
+  {name:'STUDIO',       sub:'live creation feed',   col:'#37e6ff', ang:2.4, t0:55},
+  {name:'DRAFTING TABLE',sub:'blueprints & tasks',  col:'#7affc7', ang:0.6, t0:59},
+  {name:'KNOWLEDGE VAULT',sub:'documents & memory', col:'#ffd76a', ang:4.2, t0:63},
+  {name:'MARKETPLACE',  sub:'plugins & organs',     col:'#c792ff', ang:5.3, t0:67},
+];
+function drawNodes(t,alpha){
+  if(alpha<=0.01)return;
+  cx.save();
+  // distant stars that become nodes
+  for(const n of NODES){
+    const dist0=1;
+    const pull=phase(t,n.t0-1.2,n.t0+1.6); // 0 far .. 1 arrived
+    const sx=W/2+Math.cos(n.ang)*560, sy=H/2-40+Math.sin(n.ang)*300;
+    const tx=W/2+Math.cos(n.ang)*380,  ty=H/2-30+Math.sin(n.ang)*215;
+    const e=easeOut(pull);
+    const x=sx+(tx-sx)*e, y=sy+(ty-sy)*e;
+    const isStar=t<n.t0-1.2;
+    if(isStar){
+      const tw=.5+.5*Math.sin(t*3+n.ang*7);
+      cx.fillStyle='#cfeaff'; cx.globalAlpha=alpha*tw;
+      cx.beginPath(); cx.arc(sx,sy,2.5,0,7); cx.fill();
+    } else if(pull<1){
+      // comet pull with trail toward viewer
+      cx.globalAlpha=alpha;
+      const g=cx.createLinearGradient(sx,sy,x,y);
+      g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(1,n.col);
+      cx.strokeStyle=g; cx.lineWidth=3;
+      cx.beginPath(); cx.moveTo(sx,sy); cx.lineTo(x,y); cx.stroke();
+      cx.fillStyle='#fff'; cx.shadowColor=n.col; cx.shadowBlur=18;
+      cx.beginPath(); cx.arc(x,y,5,0,7); cx.fill(); cx.shadowBlur=0;
+    } else {
+      // transformed: a living data panel
+      const settle=ease(phase(t,n.t0+1.6,n.t0+2.4));
+      drawDataPanel(n,tx,ty,190,settle*alpha,t);
+    }
+  }
+  cx.restore();
+}
+function drawDataPanel(n,x,y,sz,a,t){
+  if(a<=0.01)return;
+  cx.save(); cx.globalAlpha=a;
+  // panel card
+  cx.fillStyle='rgba(8,18,34,.88)';
+  cx.strokeStyle=n.col; cx.lineWidth=1.2;
+  cx.shadowColor=n.col; cx.shadowBlur=16*a;
+  const w=sz, h=sz*0.62;
+  cx.beginPath(); cx.roundRect(x-w/2,y-h/2,w,h,8); cx.fill(); cx.shadowBlur=0; cx.stroke();
+  // title
+  cx.fillStyle='#eaf6ff'; cx.font='600 13px monospace'; cx.textAlign='left';
+  cx.fillText(n.name,x-w/2+10,y-h/2+18);
+  cx.fillStyle=n.col; cx.font='10px monospace';
+  cx.fillText(n.sub,x-w/2+10,y-h/2+32);
+  // flowing data lines (animated)
+  cx.font='9px monospace';
+  const lines=n.name==='STUDIO'? ['render ▸▸▸ 98%','draft saved ✓','scene: jungle','export mp4 …']
+    : n.name==='DRAFTING TABLE'? ['task t_9f2 ▸ running','review: approve','blueprint v3 ✓','ship: github']
+    : n.name==='KNOWLEDGE VAULT'? ['memory: pinned','doc: thesis.md','recall 0.02s ✓','index +412']
+    : ['plugin: cron ✓','organ: revenue','install ▸ done','white-label ✓'];
+  lines.forEach((ln,i)=>{
+    const flow=sat((t-n.t0-1.6)*1.4 - i*0.3);
+    cx.globalAlpha=a*flow;
+    cx.fillStyle=i%2?n.col:'#9fd8ff';
+    cx.fillText(ln, x-w/2+10, y-h/2+48+i*14);
+  });
+  // sparkline
+  cx.globalAlpha=a*.8; cx.strokeStyle=n.col; cx.lineWidth=1;
+  cx.beginPath();
+  for(let i=0;i<=20;i++){
+    const vx=x-w/2+12+i*((w-24)/20);
+    const vy=y+h/2-14-Math.abs(Math.sin(t*2+i*.8+n.ang))*16;
+    i?cx.lineTo(vx,vy):cx.moveTo(vx,vy);
+  }
+  cx.stroke();
+  // tether to core
+  cx.globalAlpha=a*.4; cx.strokeStyle=n.col;
+  cx.beginPath(); cx.moveTo(x,y+h/2);
+  cx.quadraticCurveTo((x+W/2)/2,(y+coreY)/2+30,W/2,coreY); cx.stroke();
+  cx.restore();
+}
+
+// finale ----------------------------------------------------------------
+function drawFinale(t){
+  const a=phase(t,72,74);
+  if(a<=0)return;
+  cx.save(); cx.globalAlpha=a;
+  cx.fillStyle='rgba(4,6,13,.45)'; cx.fillRect(0,0,W,H);
+  cx.textAlign='center';
+  cx.font='700 64px Georgia,serif'; cx.fillStyle='#f4fbff';
+  cx.shadowColor=DNA1; cx.shadowBlur=30;
+  cx.fillText('A M A R T I E',W/2,H/2-10); cx.shadowBlur=0;
+  cx.font='italic 20px Georgia,serif'; cx.fillStyle=DIM+'.9)';
+  cx.fillText('Everything changes around the DNA — except the DNA.',W/2,H/2+34);
+  cx.font='14px monospace'; cx.fillStyle=DIM+'.7)';
+  cx.fillText('judged · adaptive · task-first · end-to-end verified',W/2,H/2+64);
+  cx.restore();
+}
+
+// ---- master render ----------------------------------------------------
+function render(t){
+  cx.clearRect(0,0,W,H);
+  // backdrop
+  const bg=cx.createRadialGradient(W/2,groundY-160,60,W/2,H/2,900);
+  bg.addColorStop(0,'#0a1526'); bg.addColorStop(1,'#04060d');
+  cx.fillStyle=bg; cx.fillRect(0,0,W,H);
+  starfield(t,.5);
+  drawAbyss(t,1);
+
+  // DNA growth: full by t=17
+  DNA_H=ease(phase(t,7,17))*(groundY-140);
+  const dnaA=ghost(t,22,.68);
+  drawSpark(t);
+  drawDNA(t,DNA_H,0,dnaA);
+
+  // harnesses from 15s
+  drawHarnesses(t, ghost(t,50,.55)*phase(t,15,16));
+
+  // judges + gatekeeping
+  const jA=ghost(t,36,.5)*phase(t,22,23);
+  drawJudges(t,jA);
+  drawGatekeeping(t, ghost(t,40,.4)*phase(t,25,26));
+
+  // pillars + cockpit
+  drawPillars(t, ghost(t,46,.4)*phase(t,36,37));
+  drawCockpit(t, ghost(t,50,.45)*phase(t,42,43));
+
+  // pulled nodes
+  drawNodes(t, phase(t,54,55));
+
+  // core heartbeat (always)
+  if(t>7){
+    coreY=groundY-DNA_H*0.42;
+    const p=.6+.4*Math.sin(t*2.4);
+    const rg=cx.createRadialGradient(W/2,coreY,0,W/2,coreY,90);
+    rg.addColorStop(0,'rgba(160,240,255,'+(.30*p)+')');
+    rg.addColorStop(1,'rgba(40,120,255,0)');
+    cx.fillStyle=rg; cx.beginPath(); cx.arc(W/2,coreY,90,0,7); cx.fill();
+  }
+
+  // ---- on-screen labels (fade-away discipline) ----
+  label(t,'THE SEED','AMARTIE DNA — a spark of light, planted',        fadeInOut(t,2,8),120);
+  label(t,'AMARTIE DNA','the permanent spine',                          fadeInOut(t,10,19),120);
+  label(t,'HARNESSES','models plug in · work · detach · are replaced',  fadeInOut(t,17,26),120);
+  label(t,'THE NINE','judges — nothing enters without a verdict',       fadeInOut(t,23.5,33),120);
+  label(t,'ALLOWED — or TURNED AWAY','the gate decides what becomes real',fadeInOut(t,28,36),120);
+  label(t,'PILLARS','the structure rises',                              fadeInOut(t,37,43),120);
+  label(t,'THE COCKPIT','a body forms around the core',                 fadeInOut(t,43,50),120);
+  label(t,'THE ABYSS','the system looks outward — unbounded knowledge', fadeInOut(t,47.5,56),120);
+  label(t,'NODES, PULLED INWARD','each star becomes real, living data', fadeInOut(t,55,64),120);
+  drawFinale(t);
+}
+
+// ---- playback engine --------------------------------------------------
+function seek(t){T=clamp(t,0,DUR);render(T);
+  document.getElementById('bar').style.width=(T/DUR*100)+'%';}
+function loop(ms){
+  if(playing){
+    if(lastMs!=null)T+=(ms-lastMs)/1000;
+    if(T>=DUR){T=DUR;playing=false;}
+    seek(T);
+  }
+  lastMs=ms; requestAnimationFrame(loop);
+}
+window.seek=seek; window.playing=()=>playing; window.dur=DUR;
+window.setPlaying=v=>{playing=v;};
+addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();playing=!playing;}
+  if(e.key==='ArrowRight')seek(T+2);
+  if(e.key==='ArrowLeft')seek(T-2);
+  if(e.key==='r'||e.key==='R'){seek(0);playing=true;}
+});
+requestAnimationFrame(loop);
+if(new URLSearchParams(location.search).get('clean'))document.body.classList.add('clean');
+seek(0); playing=true;
+</script>
+</body>
+</html>

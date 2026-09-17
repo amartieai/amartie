@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMARTIE HALO — The Spark of Life</title>
+<style>
+body{margin:0;background:#0A0A0A;overflow:hidden;font-family:'Segoe UI',sans-serif;color:#fff}
+canvas{display:block}
+#ui{position:absolute;top:20px;left:20px;color:#00FFFF;font-size:14px;pointer-events:none}
+#ui h1{color:#FFD700;font-size:28px;margin-bottom:5px;text-shadow:0 0 10px #FFD700}
+#ui p{color:#00FFFF;margin:2px 0}
+#scene-info{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#fff;font-size:16px;text-align:center;pointer-events:none;max-width:600px}
+#nav{position:absolute;top:20px;right:20px;display:flex;gap:10px}
+.nav-btn{padding:8px 16px;border:1px solid #00FFFF;border-radius:20px;color:#00FFFF;cursor:pointer;background:transparent;font-size:12px;transition:all .3s}
+.nav-btn:hover{background:#00FFFF;color:#0A0A0A}
+</style>
+</head>
+<body>
+<div id="ui"><h1>AMARTIE HALO</h1><p>The Spark of Life</p><p>Status: <span id="status">RESONANT</span> | <span id="time"></span></p></div>
+<div id="nav"><button class="nav-btn" onclick="setScene(0)">Scene 1</button><button class="nav-btn" onclick="setScene(1)">Scene 2</button><button class="nav-btn" onclick="setScene(2)">Scene 3</button><button class="nav-btn" onclick="setScene(3)">Scene 4</button><button class="nav-btn" onclick="setScene(4)">Scene 5</button></div>
+<div id="scene-info">The toroidal fields of the mind</div>
+<canvas id="c"></canvas>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;
+const P=9;const pillars=['INGEST','CORRELATE','QUERY','SELF_MOD','PERSIST','VISUAL','VOICE','FRACTAL','ADAPT'];
+const colors=['#00FFFF','#FF00FF','#FFFF00','#00FF00','#FF0000','#0080FF','#8000FF','#FF8000','#FFFFFF'];
+let angle=0,selectedPillar=-1,t=0,currentScene=0;
+const nodes=[];for(let i=0;i<P;i++)nodes.push({angle:(i/P)*Math.PI*2,r:200,size:8+pillar(i)*2});
+function pillar(i){return[1,2,3,4,5,6,7,8,9][i];}
+function ringEdges(i){return[(i+3)%9,(i+6)%9,(i+9)%9];}
+const sceneTexts=["THE SPARK OF LIFE","THE TOROIDAL FIELDS","THE PINEAL GLAND","TWO CELLS JOIN","ZERO POINT ENERGY"];
+function animate(){
+t+=0.01;angle+=0.002;c.clearRect(0,0,c.width,c.height);
+const cx=c.width/2,cy=c.height/2;
+x.strokeStyle='#0A0A1A';x.lineWidth=0.5;
+for(let r=60;r<300;r+=40){x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke();}
+for(let i=0;i<P;i++){const a=nodes[i].angle+angle;const r=200+Math.sin(t+i*50)*40;const px=cx+Math.cos(a)*r;const py=cy+Math.sin(a)*r;
+nodes[i].x=px;nodes[i].y=py;const isSelected=selectedPillar===i;
+x.beginPath();x.arc(px,py,isSelected?nodes[i].size+10:nodes[i].size,0,Math.PI*2);
+x.fillStyle=colors[i];x.fill();if(isSelected){x.strokeStyle='#FFFFFF';x.lineWidth=2;x.stroke();}
+x.fillStyle=colors[i];x.font='bold 12px monospace';x.fillText(pillars[i],px-30,py-nodes[i].size-15);}
+for(let i=0;i<P;i++){const edges=ringEdges(i);for(const e of edges){const a2=nodes[e].angle+angle;const r2=200+Math.sin(t+e*50)*40;const px2=cx+Math.cos(a2)*r2;const py2=cy+Math.sin(a2)*r2;
+x.beginPath();x.moveTo(nodes[i].x,nodes[i].y);x.lineTo(px2,py2);x.strokeStyle=colors[i]+'50';x.lineWidth=1;x.stroke();}}
+const sparkX=cx+Math.sin(angle*3)*10,sparkY=cy;
+const sparkGrad=x.createRadialGradient(sparkX,sparkY,0,sparkX,sparkY,20);
+sparkGrad.addColorStop(0,'rgba(255,255,255,0.8)');sparkGrad.addColorStop(0.5,'rgba(255,200,0,0.4)');sparkGrad.addColorStop(1,'rgba(255,100,0,0)');
+x.beginPath();x.arc(sparkX,sparkY,20,0,Math.PI*2);x.fillStyle=sparkGrad;x.fill();
+x.fillStyle='rgba(10,10,10,0.2)';x.fillRect(0,0,c.width,c.height);
+document.getElementById('time').textContent=new Date().toLocaleTimeString();
+document.getElementById('scene-info').textContent=sceneTexts[currentScene];
+requestAnimationFrame(animate);}
+function setScene(s){currentScene=s;selectedPillar=-1;}
+window.addEventListener('resize',()=>{c.width=window.innerWidth;c.height=window.innerHeight;});
+animate();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AMARTIE — README hero</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1600px; height: 1120px; overflow: hidden;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    background:
+      radial-gradient(ellipse 1100px 600px at 18% 0%, rgba(30,80,180,.28), transparent 60%),
+      radial-gradient(ellipse 900px 550px at 85% 8%, rgba(130,40,180,.20), transparent 55%),
+      radial-gradient(ellipse 800px 500px at 50% 110%, rgba(15,50,110,.30), transparent 55%),
+      linear-gradient(180deg, #040710 0%, #050810 45%, #040812 100%);
+    color: #e6e9f0;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 56px 70px 44px;
+  }
+  .stars {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 140px 90px, rgba(255,255,255,.7), transparent),
+      radial-gradient(1px 1px at 420px 60px, rgba(255,255,255,.5), transparent),
+      radial-gradient(2px 2px at 760px 130px, rgba(120,220,255,.8), transparent),
+      radial-gradient(1px 1px at 1080px 80px, rgba(255,255,255,.55), transparent),
+      radial-gradient(1.5px 1.5px at 1350px 170px, rgba(255,255,255,.6), transparent),
+      radial-gradient(1px 1px at 1560px 60px, rgba(120,220,255,.6), transparent),
+      radial-gradient(1px 1px at 240px 260px, rgba(255,255,255,.4), transparent),
+      radial-gradient(1.5px 1.5px at 940px 300px, rgba(255,255,255,.5), transparent),
+      radial-gradient(1px 1px at 1240px 240px, rgba(120,220,255,.5), transparent),
+      radial-gradient(2.5px 2.5px at 180px 640px, rgba(255,255,255,.7), transparent),
+      radial-gradient(1.5px 1.5px at 1480px 560px, rgba(120,220,255,.6), transparent);
+  }
+  .brand { display: flex; align-items: center; gap: 22px; z-index: 2; }
+  .logo {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: linear-gradient(135deg, #4cc9ff, #ffd166);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: #07090d; font-weight: 700;
+    box-shadow: 0 0 30px rgba(76,201,255,.4), 0 0 60px rgba(76,201,255,.18);
+  }
+  h1 {
+    font-size: 54px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; color: #ffd166;
+    text-shadow: 0 0 24px rgba(255,209,102,.35);
+  }
+  .tag {
+    margin-top: 14px; font-size: 16px; letter-spacing: .32em;
+    text-transform: uppercase; color: #7d879c; z-index: 2;
+  }
+  .tag b { color: #4cc9ff; font-weight: 600; }
+  .diagram {
+    margin-top: 36px; z-index: 2;
+    background: rgba(10,14,22,.72);
+    border: 1px solid rgba(76,201,255,.22);
+    border-radius: 18px; padding: 22px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6), 0 0 1px rgba(76,201,255,.3);
+    backdrop-filter: blur(6px);
+    max-width: 100%;
+  }
+  .diagram img {
+    display: block; border-radius: 10px;
+    max-height: 760px; max-width: 1380px; width: auto; height: auto;
+    margin: 0 auto;
+    filter: saturate(1.05);
+  }
+  .footer {
+    margin-top: auto; padding-top: 26px; z-index: 2;
+    display: flex; gap: 34px; font-size: 13px;
+    letter-spacing: .18em; text-transform: uppercase; color: #7d879c;
+  }
+  .footer span b { color: #4cc9ff; }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="brand">
+  <div class="logo">◆</div>
+  <h1>Amartie</h1>
+</div>
+<div class="tag">the machine that trades while you sleep — <b>live cockpit · zero-defect gates</b></div>
+<div class="diagram"><img src="AMARTIE_ARCHITECTURE.png" alt="AMARTIE architecture"></div>
+<div class="footer">
+  <span><b>◆</b> signal → gate → execution</span>
+  <span><b>◆</b> every trade verified twice</span>
+  <span><b>◆</b> receipts, not promises</span>
+</div>
+</body>
+</html>
