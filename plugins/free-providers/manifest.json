@@ -1,0 +1,24 @@
+{
+  "name": "free-providers",
+  "version": "0.2.0",
+  "description": "Free AI API provider integrations. Inception Labs (100M tokens), Atria Dawn Preview, Cloudflare Workers AI, OpenCode, and more. All OpenAI-compatible.",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "network",
+    "execute"
+  ],
+  "api_endpoints": {
+    "models": "/api/providers/models",
+    "chat": "/api/providers/chat",
+    "status": "/api/providers/status"
+  },
+  "studio_type": "providers",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "Free AI APIs",
+  "tool_url": "https://inceptionlabs.ai"
+}

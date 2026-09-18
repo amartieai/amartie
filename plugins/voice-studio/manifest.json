@@ -1,0 +1,26 @@
+{
+  "name": "voice-studio",
+  "version": "0.2.0",
+  "description": "Voice-first interaction engine. Local Whisper STT + cloud TTS with pipeline scheduling. Runs on 12GB GPU or CPU.",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "audio_record",
+    "audio_play",
+    "network",
+    "execute"
+  ],
+  "api_endpoints": {
+    "stt": "/api/voice/transcribe",
+    "tts": "/api/voice/speak",
+    "pipeline": "/api/voice/pipeline"
+  },
+  "studio_type": "voice",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "Whisper + ElevenLabs",
+  "tool_url": "https://github.com/openai/whisper"
+}

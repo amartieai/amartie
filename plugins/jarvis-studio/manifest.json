@@ -1,0 +1,28 @@
+{
+  "name": "jarvis-studio",
+  "version": "0.2.0",
+  "description": "Jarvis-style multi-tool AI agent. Voice + Gmail + Calendar + Drive + custom tools. Model-agnostic with gate verification.",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "audio_record",
+    "audio_play",
+    "network",
+    "execute",
+    "file_read",
+    "file_write"
+  ],
+  "api_endpoints": {
+    "agent": "/api/jarvis/agent",
+    "tools": "/api/jarvis/tools",
+    "history": "/api/jarvis/history"
+  },
+  "studio_type": "jarvis",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "AMARTIE Jarvis Engine",
+  "tool_url": "https://github.com/amartieai/amartie"
+}
