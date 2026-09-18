@@ -148,6 +148,19 @@ Every AMARTIE instance is unique — your avatar, your pineal spark, your life l
 
 ---
 
+## Donations — R&D Pool
+
+Every donation funds AMARTIE's continued development.
+
+| Method | Address |
+|--------|---------|
+| **Solana** | `FjhNTArFrE1eunxKhgXqX6AB5XYgkMrMAZtXc7FwCcJV` |
+
+All funds pool in trust → reinvested → profits shared back to R&D contributors.
+
+- **R (Research):** New features, judges, plugins
+- **D (Defense):** Security audits, hardening, forensics
+
 ## License
 
 MIT — Open source, forever.

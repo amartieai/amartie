@@ -36,6 +36,10 @@ Thumbs.db
 .env.*
 !.env.example
 
+# AMARTIE wallet (NEVER commit)
+wallet.json
+wallet*.json
+
 # AMARTIE vault data
 *.vault
 vault_data/
