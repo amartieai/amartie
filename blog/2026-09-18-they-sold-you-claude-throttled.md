@@ -16,13 +16,30 @@ When the model gets expensive to run, the provider silently swaps it for a cheap
 
 ---
 
-## The Proof — Sweep of 323 Sessions, 39 Models, 0 Exceptions
+## The Proof — Sweep of 323 Sessions, 39 Models, 100% Failure Rate
 
 This is not a claim. This is a forensic audit of **323 session files** across 136 Hermes sessions, tracking **39 distinct models** actually served — reviewed by an independent 9-judge panel.
 
 **The evidence is anonymous.** No conversations. No prompts. No personal data. Just model names, timestamps, credit errors, and response lengths.
 
 **The tooling is open.** Anyone can run it on their own logs.
+
+### The Worst Part: Total Service Denial
+
+**Every model — 39 of them — has a 0% success rate.** Not just premium models. Free models too. The user has been completely locked out of the entire system.
+
+| Model | Requests | Success Rate |
+|-------|----------|--------------|
+| **deepseek/deepseek-v4-flash** (cheap) | 101 | **0%** |
+| **moonshotai/kimi-k3** (premium) | 41 | **0%** |
+| **anthropic/claude-opus-4.8** (premium) | 11 | **0%** |
+| **tencent/hy3:free** (free) | 3 | **0%** |
+| **qwen2.5-coder:7b** (free) | 3 | **0%** |
+| **ALL 39 MODELS** | 323 | **0%** |
+
+This is "halting credits" — total service denial. The provider advertises these models as available. Users can select them. The system logs 404/402 errors. But no model works.
+
+**The system is designed to take your money and give you nothing.**
 
 ---
 
