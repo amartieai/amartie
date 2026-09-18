@@ -154,7 +154,7 @@ Every donation funds AMARTIE's continued development.
 
 | Method | Address |
 |--------|---------|
-| **Solana** | `FjhNTArFrE1eunxKhgXqX6AB5XYgkMrMAZtXc7FwCcJV` |
+| **Solana** | `3UrVfnfHJnH4RExcaR8dipqxcevuJSyMjrbkSbjqQQth` |
 
 All funds pool in trust → reinvested → profits shared back to R&D contributors.
 

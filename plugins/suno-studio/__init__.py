@@ -29,6 +29,18 @@ def handle(action, data):
         return check_status(data.get("job_id", ""))
     elif action == "lyrics":
         return generate_lyrics(data.get("prompt", ""))
+    elif action == "genres":
+        from . import genres
+        return {"status": "ok", "presets": genres.list_presets()}
+    elif action == "genre_generate":
+        from . import genres
+        prompt = genres.generate_prompt(
+            data.get("genre", "blues"),
+            data.get("theme", ""),
+            data.get("details", ""),
+            data.get("mood", "")
+        )
+        return generate(prompt)
     return {"error": "unknown action"}
 
 
