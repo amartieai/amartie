@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMARTIE — Your AI, Verified</title>
+<meta name="description" content="The open-source gate that proves your AI wasn't swapped. Nine independent judges. Hash-chained receipts. 250M+ free tokens.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04060b; --ink:#e8ecf4; --dim:#8b96a8; --gold:#ffd166; --cyan:#4cc9ff;
+  --line:rgba(255,209,102,.16); --panel:rgba(8,12,20,.78);
+  --serif:'Instrument Serif',Georgia,serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;overflow-x:hidden}
+
+/* HALO background */
+#halo-bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+#halo-bg canvas{width:100%;height:100%;display:block}
+.halo-fade{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg, rgba(4,6,11,.3) 0%, rgba(4,6,11,.7) 40%, rgba(4,6,11,.95) 100%)}
+
+/* Content layer */
+.content{position:relative;z-index:2}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;background:rgba(4,6,11,.65);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:var(--gold);display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:var(--bg);font-size:14px;box-shadow:0 0 20px rgba(255,209,102,.3)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);transition:color .2s;text-decoration:none;font-weight:500}
+.nav-links a:hover{color:var(--gold)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 32px 80px}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:18px}
+.hero h1{font-family:var(--serif);font-size:clamp(42px,7vw,72px);font-weight:400;line-height:1.06;letter-spacing:-.03em;margin-bottom:20px;max-width:800px}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero p{font-size:17px;color:var(--ink-2);max-width:560px;margin-bottom:36px;line-height:1.7;color:#c9d2e0}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--bg);font-size:13px;letter-spacing:.1em;
+  text-transform:uppercase;padding:15px 28px;border-radius:11px;font-weight:700;transition:all .15s;text-decoration:none}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,209,102,.25)}
+.cta-sec{display:inline-flex;align-items:center;gap:10px;background:rgba(8,12,20,.8);color:var(--ink-2);font-size:13px;letter-spacing:.1em;
+  text-transform:uppercase;padding:15px 28px;border-radius:11px;font-weight:600;border:1px solid var(--line);transition:all .15s;text-decoration:none}
+.cta-sec:hover{border-color:var(--gold);color:var(--ink)}
+
+/* SECTIONS */
+.section{padding:100px 32px;max-width:1140px;margin:0 auto}
+.section .label-sm{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px}
+.section h2{font-family:var(--serif);font-size:clamp(32px,4vw,44px);font-weight:400;letter-spacing:-.025em;max-width:620px;margin-bottom:16px;line-height:1.12}
+.section h2 em{font-style:italic;color:var(--gold)}
+.section .lead{font-size:16px;color:var(--ink-2);max-width:520px;margin-bottom:56px;line-height:1.7;color:#c9d2e0}
+
+/* RECEIPT */
+.receipt{background:rgba(8,12,20,.85);border:1px solid var(--line);border-radius:14px;padding:28px 32px;
+  font-family:'SF Mono','Monaco','Consolas',monospace;font-size:11px;line-height:1.85;color:var(--dim);
+  position:relative;overflow:hidden;max-width:700px;margin:0 auto}
+.receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.receipt .row{display:flex;gap:16px;align-items:baseline}
+.receipt .label{color:var(--gold);font-weight:600;min-width:110px;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.receipt .hash{color:var(--cyan);word-break:break-all;font-size:10px}
+.receipt .verdict{color:#3fb950;font-weight:600;font-size:10px}
+
+/* JUDGES */
+.judges{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.judge{background:rgba(8,12,20,.75);border:1px solid var(--line);border-radius:13px;padding:26px;position:relative;transition:border-color .2s}
+.judge:hover{border-color:var(--line)}
+.judge .jnum{position:absolute;top:18px;right:18px;font-family:var(--serif);font-size:32px;color:rgba(255,255,255,.06);font-style:italic}
+.judge h3{font-size:14px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
+.judge p{font-size:13px;color:var(--dim);line-height:1.6}
+
+/* STUDIOS */
+.studios{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.studio{background:rgba(8,12,20,.75);border:1px solid var(--line);border-radius:13px;padding:32px;
+  cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block}
+.studio:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.studio .icon{font-size:36px;margin-bottom:16px;display:block}
+.studio h3{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.studio p{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px;color:#c9d2e0}
+.studio .tags{display:flex;gap:6px;flex-wrap:wrap}
+.studio .tag{font-size:10px;letter-spacing:.04em;color:var(--dim);background:rgba(4,6,11,.6);padding:4px 10px;border-radius:6px;border:1px solid var(--line)}
+
+/* PROOF BAR */
+.proof{display:flex;gap:48px;margin-top:48px;padding-top:40px;border-top:1px solid var(--line);flex-wrap:wrap}
+.proof .item .num{font-family:var(--serif);font-size:40px;font-weight:400;color:var(--gold);line-height:1}
+.proof .item .txt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:6px;font-weight:500}
+
+/* FINAL */
+.final-cta{text-align:center;padding:120px 32px}
+.final-cta h2{font-family:var(--serif);font-size:clamp(32px,4vw,48px);font-weight:400;letter-spacing:-.03em;margin-bottom:14px}
+.final-cta h2 em{font-style:italic;color:var(--gold)}
+.final-cta p{font-size:16px;color:var(--dim);margin-bottom:36px;color:#c9d2e0}
+
+footer{border-top:1px solid var(--line);padding:32px;display:flex;justify-content:space-between;font-size:12px;color:var(--dim);
+  position:relative;z-index:2;background:rgba(4,6,11,.8)}
+footer a{color:var(--ink-2);text-decoration:none;transition:color .15s}
+footer a:hover{color:var(--gold)}
+
+@media(max-width:860px){
+  .hero h1{font-size:42px}
+  .section h2{font-size:32px}
+  .judges,.studios{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .proof{flex-wrap:wrap;gap:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- HALO 3D Background -->
+<div id="halo-bg">
+  <canvas id="halo-canvas"></canvas>
+</div>
+<div class="halo-fade"></div>
+
+<div class="content">
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#"><div class="logo-mark">A</div><span>AMARTIE</span></a>
+  <div class="nav-links">
+    <a href="#judges">Judges</a>
+    <a href="#studios">Studios</a>
+    <a href="#receipt">Proof</a>
+    <a href="/visuals/cockpit.html">Open Cockpit</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">Open Source &middot; v0.1.0</div>
+  <h1>Your AI,<br><em>verified.</em></h1>
+  <p>AMARTIE is the gate that proves your AI wasn't swapped. Nine independent judges review every action. Hash-chained receipts leave no room for doubt.</p>
+  <div class="cta-row">
+    <a class="cta" href="/visuals/cockpit.html">Try the Cockpit</a>
+    <a class="cta-sec" href="https://github.com/amartieai/amartie" target="_blank">Star on GitHub</a>
+  </div>
+</section>
+
+<!-- LIVE RECEIPT -->
+<section class="section" id="receipt" style="padding-top:40px">
+  <div class="label-sm">Live Receipt</div>
+  <h2>Every action, <em>proven.</em></h2>
+  <p class="lead">Hash-chained receipts. Tamper-evident. Independently verifiable. No trust required.</p>
+  <div class="receipt">
+    <div class="row"><span class="label">Receipt</span><span class="hash">sha256:a3f8e91b2c4d...6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c</span></div>
+    <div class="row"><span class="label">Action</span>Email blast &middot; 31 recipients &middot; SMTP relay</div>
+    <div class="row"><span class="label">Judges</span><span class="verdict">9/9 PASS</span> &nbsp; TRUTH &middot; BOUNDARY &middot; LOGIC &middot; COMPLETENESS &middot; EXECUTION &middot; OWNER-INTENT &middot; RECOVERY &middot; TRADE &middot; UNITY</div>
+    <div class="row"><span class="label">Chain</span><span class="hash">prev: 8f9a0b1c2d3e... &rarr; this: a3f8e91b...</span></div>
+    <div class="row"><span class="label">Status</span><span class="verdict">VERIFIED &middot; tamper-free &middot; signed 2026-09-18 04:57 UTC</span></div>
+  </div>
+</section>
+
+<!-- JUDGES -->
+<section class="section" id="judges">
+  <div class="label-sm">The Braid</div>
+  <h2>Nine judges.<br><em>One dissents, it bounces.</em></h2>
+  <p class="lead">Every outbound action passes through nine independent judges. Unanimous PASS or correction. Never a push-through.</p>
+  <div class="judges">
+    <div class="judge"><span class="jnum">01</span><h3>Truth</h3><p>Facts are checked. No hallucination passes.</p></div>
+    <div class="judge"><span class="jnum">02</span><h3>Boundary</h3><p>Scope is enforced. No mission drift.</p></div>
+    <div class="judge"><span class="jnum">03</span><h3>Logic</h3><p>Reasoning holds. No contradictions.</p></div>
+    <div class="judge"><span class="jnum">04</span><h3>Completeness</h3><p>Nothing critical missing. Full picture.</p></div>
+    <div class="judge"><span class="jnum">05</span><h3>Execution</h3><p>Action is simple, direct, achievable.</p></div>
+    <div class="judge"><span class="jnum">06</span><h3>Owner Intent</h3><p>Aligned with what you actually want.</p></div>
+    <div class="judge"><span class="jnum">07</span><h3>Recovery</h3><p>If it fails, there's a path back.</p></div>
+    <div class="judge"><span class="jnum">08</span><h3>Trade Integrity</h3><p>Fair exchange. No hidden cost.</p></div>
+    <div class="judge"><span class="jnum">09</span><h3>Unity</h3><p>Team runs as one. No solo runs.</p></div>
+  </div>
+</section>
+
+<!-- STUDIOS -->
+<section class="section" id="studios">
+  <div class="label-sm">The Cockpit</div>
+  <h2>Every studio.<br><em>One interface.</em></h2>
+  <p class="lead">Open the cockpit and pick a studio. The entire interface transforms — visuals, tools, even the music.</p>
+  <div class="studios">
+    <a class="studio" href="/visuals/cockpit.html">
+      <span class="icon">🎵</span>
+      <h3>Music Studio</h3>
+      <p>Generate full songs with AI. 21 genres including fusion styles. Set the mood, add details, and create.</p>
+      <div class="tags"><span class="tag">Suno</span><span class="tag">21 genres</span><span class="tag">Lyrics + full</span></div>
+    </a>
+    <a class="studio" href="/visuals/cockpit.html">
+      <span class="icon">🎬</span>
+      <h3>Video Studio</h3>
+      <p>AI video generation with Luma, Runway, or Leonardo. From text prompt to finished clip.</p>
+      <div class="tags"><span class="tag">Luma</span><span class="tag">Runway</span><span class="tag">Leonardo</span></div>
+    </a>
+    <a class="studio" href="/visuals/cockpit.html">
+      <span class="icon">🎨</span>
+      <h3>Image Studio</h3>
+      <p>AI image generation and editing. Consistent characters, style transfer, upscaling.</p>
+      <div class="tags"><span class="tag">Leonardo</span><span class="tag">Luma</span><span class="tag">Styles</span></div>
+    </a>
+    <a class="studio" href="/visuals/cockpit.html">
+      <span class="icon">🗣️</span>
+      <h3>Voice Studio</h3>
+      <p>Local Whisper STT + ElevenLabs TTS. Pipeline scheduling: 6.8s → 3.0s latency.</p>
+      <div class="tags"><span class="tag">Whisper</span><span class="tag">ElevenLabs</span><span class="tag">Pipeline</span></div>
+    </a>
+    <a class="studio" href="/visuals/cockpit.html">
+      <span class="icon">🔧</span>
+      <h3>Jarvis Studio</h3>
+      <p>Multi-tool AI agent. Gmail, Calendar, Drive, web search. Every action gate-verified.</p>
+      <div class="tags"><span class="tag">Gmail</span><span class="tag">Calendar</span><span class="tag">Custom tools</span></div>
+    </a>
+    <a class="studio" href="/visuals/cockpit.html">
+      <span class="icon">🔌</span>
+      <h3>Free Providers</h3>
+      <p>250M+ free tokens across 7 providers. Automatic failover. All OpenAI-compatible.</p>
+      <div class="tags"><span class="tag">Inception 100M</span><span class="tag">Atria 100M</span><span class="tag">7 providers</span></div>
+    </a>
+  </div>
+</section>
+
+<!-- PROOF BAR -->
+<section class="section">
+  <div class="label-sm">By the Numbers</div>
+  <div class="proof">
+    <div class="item"><div class="num">9</div><div class="txt">Judges per action</div></div>
+    <div class="item"><div class="num">16</div><div class="txt">Commits to main</div></div>
+    <div class="item"><div class="num">10</div><div class="txt">Studio plugins</div></div>
+    <div class="item"><div class="num">250M+</div><div class="txt">Free AI tokens</div></div>
+    <div class="item"><div class="num">7</div><div class="txt">Free providers</div></div>
+    <div class="item"><div class="num">0</div><div class="txt">Trust required</div></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2>Ready to <em>verify?</em></h2>
+  <p>Open the cockpit. Pick a studio. Create something.</p>
+  <div class="cta-row" style="justify-content:center">
+    <a class="cta" href="/visuals/cockpit.html">Open the Cockpit</a>
+    <a class="cta-sec" href="https://github.com/amartieai/amartie" target="_blank">View on GitHub</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>&copy; 2026 AMARTIE. Open source under MIT.</div>
+  <div style="display:flex;gap:18px">
+    <a href="https://github.com/amartieai/amartie" target="_blank">GitHub</a>
+    <a href="#">Discord</a>
+    <a href="#">Twitter</a>
+  </div>
+</footer>
+
+</div>
+
+<!-- HALO 3D Simplified Background -->
+<script>
+// Lightweight 3D torus particle field using Canvas 2D
+(function(){
+  const canvas = document.getElementById('halo-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    initParticles();
+  }
+  
+  function initParticles(){
+    particles = [];
+    const N = Math.min(800, Math.floor(W * H / 2000));
+    for(let i = 0; i < N; i++){
+      const angle = Math.random() * Math.PI * 2;
+      const tubeAngle = Math.random() * Math.PI * 2;
+      const R = 180 + (Math.random() - 0.5) * 40;
+      const r = 60 + (Math.random() - 0.5) * 30;
+      particles.push({
+        u: angle / (Math.PI * 2),
+        v: tubeAngle / (Math.PI * 2),
+        R, r,
+        speed: 0.0003 + Math.random() * 0.0007,
+        size: 1 + Math.random() * 2,
+        color: Math.random() < 0.6 ? 'gold' : 'cyan'
+      });
+    }
+  }
+  
+  let t = 0;
+  function render(){
+    t += 0.003;
+    ctx.fillStyle = 'rgba(4,6,11,0.15)';
+    ctx.fillRect(0, 0, W, H);
+    
+    const cx = W / 2, cy = H / 2;
+    const scale = Math.min(W, H) / 600;
+    
+    for(const p of particles){
+      p.u = (p.u + p.speed) % 1;
+      const a = p.u * Math.PI * 2;
+      const b = p.v * Math.PI * 2 + Math.sin(t + p.u * 6) * 0.3;
+      
+      const x = (p.R + p.r * Math.cos(b)) * Math.cos(a);
+      const y = p.r * Math.sin(b) * 0.4 + Math.sin(t * 2 + p.u * 9) * 8;
+      const z = (p.R + p.r * Math.cos(b)) * Math.sin(a);
+      
+      const px = cx + x * scale;
+      const py = cy + y * scale;
+      const depth = (z + p.R) / (2 * p.R);
+      const alpha = 0.3 + depth * 0.7;
+      const size = p.size * scale * (0.5 + depth * 0.8);
+      
+      ctx.beginPath();
+      ctx.arc(px, py, size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color === 'gold' 
+        ? `rgba(255,209,102,${alpha})` 
+        : `rgba(76,201,255,${alpha})`;
+      ctx.fill();
+    }
+    
+    // Draw connecting lines between nearby particles (3-6-9 resonance)
+    ctx.strokeStyle = 'rgba(255,209,102,0.04)';
+    ctx.lineWidth = 0.5;
+    for(let i = 0; i < particles.length; i += 7){
+      const p1 = particles[i];
+      const a1 = p1.u * Math.PI * 2;
+      const b1 = p1.v * Math.PI * 2;
+      const x1 = cx + (p1.R + p1.r * Math.cos(b1)) * Math.cos(a1) * scale;
+      const y1 = cy + p1.r * Math.sin(b1) * 0.4 * scale;
+      
+      const j = (i + 3) % particles.length;
+      const p2 = particles[j];
+      const a2 = p2.u * Math.PI * 2;
+      const b2 = p2.v * Math.PI * 2;
+      const x2 = cx + (p2.R + p2.r * Math.cos(b2)) * Math.cos(a2) * scale;
+      const y2 = cy + p2.r * Math.sin(b2) * 0.4 * scale;
+      
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo(cx + Math.sin(t) * 30, cy, x2, y2);
+      ctx.stroke();
+    }
+    
+    requestAnimationFrame(render);
+  }
+  
+  window.addEventListener('resize', resize);
+  resize();
+  render();
+})();
+</script>
+
+</body>
+</html>
