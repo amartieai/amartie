@@ -2,70 +2,79 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AMARTIE Cockpit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#06080d;--surface:#0f1319;--surface-2:#161b22;--ink:#f0f2f5;--ink-2:#c9d1d9;--dim:#8b949e;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.10);--gold:#ffd166;--gold-dim:rgba(255,209,102,.15);--accent:#58a6ff;--accent-dim:rgba(88,166,255,.15);--green:#3fb950;--purple:#bc8cff;--red:#f85149;--serif:'Instrument Serif',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+:root{--bg:#06080d;--surface:#0f1319;--surface-2:#161b22;--ink:#f0f2f5;--ink-2:#c9d1d9;--dim:#8b949e;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.10);--gold:#ffd166;--gold-dim:rgba(255,209,102,.12);--accent:#58a6ff;--green:#3fb950;--purple:#bc8cff;--red:#f85149;--serif:'Instrument Serif',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;position:relative}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(60% 40% at 15% 20%,rgba(255,209,102,.08) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(88,166,255,.06) 0%,transparent 100%);animation:drift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
-@keyframes drift{0%{opacity:.6;transform:translate(0,0)}100%{opacity:1;transform:translate(8px,-6px)}}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;position:relative;transition:background 1.2s ease}
+
+/* Atmospheric backgrounds per studio */
+body.studio-music{background:radial-gradient(60% 40% at 15% 20%,rgba(255,100,100,.08) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(255,209,102,.06) 0%,transparent 100%),#06080d}
+body.studio-video{background:radial-gradient(60% 40% at 15% 20%,rgba(88,166,255,.08) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(188,140,255,.06) 0%,transparent 100%),#06080d}
+body.studio-image{background:radial-gradient(60% 40% at 15% 20%,rgba(63,185,80,.08) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(255,209,102,.06) 0%,transparent 100%),#06080d}
+body.studio-voice{background:radial-gradient(60% 40% at 15% 20%,rgba(255,209,102,.08) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(88,166,255,.06) 0%,transparent 100%),#06080d}
+body.studio-jarvis{background:radial-gradient(60% 40% at 15% 20%,rgba(188,140,255,.08) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(63,185,80,.06) 0%,transparent 100%),#06080d}
+body.studio-providers{background:radial-gradient(60% 40% at 15% 20%,rgba(255,100,100,.06) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(188,140,255,.08) 0%,transparent 100%),#06080d}
+
 .app{display:flex;flex-direction:column;height:100vh;position:relative;z-index:1}
-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(6,8,13,.85);backdrop-filter:blur(12px);z-index:10}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:-.01em}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--line);background:rgba(6,8,13,.85);backdrop-filter:blur(14px);z-index:10}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
 .logo-mark{width:28px;height:28px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--bg);font-size:13px}
 .header-right{display:flex;align-items:center;gap:12px}
 .status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:500}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
-.voice-btn{background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.voice-btn{background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
 .voice-btn:hover{border-color:var(--gold);color:var(--gold)}
 .voice-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600}
 main{display:flex;flex:1;overflow:hidden}
-.sidebar{width:240px;flex-shrink:0;border-right:1px solid var(--line);background:rgba(6,8,13,.5);padding:16px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-.section-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding:12px 12px 6px}
-.plugin-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--ink-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.sidebar{width:260px;flex-shrink:0;border-right:1px solid var(--line);background:rgba(6,8,13,.6);padding:18px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.section-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding:14px 12px 6px}
+.plugin-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;background:transparent;border:1px solid transparent;color:var(--ink-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--sans);width:100%;text-align:left}
 .plugin-btn:hover{background:var(--surface);border-color:var(--line)}
 .plugin-btn.active{background:var(--gold-dim);border-color:rgba(255,209,102,.25);color:var(--gold)}
 .plugin-btn.active .plugin-icon{background:rgba(255,209,102,.15);border-color:rgba(255,209,102,.3)}
-.plugin-icon{width:34px;height:34px;border-radius:8px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .15s}
+.plugin-icon{width:36px;height:36px;border-radius:9px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:all .15s}
+.plugin-info{flex:1}
 .plugin-name{font-weight:600;font-size:13px}
-.plugin-desc{font-size:11px;color:var(--dim);font-weight:400}
-.content{flex:1;overflow-y:auto;padding:36px;position:relative}
-.studio{display:none;animation:fade .3s ease}
+.plugin-desc{font-size:11px;color:var(--dim);font-weight:400;margin-top:1px}
+.content{flex:1;overflow-y:auto;padding:40px;position:relative}
+.studio{display:none;animation:fade .4s cubic-bezier(.22,1,.36,1)}
 .studio.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.hero{max-width:520px;margin:0 auto;text-align:center;padding:60px 20px}
-.hero h1{font-family:var(--serif);font-size:48px;font-weight:400;line-height:1.08;letter-spacing:-.03em;margin-bottom:16px}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hero{max-width:560px;margin:0 auto;text-align:center;padding:60px 20px}
+.hero h1{font-family:var(--serif);font-size:52px;font-weight:400;line-height:1.08;letter-spacing:-.03em;margin-bottom:18px}
 .hero h1 em{font-style:italic;color:var(--gold)}
-.hero p{color:var(--dim);font-size:15px;line-height:1.65;margin-bottom:32px}
+.hero p{color:var(--dim);font-size:15px;line-height:1.65;margin-bottom:34px}
 .quick-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.quick-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.quick-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:11px;background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
 .quick-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
-.quick-btn .qi{font-size:16px}
-.studio-head{margin-bottom:28px}
-.studio-head h2{font-family:var(--serif);font-size:32px;font-weight:400;display:flex;align-items:center;gap:12px;letter-spacing:-.02em}
-.studio-head .desc{color:var(--dim);font-size:14px;margin-top:4px}
-.genre-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;margin-bottom:24px}
-.genre-btn{padding:12px 6px;border-radius:10px;background:var(--surface);border:1px solid var(--line);text-align:center;cursor:pointer;transition:all .15s;color:var(--ink-2);font-size:11px;font-weight:500}
+.quick-btn .qi{font-size:17px}
+.studio-head{margin-bottom:32px}
+.studio-head h2{font-family:var(--serif);font-size:36px;font-weight:400;display:flex;align-items:center;gap:14px;letter-spacing:-.02em}
+.studio-head .desc{color:var(--dim);font-size:14px;margin-top:4px;max-width:600px;line-height:1.6}
+.genre-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:7px;margin-bottom:26px}
+.genre-btn{padding:14px 6px;border-radius:11px;background:var(--surface);border:1px solid var(--line);text-align:center;cursor:pointer;transition:all .15s;color:var(--ink-2);font-size:11px;font-weight:500}
 .genre-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
-.genre-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
-.genre-btn .gi{display:block;font-size:20px;margin-bottom:4px}
-.field{margin-bottom:18px;max-width:640px}
-.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
-.field input,.field textarea,.field select{width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:var(--sans);font-size:14px;transition:border-color .15s}
-.field textarea{min-height:80px;resize:vertical;line-height:1.55}
+.genre-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700;box-shadow:0 4px 16px rgba(255,209,102,.2)}
+.genre-btn .gi{display:block;font-size:22px;margin-bottom:5px}
+.field{margin-bottom:20px;max-width:680px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.field input,.field textarea,.field select{width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:11px;padding:13px 15px;color:var(--ink);font-family:var(--sans);font-size:14px;transition:border-color .15s}
+.field textarea{min-height:90px;resize:vertical;line-height:1.55}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,209,102,.08)}
-.btn-row{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
-.btn{padding:11px 22px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;border:1px solid transparent;font-family:var(--sans)}
+.btn-row{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.btn{padding:12px 24px;border-radius:11px;font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;border:1px solid transparent;font-family:var(--sans)}
 .btn-primary{background:var(--gold);color:var(--bg)}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,209,102,.25)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
 .btn-ghost{background:var(--surface);color:var(--ink-2);border-color:var(--line-2)}
 .btn-ghost:hover{border-color:var(--gold)}
-.wave{height:56px;background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:3px;padding:0 16px;margin-bottom:24px;overflow:hidden}
+.wave{height:60px;background:var(--surface);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;justify-content:center;gap:3px;padding:0 18px;margin-bottom:26px;overflow:hidden}
 .wave span{width:3px;background:var(--gold);border-radius:2px;animation:wave 1.4s ease-in-out infinite alternate}
 .wave span:nth-child(1){animation-delay:.0s}
 .wave span:nth-child(2){animation-delay:.1s}
@@ -79,18 +88,35 @@ main{display:flex;flex:1;overflow:hidden}
 .wave span:nth-child(10){animation-delay:.9s}
 .wave span:nth-child(11){animation-delay:1.0s}
 .wave span:nth-child(12){animation-delay:1.1s}
-@keyframes wave{0%{height:6px;opacity:.5}100%{height:28px;opacity:1}}
-.bubble{background:var(--surface);border:1px solid var(--line-2);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0 24px;font-size:14px;color:var(--ink-2);max-width:520px;line-height:1.6}
-.status{margin-top:16px;font-size:13px;color:var(--dim);min-height:20px}
-.result{margin-top:24px;display:flex;flex-wrap:wrap;gap:16px}
-.result img,.result video{max-width:340px;border-radius:10px;border:1px solid var(--line)}
-@media(max-width:800px){.sidebar{display:none}.hero h1{font-size:34px}.genre-grid{grid-template-columns:repeat(3,1fr)}}
+@keyframes wave{0%{height:6px;opacity:.4}100%{height:32px;opacity:1}}
+.bubble{background:var(--surface);border:1px solid var(--line-2);border-left:3px solid var(--gold);border-radius:0 11px 11px 0;padding:15px 20px;margin:18px 0 26px;font-size:14px;color:var(--ink-2);max-width:560px;line-height:1.6}
+.studio-atmosphere{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--line-2);border-radius:11px;padding:14px 18px;font-size:12px;color:var(--dim);z-index:5;max-width:240px}
+.studio-atmosphere .atm-title{font-weight:600;color:var(--gold);margin-bottom:4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.result{margin-top:26px;display:flex;flex-wrap:wrap;gap:16px}
+.result img,.result video{max-width:360px;border-radius:11px;border:1px solid var(--line)}
+.provider-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+.provider-card{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:18px;transition:all .15s}
+.provider-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.provider-card .pname{font-size:14px;font-weight:600;margin-bottom:4px}
+.provider-card .ptokens{font-size:11px;color:var(--gold);font-weight:500;margin-bottom:4px}
+.provider-card .pmodels{font-size:11px;color:var(--dim)}
+.jarvis-chat{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:20px;height:300px;overflow-y:auto;margin-bottom:16px}
+.jarvis-msg{margin-bottom:12px;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.6}
+.jarvis-msg.user{background:var(--gold-dim);border:1px solid rgba(255,209,102,.2)}
+.jarvis-msg.agent{background:var(--surface-2);border:1px solid var(--line)}
+.tool-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tool-tag{font-size:10px;padding:3px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);color:var(--dim)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:24px}
+.tool-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+.tool-card .ticon{font-size:22px;margin-bottom:6px}
+.tool-card .tname{font-size:12px;font-weight:600}
+@media(max-width:800px){.sidebar{display:none}.hero h1{font-size:36px}.genre-grid{grid-template-columns:repeat(3,1fr)}.provider-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <div class="logo"><div class="logo-mark">A</div><span>AMARTIE</span></div>
+    <a class="logo" href="landing.html"><div class="logo-mark">A</div><span>AMARTIE</span></a>
     <div class="header-right">
       <div class="status"><div class="status-dot"></div>Live</div>
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">Voice</button>
@@ -103,38 +129,333 @@ main{display:flex;flex:1;overflow:hidden}
     </aside>
     <section class="content" id="content">
       <div class="hero">
-        <h1>Your AI, <em>Verified.</em></h1>
+        <h1>Your AI, <em>verified.</em></h1>
         <p>The open-source framework that proves your AI wasn't swapped. Nine independent judges. Hash-chained receipts.</p>
         <div class="quick-row">
-          <button class="quick-btn" onclick="Cockpit.load('suno-studio')"><span class="qi">🎵</span>Music</button>
-          <button class="quick-btn" onclick="Cockpit.load('luma-studio')"><span class="qi">🎬</span>Video</button>
-          <button class="quick-btn" onclick="Cockpit.load('leonardo-studio')"><span class="qi">🎨</span>Image</button>
-          <button class="quick-btn" onclick="Cockpit.load('elevenlabs-studio')"><span class="qi">🗣️</span>Voice</button>
+          <button class="quick-btn" onclick="Cockpit.load('music-studio')"><span class="qi">🎵</span>Music</button>
+          <button class="quick-btn" onclick="Cockpit.load('video-studio')"><span class="qi">🎬</span>Video</button>
+          <button class="quick-btn" onclick="Cockpit.load('image-studio')"><span class="qi">🎨</span>Image</button>
+          <button class="quick-btn" onclick="Cockpit.load('voice-studio')"><span class="qi">🗣️</span>Voice</button>
+          <button class="quick-btn" onclick="Cockpit.load('jarvis-studio')"><span class="qi">🔧</span>Jarvis</button>
+          <button class="quick-btn" onclick="Cockpit.load('free-providers')"><span class="qi">🔌</span>Providers</button>
         </div>
       </div>
     </section>
   </main>
 </div>
+<div class="studio-atmosphere" id="atmosphere"></div>
+
 <script>
-const Cockpit={voice:false,synth:window.speechSynthesis,selGenre:null,
+const Cockpit={
+voice:false,
+synth:window.speechSynthesis,
+selGenre:null,
+audioCtx:null,
+oscillators:[],
+currentStudio:null,
+
 plugins:{
-  'suno-studio':{name:'Suno Studio',icon:'🎵',desc:'Music generation',render:()=>music()},
-  'luma-studio':{name:'Luma Studio',icon:'🎬',desc:'Video generation',render:()=>studio('Luma Dream Machine','video')},
-  'leonardo-studio':{name:'Leonardo Studio',icon:'🎨',desc:'Image generation',render:()=>studio('Leonardo.Ai','image')},
-  'runway-studio':{name:'Runway Studio',icon:'🎥',desc:'Video synthesis',render:()=>studio('RunwayML','video')},
-  'elevenlabs-studio':{name:'ElevenLabs Studio',icon:'🗣️',desc:'Voice synthesis',render:()=>voice()}},
-init(){const s=document.getElementById('sidebar');Object.entries(this.plugins).forEach(([id,p])=>{const b=document.createElement('button');b.className='plugin-btn';b.innerHTML=`<div class="plugin-icon">${p.icon}</div><div><div class="plugin-name">${p.name}</div><div class="plugin-desc">${p.desc}</div></div>`;b.onclick=()=>this.load(id);s.appendChild(b)})},
-load(id){const p=this.plugins[id];document.querySelectorAll('.plugin-btn').forEach(b=>b.classList.toggle('active',b.querySelector('.plugin-name').textContent===p.name));document.getElementById('content').innerHTML=`<div class="studio active">${p.render()}</div>`;if(this.voice)setTimeout(()=>this.say(`Welcome to ${p.name}. What would you like to create?`),400)},
-say(t){if(!this.voice||!this.synth)return;this.synth.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.92;u.volume=.85;this.synth.speak(u)}};
-function toggleVoice(){Cockpit.voice=!Cockpit.voice;const b=document.getElementById('voiceBtn');if(Cockpit.voice){b.classList.add('active');b.textContent='Voice On';Cockpit.say('Voice enabled. What would you like to create?')}else{b.classList.remove('active');b.textContent='Voice';Cockpit.synth.cancel()}}
-function selGenre(id,btn){document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');Cockpit.selGenre=id}
-const genres=[{id:'country',n:'Country',i:'🤠'},{id:'blues',n:'Blues',i:'🎸'},{id:'jazz',n:'Jazz',i:'🎷'},{id:'reggae',n:'Reggae',i:'🌴'},{id:'electronic',n:'Electronic',i:'🎛️'},{id:'classical',n:'Classical',i:'🎻'},{id:'rock',n:'Rock',i:'🤘'},{id:'hiphop',n:'Hip-Hop',i:'🎤'},{id:'ambient',n:'Ambient',i:'🌊'},{id:'soul',n:'Soul',i:'💋'},{id:'metal',n:'Metal',i:'⚡'},{id:'folk',n:'Folk',i:'🪕'},{id:'bach_blues',n:'Bach+Blues',i:'🎹'},{id:'beethoven_reggae',n:'Beethoven+Reggae',i:'🏛️'},{id:'cyberpunk_jazz',n:'Cyberpunk Jazz',i:'🌃'}];
-function music(){return`<div class="studio-head"><h2>🎵 Suno Studio</h2><p class="desc">AI music generation — vocals, instrumentals, full songs</p></div><div class="bubble">👋 Hey! What do you want to create today? Pick a genre below, or tell me something crazy like "reggae with Mozart and bluegrass."</div><div class="wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="genre-grid">${genres.map(g=>`<button class="genre-btn" onclick="selGenre('${g.id}',this)"><span class="gi">${g.i}</span>${g.n}</button>`).join('')}</div><div class="field"><label>What's it about?</label><input id="m-theme" placeholder="e.g. driving home for Christmas, a rainy city night..."></div><div class="field"><label>Mood</label><select id="m-mood"><option>heartfelt</option><option>upbeat</option><option>melancholic</option><option>nostalgic</option><option>euphoric</option><option>dark</option><option>smooth</option></select></div><div class="field"><label>Details</label><textarea id="m-details" rows="2" placeholder="Instruments, tempo, era, vibe..."></textarea></div><div class="btn-row"><button class="btn btn-primary" onclick="generate()">Generate Song</button><button class="btn btn-ghost" onclick="genLyrics()">Just Lyrics</button></div><div class="status" id="m-status"></div><div class="result" id="m-result"></div>`}
-function studio(name,type){return`<div class="studio-head"><h2>${type==='video'?'🎬':'🎨'} ${name}</h2><p class="desc">AI ${type} generation</p></div><div class="bubble">🎬 Ready to create a ${type}. What's the vision?</div><div class="field"><label>Prompt</label><textarea id="g-prompt" rows="4" placeholder="Describe what you want to create..."></textarea></div><div class="field"><label>Model</label><select id="g-model"><option>ray-3</option><option>ray-2</option><option>gen4.5</option></select></div><div class="btn-row"><button class="btn btn-primary" onclick="generate()">Generate</button></div><div class="status" id="g-status"></div><div class="result" id="g-result"></div>`}
-function voice(){return`<div class="studio-head"><h2>🗣️ ElevenLabs Studio</h2><p class="desc">Text-to-speech and voice synthesis</p></div><div class="bubble">🗣️ Ready to speak. Type something below and I'll say it out loud.</div><div class="field"><label>Text</label><textarea id="v-text" rows="4" placeholder="Type anything and hear it spoken..."></textarea></div><div class="field"><label>Voice</label><select id="v-id"><option value="onwK4e9ZLuTAKqWW03F9">Daniel</option><option value="AZnzlk1XvdvUeBnXmlld">Domi</option><option value="EXAVITQu4vr4xnSDxMaL">Bella</option><option value="ErXwobaYiN019PkySvjV">Adam</option></select></div><div class="btn-row"><button class="btn btn-primary" onclick="speak()">Speak</button></div><div class="status" id="v-status"></div>`}
-function generate(){const s=document.getElementById('m-status')||document.getElementById('g-status');const r=document.getElementById('m-result')||document.getElementById('g-result');s.textContent='⏳ Generating...';setTimeout(()=>{s.textContent='✅ Demo output:';r.innerHTML='<div style="padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:520px"><p style="font-weight:600;margin-bottom:6px">Demo Mode</p><p style="font-size:13px;color:var(--dim);line-height:1.7">Working prototype. For real generation, get a free API key and set the environment variable.</p></div>';if(Cockpit.voice)Cockpit.say('This is a demo.')},1500)}
-function genLyrics(){document.getElementById('m-status').textContent='📝 Generating...';setTimeout(()=>{document.getElementById('m-status').textContent='Demo lyrics:';document.getElementById('m-result').innerHTML='<div style="font-size:13px;color:var(--dim);background:var(--surface);padding:20px;border-radius:10px;line-height:1.8;font-family:var(--serif)"><i>"Neon lights on a Sunday night,<br>Blues man playing \'til the morning light,<br>Bach would smile at this crazy sound,<br>Reggae rhythms hitting the ground..."</i><br><br><span style="font-size:10px;font-family:var(--sans)">Demo</span></div>'},1000)}
-function speak(){const t=document.getElementById('v-text').value;if(!t)return;Cockpit.say(t);document.getElementById('v-status').textContent='🔊 Speaking...'}
+  'music-studio':{
+    name:'Music Studio',icon:'🎵',desc:'AI music generation',
+    atmosphere:'🎶 Lo-fi beats playing — creative flow mode',
+    render:()=>musicStudio()
+  },
+  'video-studio':{
+    name:'Video Studio',icon:'🎬',desc:'AI video synthesis',
+    atmosphere:'🎬 Cinematic mode — deep focus, ambient tones',
+    render:()=>videoStudio()
+  },
+  'image-studio':{
+    name:'Image Studio',icon:'🎨',desc:'AI image generation',
+    atmosphere:'🎨 Visual mode — color palette active',
+    render:()=>imageStudio()
+  },
+  'voice-studio':{
+    name:'Voice Studio',icon:'🗣️',desc:'STT + TTS pipeline',
+    atmosphere:'🎤 Voice mode — Whisper ready, ElevenLabs on standby',
+    render:()=>voiceStudioHTML()
+  },
+  'jarvis-studio':{
+    name:'Jarvis Studio',icon:'🔧',desc:'Multi-tool AI agent',
+    atmosphere:'⚡ Jarvis online — 5 tools loaded, gate armed',
+    render:()=>jarvisStudio()
+  },
+  'free-providers':{
+    name:'Free Providers',icon:'🔌',desc:'250M+ free tokens',
+    atmosphere:'🔌 Provider mesh — auto-failover enabled',
+    render:()=>providersStudio()
+  }
+},
+
+init(){
+  const s=document.getElementById('sidebar');
+  Object.entries(this.plugins).forEach(([id,p])=>{
+    const b=document.createElement('button');
+    b.className='plugin-btn';
+    b.id='btn-'+id;
+    b.innerHTML=`<div class="plugin-icon">${p.icon}</div><div class="plugin-info"><div class="plugin-name">${p.name}</div><div class="plugin-desc">${p.desc}</div></div>`;
+    b.onclick=()=>this.load(id);
+    s.appendChild(b);
+  });
+},
+
+load(id){
+  const p=this.plugins[id];
+  this.currentStudio=id;
+
+  // Update sidebar
+  document.querySelectorAll('.plugin-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+id).classList.add('active');
+
+  // Change atmosphere
+  document.body.className='studio-'+id;
+
+  // Render studio
+  document.getElementById('content').innerHTML=`<div class="studio active">${p.render()}</div>`;
+
+  // Update atmosphere bar
+  const atm=document.getElementById('atmosphere');
+  atm.innerHTML=`<div class="atm-title">${p.name}</div>${p.atmosphere}`;
+
+  // Voice greeting
+  if(this.voice)setTimeout(()=>this.say(`Welcome to ${p.name}. What would you like to create?`),500);
+
+  // Stop any playing tones
+  this.stopAmbient();
+  if(id==='music-studio')this.playAmbient('music');
+  if(id==='video-studio')this.playAmbient('video');
+},
+
+say(t){
+  if(!this.voice||!this.synth)return;
+  this.synth.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.rate=.92;u.volume=.85;
+  this.synth.speak(u);
+},
+
+playAmbient(type){
+  try{
+    if(!this.audioCtx)this.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const ctx=this.audioCtx;
+    const now=ctx.currentTime;
+
+    if(type==='music'){
+      // Soft chord: C major 7th
+      [261.63,329.63,392.0,493.88].forEach((freq,i)=>{
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.type='sine';
+        osc.frequency.value=freq;
+        gain.gain.value=0.03;
+        gain.gain.setValueAtTime(0,now);
+        gain.gain.linearRampToValueAtTime(0.03,now+0.5);
+        gain.gain.linearRampToValueAtTime(0,now+4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now+4);
+        this.oscillators.push(osc);
+      });
+    }else if(type==='video'){
+      // Low drone
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.type='triangle';
+      osc.frequency.value=80;
+      gain.gain.value=0.02;
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      this.oscillators.push(osc);
+      setTimeout(()=>{try{osc.stop()}catch(e){}},8000);
+    }
+  }catch(e){}
+},
+
+stopAmbient(){
+  this.oscillators.forEach(o=>{try{o.stop()}catch(e){}});
+  this.oscillators=[];
+}
+};
+
+function toggleVoice(){
+  Cockpit.voice=!Cockpit.voice;
+  const b=document.getElementById('voiceBtn');
+  if(Cockpit.voice){
+    b.classList.add('active');
+    b.textContent='Voice On';
+    Cockpit.say('Voice enabled. What would you like to create?');
+  }else{
+    b.classList.remove('active');
+    b.textContent='Voice';
+    Cockpit.synth.cancel();
+    Cockpit.stopAmbient();
+  }
+}
+
+function selGenre(id,btn){
+  document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  Cockpit.selGenre=id;
+}
+
+const genres=[
+  {id:'country',n:'Country',i:'🤠'},
+  {id:'blues',n:'Blues',i:'🎸'},
+  {id:'jazz',n:'Jazz',i:'🎷'},
+  {id:'reggae',n:'Reggae',i:'🌴'},
+  {id:'electronic',n:'Electronic',i:'🎛️'},
+  {id:'classical',n:'Classical',i:'🎻'},
+  {id:'rock',n:'Rock',i:'🤘'},
+  {id:'hiphop',n:'Hip-Hop',i:'🎤'},
+  {id:'ambient',n:'Ambient',i:'🌊'},
+  {id:'soul',n:'Soul',i:'💋'},
+  {id:'metal',n:'Metal',i:'⚡'},
+  {id:'folk',n:'Folk',i:'🪕'},
+  {id:'bach_blues',n:'Bach+Blues',i:'🎹'},
+  {id:'beethoven_reggae',n:'Beethoven+Reggae',i:'🏛️'},
+  {id:'cyberpunk_jazz',n:'Cyberpunk Jazz',i:'🌃'}
+];
+
+function musicStudio(){
+  return `<div class="studio-head"><h2>🎵 Music Studio</h2><p class="desc">AI music generation — vocals, instrumentals, full songs. 21 genres including fusion styles. Powered by Suno.</p></div>
+  <div class="bubble">👋 Hey! What do you want to create today? Pick a genre below, or tell me something crazy like "reggae with Mozart and bluegrass."</div>
+  <div class="wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="genre-grid">${genres.map(g=>`<button class="genre-btn" onclick="selGenre('${g.id}',this)"><span class="gi">${g.i}</span>${g.n}</button>`).join('')}</div>
+  <div class="field"><label>What's it about?</label><input id="m-theme" placeholder="e.g. driving home for Christmas, a rainy city night..."></div>
+  <div class="field"><label>Mood</label><select id="m-mood"><option>heartfelt</option><option>upbeat</option><option>melancholic</option><option>nostalgic</option><option>euphoric</option><option>dark</option><option>smooth</option></select></div>
+  <div class="field"><label>Details</label><textarea id="m-details" rows="2" placeholder="Instruments, tempo, era, vibe..."></textarea></div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="generateDemo()">Generate Song</button><button class="btn btn-ghost" onclick="genLyrics()">Just Lyrics</button></div>
+  <div class="status" id="m-status"></div><div class="result" id="m-result"></div>`;
+}
+
+function videoStudio(){
+  return `<div class="studio-head"><h2>🎬 Video Studio</h2><p class="desc">AI video synthesis. Text-to-video, image-to-video, motion, upscaling. Luma, Runway, Leonardo.</p></div>
+  <div class="bubble">🎬 Ready to create a video. What's the vision?</div>
+  <div class="field"><label>Prompt</label><textarea id="g-prompt" rows="4" placeholder="Describe the video you want to create..."></textarea></div>
+  <div class="field"><label>Model</label><select id="g-model"><option>Luma Dream Machine</option><option>Runway Gen-4.5</option><option>Leonardo Video</option></select></div>
+  <div class="field"><label>Duration</label><select id="g-dur"><option>5 seconds</option><option>10 seconds</option><option>15 seconds</option></select></div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="generateDemo()">Generate Video</button></div>
+  <div class="status" id="g-status"></div><div class="result" id="g-result"></div>`;
+}
+
+function imageStudio(){
+  return `<div class="studio-head"><h2>🎨 Image Studio</h2><p class="desc">AI image generation and editing. Consistent characters, style transfer, upscaling.</p></div>
+  <div class="bubble">🎨 Ready to create. Describe the image you want.</div>
+  <div class="field"><label>Prompt</label><textarea id="i-prompt" rows="4" placeholder="Describe the image..."></textarea></div>
+  <div class="field"><label>Style</label><select id="i-style"><option>Photorealistic</option><option>Cinematic</option><option>Illustration</option><option>3D Render</option><option>Oil Painting</option></select></div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="generateDemo()">Generate Image</button></div>
+  <div class="status" id="i-status"></div><div class="result" id="i-result"></div>`;
+}
+
+function voiceStudioHTML(){
+  return `<div class="studio-head"><h2>🗣️ Voice Studio</h2><p class="desc">Local Whisper STT + cloud ElevenLabs TTS. Pipeline scheduling: 6.8s → 3.0s. Barge-in interruption.</p></div>
+  <div class="bubble">🗣️ Voice pipeline ready. Click Start to begin.</div>
+  <div class="wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="tools-grid">
+    <div class="tool-card"><div class="ticon">🎙️</div><div class="tname">Whisper STT</div><span class="tool-tag">Local</span></div>
+    <div class="tool-card"><div class="ticon">🔊</div><div class="tname">ElevenLabs TTS</div><span class="tool-tag">Cloud</span></div>
+    <div class="tool-card"><div class="ticon">⚡</div><div class="tname">Pipeline</div><span class="tool-tag">3.0s</span></div>
+    <div class="tool-card"><div class="ticon">🎤</div><div class="tname">Barge-in</div><span class="tool-tag">Interrupt</span></div>
+  </div>
+  <div class="field"><label>API Key (ElevenLabs)</label><input id="v-key" type="password" placeholder="Enter your ElevenLabs API key..."></div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="startVoicePipeline()">Start Pipeline</button><button class="btn btn-ghost" onclick="checkVoiceDeps()">Check Deps</button></div>
+  <div class="status" id="v-status"></div>`;
+}
+
+function jarvisStudio(){
+  return `<div class="studio-head"><h2>🔧 Jarvis Studio</h2><p class="desc">Multi-tool AI agent. Gmail, Calendar, Drive, web search. Every action gate-verified.</p></div>
+  <div class="jarvis-chat" id="jarvis-chat">
+    <div class="jarvis-msg agent">Hello. I'm Jarvis. What would you like me to do?</div>
+  </div>
+  <div class="field"><label>Ask Jarvis</label><input id="jarvis-input" placeholder="Search my calendar, check emails, find files..."></div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="jarvisSend()">Send</button><button class="btn btn-ghost" onclick="jarvisVoice()">Voice</button></div>
+  <h3 style="margin-top:24px;margin-bottom:12px">Loaded Tools</h3>
+  <div class="tool-list">
+    <span class="tool-tag">📧 Gmail Search</span>
+    <span class="tool-tag">📅 Calendar</span>
+    <span class="tool-tag">📁 Drive Search</span>
+    <span class="tool-tag">🔍 Web Search</span>
+    <span class="tool-tag">📄 File Read</span>
+  </div>`;
+}
+
+function providersStudio(){
+  const providers=[
+    {n:'Inception Labs',t:'100M',m:'Mercury 2.5',url:'https://platform.inceptionlabs.ai/'},
+    {n:'Atria AI',t:'100M',m:'Dawn Preview',url:'https://atria.ai/'},
+    {n:'Cloudflare',t:'10M/day',m:'Llama 3.1',url:'https://dash.cloudflare.com/'},
+    {n:'OpenCode Zen',t:'1M/day',m:'56+ models',url:'https://opencode.ai/zen'},
+    {n:'Together AI',t:'$25',m:'Llama 3.3',url:'https://together.ai/'},
+    {n:'Groq',t:'Free',m:'Llama 3.3',url:'https://groq.com/'},
+    {n:'Gemini',t:'1.5M/day',m:'1.5 Flash',url:'https://aistudio.google.com/'}
+  ];
+  return `<div class="studio-head"><h2>🔌 Free Providers</h2><p class="desc">250M+ free tokens across 7 providers. Automatic failover. All OpenAI-compatible.</p></div>
+  <div class="bubble">🔌 Add your API keys and the system routes between providers automatically. When one runs out, it fails over to the next.</div>
+  <div class="provider-grid">${providers.map(p=>`<div class="provider-card"><div class="pname">${p.n}</div><div class="ptokens">${p.t} free tokens</div><div class="pmodels">${p.m}</div><a href="${p.url}" target="_blank" style="font-size:11px;color:var(--accent);display:inline-block;margin-top:8px">Get Key</a></div>`).join('')}</div>
+  <div class="field"><label>Add Provider</label><select id="prov-select"><option value="inception_labs">Inception Labs</option><option value="atria">Atria AI</option><option value="cloudflare">Cloudflare</option><option value="opencode">OpenCode</option><option value="groq">Groq</option><option value="gemini">Google Gemini</option></select></div>
+  <div class="field"><label>API Key</label><input id="prov-key" type="password" placeholder="Enter API key..."></div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="addProvider()">Add Provider</button></div>
+  <div class="status" id="prov-status"></div>`;
+}
+
+function generateDemo(){
+  const s=document.getElementById('m-status')||document.getElementById('g-status')||document.getElementById('i-status');
+  const r=document.getElementById('m-result')||document.getElementById('g-result')||document.getElementById('i-result');
+  s.textContent='⏳ Generating...';
+  setTimeout(()=>{
+    s.textContent='✅ Demo output:';
+    r.innerHTML='<div style="padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:11px;max-width:520px"><p style="font-weight:600;margin-bottom:6px">Demo Mode</p><p style="font-size:13px;color:var(--dim);line-height:1.7">Working prototype. For real generation, get a free API key from the Providers studio and set the environment variable.</p></div>';
+    if(Cockpit.voice)Cockpit.say('This is a demo.');
+  },1500);
+}
+
+function genLyrics(){
+  document.getElementById('m-status').textContent='📝 Generating...';
+  setTimeout(()=>{
+    document.getElementById('m-status').textContent='Demo lyrics:';
+    document.getElementById('m-result').innerHTML='<div style="font-size:13px;color:var(--ink-2);background:var(--surface);padding:20px;border-radius:11px;line-height:1.8;font-family:var(--serif)"><i>"Neon lights on a Sunday night,<br>Blues man playing \'til the morning light,<br>Bach would smile at this crazy sound,<br>Reggae rhythms hitting the ground..."</i><br><br><span style="font-size:10px;font-family:var(--sans)">Demo</span></div>';
+  },1000);
+}
+
+function jarvisSend(){
+  const input=document.getElementById('jarvis-input').value;
+  if(!input)return;
+  const chat=document.getElementById('jarvis-chat');
+  chat.innerHTML+=`<div class="jarvis-msg user">${input}</div>`;
+  document.getElementById('jarvis-input').value='';
+  setTimeout(()=>{
+    chat.innerHTML+=`<div class="jarvis-msg agent">Processing: "${input}"... (Demo mode — real agent requires AMARTIE engine running)</div>`;
+    chat.scrollTop=chat.scrollHeight;
+  },500);
+}
+
+function jarvisVoice(){
+  if(Cockpit.voice){
+    Cockpit.say('Listening...');
+  }else{
+    toggleVoice();
+  }
+}
+
+function startVoicePipeline(){
+  document.getElementById('v-status').textContent='🎤 Pipeline started — listening... (Demo)';
+}
+
+function checkVoiceDeps(){
+  const status=document.getElementById('v-status');
+  status.textContent='Checking...';
+  setTimeout(()=>{
+    status.innerHTML='📋 <strong>Local mode:</strong> <code>pip install openai-whisper pyaudio</code><br>📋 <strong>Cloud mode:</strong> <code>pip install requests elevenlabs</code>';
+  },500);
+}
+
+function addProvider(){
+  const p=document.getElementById('prov-select').value;
+  const k=document.getElementById('prov-key').value;
+  if(!k){document.getElementById('prov-status').textContent='❌ Please enter an API key';return;}
+  document.getElementById('prov-status').textContent='✅ Provider added (Demo)';
+}
+
 Cockpit.init();
 </script>
 </body>

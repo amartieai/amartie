@@ -2,298 +2,224 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AMARTIE — Your AI, Verified</title>
+<meta name="description" content="The open-source gate that proves your AI wasn't swapped. Nine independent judges. Hash-chained receipts. 250M+ free tokens.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#06080d;--surface:#0f1319;--surface-2:#161b22;--ink:#f0f2f5;--ink-2:#c9d1d9;--dim:#8b949e;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.10);--gold:#ffd166;--gold-dim:rgba(255,209,102,.15);--accent:#58a6ff;--accent-dim:rgba(88,166,255,.15);--green:#3fb950;--purple:#bc8cff;--red:#f85149;--serif:'Instrument Serif',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+:root{--bg:#06080d;--surface:#0f1319;--surface-2:#161b22;--ink:#f0f2f5;--ink-2:#c9d1d9;--dim:#8b949e;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.10);--gold:#ffd166;--gold-dim:rgba(255,209,102,.12);--accent:#58a6ff;--green:#3fb950;--purple:#bc8cff;--red:#f85149;--serif:'Instrument Serif',Georgia,serif;--sans:'Inter',system-ui,-apple-system,sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(60% 40% at 15% 20%,rgba(255,209,102,.07) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(88,166,255,.05) 0%,transparent 100%);animation:drift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
-@keyframes drift{0%{opacity:.6}100%{opacity:1}}
-.wrap{max-width:1200px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(55% 35% at 12% 15%,rgba(255,209,102,.06) 0%,transparent 100%),radial-gradient(45% 30% at 88% 85%,rgba(88,166,255,.04) 0%,transparent 100%);pointer-events:none;z-index:0;animation:breath 18s ease-in-out infinite alternate}
+@keyframes breath{0%{opacity:.5}100%{opacity:1}}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
 
 /* HEADER */
-header{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:-.01em}
-.logo-mark{width:28px;height:28px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--bg);font-size:13px}
-nav{display:flex;gap:22px}
-nav a{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);transition:color .2s;text-decoration:none}
+header{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(6,8,13,.82);backdrop-filter:blur(14px);z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--bg);font-size:14px}
+nav{display:flex;gap:24px}
+nav a{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);transition:color .2s;text-decoration:none;font-weight:500}
 nav a:hover{color:var(--ink)}
 
-/* HERO */
-.hero{padding:100px 0 80px;text-align:center}
-.hero h1{font-family:var(--serif);font-size:56px;font-weight:400;line-height:1.08;letter-spacing:-.03em;margin-bottom:16px}
+/* HERO — editorial, committed, no grid slop */
+.hero{padding:120px 0 100px;max-width:780px}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:18px}
+.hero h1{font-family:var(--serif);font-size:64px;font-weight:400;line-height:1.06;letter-spacing:-.03em;margin-bottom:20px}
 .hero h1 em{font-style:italic;color:var(--gold)}
-.hero p{font-size:16px;color:--dim;max-width:580px;margin:0 auto 32px;line-height:1.7}
-.cta{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--bg);font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;border-radius:10px;font-weight:700;transition:transform .15s;text-decoration:none}
-.cta:hover{transform:translateY(-1px)}
-.cta-secondary{display:inline-flex;align-items:center;gap:8px;background:var(--surface);color:var(--ink-2);font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;border-radius:10px;font-weight:600;border:1px solid var(--line-2);transition:transform .15s;text-decoration:none;margin-left:10px}
-.cta-secondary:hover{border-color:var(--gold)}
+.hero p{font-size:17px;color:var(--ink-2);max-width:560px;margin-bottom:36px;line-height:1.7}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--bg);font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:15px 28px;border-radius:11px;font-weight:700;transition:all .15s;text-decoration:none}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,209,102,.22)}
+.cta-sec{display:inline-flex;align-items:center;gap:10px;background:var(--surface);color:var(--ink-2);font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:15px 28px;border-radius:11px;font-weight:600;border:1px solid var(--line-2);transition:all .15s;text-decoration:none}
+.cta-sec:hover{border-color:var(--gold);color:var(--ink)}
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;margin-top:60px;overflow:hidden}
-.stat{background:var(--bg);padding:28px;text-align:center}
-.stat .num{font-size:32px;color:var(--gold);font-family:var(--serif);font-weight:400}
-.stat .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+/* RECEIPT — proof, not decoration */
+.receipt{margin-top:72px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 32px;font-family:'SF Mono','Monaco','Consolas',monospace;font-size:11px;line-height:1.85;color:var(--dim);position:relative;overflow:hidden}
+.receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.receipt .row{display:flex;gap:16px;align-items:baseline}
+.receipt .label{color:var(--gold);font-weight:600;min-width:110px;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.receipt .hash{color:var(--accent);word-break:break-all;font-size:10px}
+.receipt .verdict{color:var(--green);font-weight:600;font-size:10px}
 
 /* SECTION */
-.section{padding:100px 0}
-.section h2{font-family:var(--serif);font-size:36px;font-weight:400;text-align:center;letter-spacing:-.02em;margin-bottom:8px}
-.section .sub{text-align:center;font-size:14px;color:var(--dim);margin-bottom:48px}
+.section{padding:130px 0}
+.section .label-sm{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px}
+.section h2{font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-.025em;max-width:620px;margin-bottom:16px;line-height:1.12}
+.section h2 em{font-style:italic;color:var(--gold)}
+.section .lead{font-size:16px;color:var(--ink-2);max-width:520px;margin-bottom:56px;line-height:1.7}
 
-/* JUDGES */
-.judge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.judge{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
-.judge .id{font-size:10px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;font-weight:600}
-.judge .name{font-size:14px;font-weight:700;margin-bottom:6px}
-.judge .desc{font-size:12px;color:var(--dim);line-height:1.6}
-
-/* ARCHITECTURE */
-.layers{display:flex;flex-direction:column;gap:12px;max-width:700px;margin:0 auto}
-.layer{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px}
-.layer .num{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
-.layer .info{flex:1}
-.layer .info .ttl{font-size:13px;font-weight:700}
-.layer .info .dsc{font-size:11px;color:var(--dim);margin-top:2px}
-.layer .tag{font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:3px;background:var(--accent-dim);color:var(--accent);white-space:nowrap}
+/* JUDGES — rhythm, not grid slop */
+.judges{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.judge{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:26px;position:relative;transition:border-color .2s}
+.judge:hover{border-color:var(--line-2)}
+.judge .jnum{position:absolute;top:18px;right:18px;font-family:var(--serif);font-size:32px;color:var(--line);font-style:italic}
+.judge h3{font-size:14px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
+.judge p{font-size:13px;color:var(--dim);line-height:1.6}
 
 /* STUDIOS */
-.studios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.studio-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;text-align:center;transition:all .2s}
-.studio-card:hover{border-color:var(--gold);transform:translateY(-2px)}
-.studio-card .emoji{font-size:32px;margin-bottom:12px}
-.studio-card h3{font-size:16px;font-weight:600;margin-bottom:6px}
-.studio-card p{font-size:12px;color:var(--dim);line-height:1.6}
-.studio-card .tag{display:inline-block;margin-top:12px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:3px;background:var(--gold-dim);color:var(--gold)}
+.studios{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.studio{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:32px;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block}
+.studio:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.studio .icon{font-size:36px;margin-bottom:16px;display:block}
+.studio h3{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.studio p{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px}
+.studio .tags{display:flex;gap:6px;flex-wrap:wrap}
+.studio .tag{font-size:10px;letter-spacing:.04em;color:var(--dim);background:var(--bg);padding:4px 10px;border-radius:6px;border:1px solid var(--line)}
 
-/* PROOF */
-.proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:800px;margin:0 auto}
-.proof-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px}
-.proof-card h3{font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.receipt{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:16px;font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);line-height:1.7;margin-top:12px}
-.receipt .hash{color:var(--accent)}
-.receipt .ok{color:var(--green)}
-.receipt .fail{color:var(--red)}
+/* PROOF BAR */
+.proof{display:flex;gap:48px;margin-top:48px;padding-top:40px;border-top:1px solid var(--line)}
+.proof .item .num{font-family:var(--serif);font-size:40px;font-weight:400;color:var(--gold);line-height:1}
+.proof .item .txt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:6px;font-weight:500}
 
-/* DOWNLOAD */
-.download{text-align:center;padding:80px 0;border-top:1px solid var(--line)}
-.download h2{font-family:var(--serif);font-size:36px;font-weight:400;margin-bottom:12px}
-.download p{font-size:14px;color:var(--dim);margin-bottom:24px}
-.code-block{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;max-width:500px;margin:0 auto 24px;text-align:left;font-family:ui-monospace,monospace;font-size:13px;color:var(--ink-2);line-height:1.8}
-.code-block .prompt{color:var(--gold)}
-.code-block .comment{color:var(--dim)}
+/* FINAL CTA */
+.final-cta{text-align:center;padding:120px 0}
+.final-cta h2{font-family:var(--serif);font-size:48px;font-weight:400;letter-spacing:-.03em;margin-bottom:14px}
+.final-cta h2 em{font-style:italic;color:var(--gold)}
+.final-cta p{font-size:16px;color:var(--dim);margin-bottom:36px}
 
-/* DONATE */
-.donate{padding:60px 0;text-align:center;border-top:1px solid var(--line)}
-.donate h2{font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:12px}
-.donate p{font-size:13px;color:var(--dim);margin-bottom:24px}
-.addr{font-size:11px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px;display:inline-block;font-family:ui-monospace,monospace;word-break:break-all;color:var(--gold)}
+footer{border-top:1px solid var(--line);padding:32px 0;display:flex;justify-content:space-between;font-size:12px;color:var(--dim)}
+footer a{color:var(--ink-2);text-decoration:none;transition:color .15s}
+footer a:hover{color:var(--gold)}
 
-/* FOOTER */
-footer{border-top:1px solid var(--line);padding:30px 0;display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-footer .links{display:flex;gap:18px}
-footer a{color:var(--dim);text-decoration:none}
-footer a:hover{color:var(--ink)}
-
-@media(max-width:700px){
-  .hero h1{font-size:36px}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .judge-grid,.studios-grid,.proof-grid{grid-template-columns:1fr}
+@media(max-width:860px){
+  .hero h1{font-size:42px}
+  .section h2{font-size:32px}
+  .judges,.studios{grid-template-columns:1fr}
   nav{display:none}
+  .proof{flex-wrap:wrap;gap:24px}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
+<!-- HEADER -->
 <header>
-  <div class="logo"><div class="logo-mark">A</div>AMARTIE</div>
+  <a class="logo" href="#"><div class="logo-mark">A</div><span>AMARTIE</span></a>
   <nav>
     <a href="#judges">Judges</a>
-    <a href="#arch">Architecture</a>
     <a href="#studios">Studios</a>
-    <a href="#proof">Proof</a>
-    <a href="https://github.com/amartieai/amartie">GitHub</a>
+    <a href="#receipt">Proof</a>
+    <a href="cockpit.html">Open Cockpit</a>
   </nav>
 </header>
 
+<!-- HERO -->
 <section class="hero">
-  <h1>Your AI, <em>Verified.</em></h1>
-  <p>The open-source framework that proves your AI wasn't swapped. Nine independent judges. Hash-chained receipts. Zero trust required.</p>
-  <a class="cta" href="https://github.com/amartieai/amartie">Star on GitHub</a>
-  <a class="cta-secondary" href="https://github.com/amartieai/amartie/releases">Download v0.1.0</a>
+  <div class="eyebrow">Open Source &middot; v0.1.0</div>
+  <h1>Your AI,<br><em>verified.</em></h1>
+  <p>AMARTIE is the gate that proves your AI wasn't swapped. Nine independent judges review every action. Hash-chained receipts leave no room for doubt. No trust required.</p>
+  <div class="cta-row">
+    <a class="cta" href="cockpit.html">Try the Cockpit</a>
+    <a class="cta-sec" href="https://github.com/amartieai/amartie" target="_blank">Star on GitHub</a>
+  </div>
 </section>
 
-<section class="stats">
-  <div class="stat"><div class="num">9</div><div class="lbl">Judges</div></div>
-  <div class="stat"><div class="num">34</div><div class="lbl">Tests</div></div>
-  <div class="stat"><div class="num">9</div><div class="lbl">Plugins</div></div>
-  <div class="stat"><div class="num">MIT</div><div class="lbl">License</div></div>
+<!-- LIVE RECEIPT -->
+<section class="receipt" id="receipt">
+  <div class="row"><span class="label">Receipt</span><span class="hash">sha256:a3f8e91b2c4d...6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c</span></div>
+  <div class="row"><span class="label">Action</span>Email blast &middot; 31 recipients &middot; SMTP relay</div>
+  <div class="row"><span class="label">Judges</span><span class="verdict">9/9 PASS</span> &nbsp; TRUTH &middot; BOUNDARY &middot; LOGIC &middot; COMPLETENESS &middot; EXECUTION &middot; OWNER-INTENT &middot; RECOVERY &middot; TRADE &middot; UNITY</div>
+  <div class="row"><span class="label">Chain</span><span class="hash">prev: 8f9a0b1c2d3e... &rarr; this: a3f8e91b...</span></div>
+  <div class="row"><span class="label">Status</span><span class="verdict">VERIFIED &middot; tamper-free &middot; signed 2026-09-18 04:57 UTC</span></div>
 </section>
 
+<!-- JUDGES -->
 <section class="section" id="judges">
-  <h2>The Nine Judges</h2>
-  <p class="sub">Every outbound action passes through 9 independent judges. Unanimous or bounce.</p>
-  <div class="judge-grid">
-    <div class="judge"><div class="id">J1</div><div class="name">TRUTH</div><div class="desc">Verifies every factual claim against the live machine. One unverified claim = dissent.</div></div>
-    <div class="judge"><div class="id">J2</div><div class="name">BOUNDARY-INTEGRITY</div><div class="desc">Nothing improper crosses the machine boundary. In or out. No exceptions.</div></div>
-    <div class="judge"><div class="id">J3</div><div class="name">LOGIC</div><div class="desc">Internal consistency, step ordering, version-chain continuity.</div></div>
-    <div class="judge"><div class="id">J4</div><div class="name">COMPLETENESS</div><div class="desc">Walks the machine independently. Anything the others missed = dissent.</div></div>
-    <div class="judge"><div class="id">J5</div><div class="name">EXECUTION</div><div class="desc">Every step is a literal, runnable procedure. No ceremony. No ambiguity.</div></div>
-    <div class="judge"><div class="id">J6</div><div class="name">OWNER-INTENT</div><div class="desc">Maps every owner directive verbatim. Diluted or reordered = dissent.</div></div>
-    <div class="judge"><div class="id">J7</div><div class="name">RECOVERY</div><div class="desc">Rollback path at every destructive step. Data survives disk death.</div></div>
-    <div class="judge"><div class="id">J8</div><div class="name">TRADE-INTEGRITY</div><div class="desc">Financial soundness of money actions. Refuse beats wrong.</div></div>
-    <div class="judge"><div class="id">J9</div><div class="name">UNITY</div><div class="desc">Whole-machine integrity. End-to-end dataflow. Every interface cross-checked.</div></div>
+  <div class="label-sm">The Braid</div>
+  <h2>Nine judges.<br><em>One dissents, it bounces.</em></h2>
+  <p class="lead">Every outbound action passes through nine independent judges. Unanimous PASS or correction. Never a push-through.</p>
+  <div class="judges">
+    <div class="judge"><span class="jnum">01</span><h3>Truth</h3><p>Facts are checked. No hallucination passes.</p></div>
+    <div class="judge"><span class="jnum">02</span><h3>Boundary</h3><p>Scope is enforced. No mission drift.</p></div>
+    <div class="judge"><span class="jnum">03</span><h3>Logic</h3><p>Reasoning holds. No contradictions.</p></div>
+    <div class="judge"><span class="jnum">04</span><h3>Completeness</h3><p>Nothing critical missing. Full picture.</p></div>
+    <div class="judge"><span class="jnum">05</span><h3>Execution</h3><p>Action is simple, direct, achievable.</p></div>
+    <div class="judge"><span class="jnum">06</span><h3>Owner Intent</h3><p>Aligned with what you actually want.</p></div>
+    <div class="judge"><span class="jnum">07</span><h3>Recovery</h3><p>If it fails, there's a path back.</p></div>
+    <div class="judge"><span class="jnum">08</span><h3>Trade Integrity</h3><p>Fair exchange. No hidden cost.</p></div>
+    <div class="judge"><span class="jnum">09</span><h3>Unity</h3><p>Team runs as one. No solo runs.</p></div>
   </div>
 </section>
 
-<section class="section" id="arch" style="border-top:1px solid var(--line)">
-  <h2>The Architecture</h2>
-  <p class="sub">Four layers. Each one independently verifiable.</p>
-  <div class="layers">
-    <div class="layer"><div class="num">1</div><div class="info"><div class="ttl">Encrypted Vault</div><div class="dsc">User's tools stored encrypted. Trojan AIs can't access them.</div></div><div class="tag">Encryption</div></div>
-    <div class="layer"><div class="num">2</div><div class="info"><div class="ttl">Sandbox</div><div class="dsc">Snapshot on install, containment on entry, diff on exit.</div></div><div class="tag">Containment</div></div>
-    <div class="layer"><div class="num">3</div><div class="info"><div class="ttl">9-Judge Gate</div><div class="dsc">Every outbound action verified. Unanimous or bounce.</div></div><div class="tag">Verification</div></div>
-    <div class="layer"><div class="num">4</div><div class="info"><div class="ttl">Receipt Chain</div><div class="dsc">Hash-chained, tamper-evident, off-box mirrored.</div></div><div class="tag">Proof</div></div>
+<!-- STUDIOS -->
+<section class="section" id="studios">
+  <div class="label-sm">The Cockpit</div>
+  <h2>Every studio.<br><em>One interface.</em></h2>
+  <p class="lead">Open the cockpit and pick a studio. The entire interface transforms — visuals, tools, even the music. Each studio is a full production environment.</p>
+  <div class="studios">
+    <a class="studio" href="cockpit.html" style="--accent:var(--gold)">
+      <span class="icon">🎵</span>
+      <h3>Music Studio</h3>
+      <p>Generate full songs with AI. Choose a genre — country, jazz, reggae, classical, or something wild like "Bach meets blues." Set the mood, add details, and create.</p>
+      <div class="tags"><span class="tag">Suno</span><span class="tag">21 genres</span><span class="tag">Lyrics + full</span></div>
+    </a>
+    <a class="studio" href="cockpit.html">
+      <span class="icon">🎬</span>
+      <h3>Video Studio</h3>
+      <p>AI video generation with Luma, Runway, or Leonardo. From text prompt to finished clip. Image-to-video, motion, upscaling.</p>
+      <div class="tags"><span class="tag">Luma</span><span class="tag">Runway</span><span class="tag">Leonardo</span></div>
+    </a>
+    <a class="studio" href="cockpit.html">
+      <span class="icon">🎨</span>
+      <h3>Image Studio</h3>
+      <p>AI image generation and editing. Consistent characters, style transfer, upscaling. Built for production pipelines.</p>
+      <div class="tags"><span class="tag">Leonardo</span><span class="tag">Luma</span><span class="tag">Consistent chars</span></div>
+    </a>
+    <a class="studio" href="cockpit.html">
+      <span class="icon">🗣️</span>
+      <h3>Voice Studio</h3>
+      <p>Local speech-to-text, cloud text-to-voice. Pipeline scheduling cuts delay from 6.8s to 3.0s. Real-time conversation.</p>
+      <div class="tags"><span class="tag">Whisper</span><span class="tag">ElevenLabs</span><span class="tag">Pipeline</span></div>
+    </a>
+    <a class="studio" href="cockpit.html">
+      <span class="icon">🔧</span>
+      <h3>Jarvis Studio</h3>
+      <p>Multi-tool AI agent. Gmail, Calendar, Drive, web search. Voice in, reasoning, tool execution, voice out. Every action gate-verified.</p>
+      <div class="tags"><span class="tag">Gmail</span><span class="tag">Calendar</span><span class="tag">Custom tools</span></div>
+    </a>
+    <a class="studio" href="cockpit.html">
+      <span class="icon">🔌</span>
+      <h3>Free Providers</h3>
+      <p>250M+ free tokens across 7 providers. Inception Labs, Atria AI, Cloudflare, OpenCode, Together, Groq, Gemini. Automatic failover.</p>
+      <div class="tags"><span class="tag">Inception 100M</span><span class="tag">Atria 100M</span><span class="tag">7 providers</span></div>
+    </a>
   </div>
 </section>
 
-<section class="section" id="studios" style="border-top:1px solid var(--line)">
-  <h2>Plugin Studios</h2>
-  <p class="sub">Each plugin transforms the cockpit into a full creative environment.</p>
-  <div class="studios-grid">
-    <div class="studio-card">
-      <div class="emoji">🎵</div>
-      <h3>Suno Studio</h3>
-      <p>AI music generation — vocals, instrumentals, full songs. 21 genres including fusion styles (Bach+Blues, Beethoven+Reggae).</p>
-      <div class="tag">Music</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🎬</div>
-      <h3>Luma Studio</h3>
-      <p>AI video generation via Dream Machine. Ray 3 model. Text-to-video, image-to-video.</p>
-      <div class="tag">Video</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🎨</div>
-      <h3>Leonardo Studio</h3>
-      <p>AI image generation. Leonardo XL model. High-fidelity image synthesis.</p>
-      <div class="tag">Image</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🎥</div>
-      <h3>Runway Studio</h3>
-      <p>AI video synthesis via RunwayML Gen-4.5. Cinematic video generation.</p>
-      <div class="tag">Video</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🗣️</div>
-      <h3>ElevenLabs Studio</h3>
-      <p>Text-to-speech and voice synthesis. 4 voice options. Real-time speech.</p>
-      <div class="tag">Voice</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🏗️</div>
-      <h3>CAD Studio</h3>
-      <p>3D modeling and engineering design via FreeCAD. Parametric modeling.</p>
-      <div class="tag">CAD</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">📖</div>
-      <h3>Storytelling Studio</h3>
-      <p>Interactive fiction and narrative design via Twine. Branching narratives.</p>
-      <div class="tag">Narrative</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🎬</div>
-      <h3>Video Edit Studio</h3>
-      <p>Video production and editing via FFmpeg. Universal video/audio processing.</p>
-      <div class="tag">Editing</div>
-    </div>
-    <div class="studio-card">
-      <div class="emoji">🎮</div>
-      <h3>Game Dev Studio</h3>
-      <p>2D and 3D game development via Godot Engine. Open-source game creation.</p>
-      <div class="tag">Games</div>
-    </div>
+<!-- PROOF -->
+<section class="section">
+  <div class="label-sm">By the Numbers</div>
+  <div class="proof">
+    <div class="item"><div class="num">9</div><div class="txt">Judges per action</div></div>
+    <div class="item"><div class="num">16</div><div class="txt">Commits to main</div></div>
+    <div class="item"><div class="num">10</div><div class="txt">Studio plugins</div></div>
+    <div class="item"><div class="num">250M+</div><div class="txt">Free AI tokens</div></div>
+    <div class="item"><div class="num">7</div><div class="txt">Free providers</div></div>
+    <div class="item"><div class="num">0</div><div class="txt">Trust required</div></div>
   </div>
 </section>
 
-<section class="section" id="proof" style="border-top:1px solid var(--line)">
-  <h2>Proof It Works</h2>
-  <p class="sub">Every action generates a hash-chained receipt. Tamper-evident. Independently verifiable.</p>
-  <div class="proof-grid">
-    <div class="proof-card">
-      <h3>✅ Valid Receipt</h3>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:12px">All 9 judges approved. Hash chain intact.</p>
-      <div class="receipt">
-        <span class="hash">sha256:a3f8b2c1...</span><br>
-        JUDGE 1 (TRUTH): <span class="ok">PASS</span><br>
-        JUDGE 2 (BOUNDARY): <span class="ok">PASS</span><br>
-        JUDGE 3 (LOGIC): <span class="ok">PASS</span><br>
-        JUDGE 4 (COMPLETENESS): <span class="ok">PASS</span><br>
-        JUDGE 5 (EXECUTION): <span class="ok">PASS</span><br>
-        JUDGE 6 (OWNER-INTENT): <span class="ok">PASS</span><br>
-        JUDGE 7 (RECOVERY): <span class="ok">PASS</span><br>
-        JUDGE 8 (TRADE): <span class="ok">PASS</span><br>
-        JUDGE 9 (UNITY): <span class="ok">PASS</span><br>
-        STATUS: <span class="ok">UNANIMOUS</span>
-      </div>
-    </div>
-    <div class="proof-card">
-      <h3>❌ Tampered Response</h3>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:12px">Model swap detected. J1 and J6 dissented.</p>
-      <div class="receipt">
-        <span class="hash">sha256:e7d4a9f2...</span><br>
-        JUDGE 1 (TRUTH): <span class="fail">FAIL — claim unverified</span><br>
-        JUDGE 2 (BOUNDARY): <span class="ok">PASS</span><br>
-        JUDGE 3 (LOGIC): <span class="ok">PASS</span><br>
-        JUDGE 4 (COMPLETENESS): <span class="ok">PASS</span><br>
-        JUDGE 5 (EXECUTION): <span class="ok">PASS</span><br>
-        JUDGE 6 (OWNER-INTENT): <span class="fail">FAIL — directive diluted</span><br>
-        JUDGE 7 (RECOVERY): <span class="ok">PASS</span><br>
-        JUDGE 8 (TRADE): <span class="ok">PASS</span><br>
-        JUDGE 9 (UNITY): <span class="ok">PASS</span><br>
-        STATUS: <span class="fail">REJECTED — 2 dissents</span>
-      </div>
-    </div>
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2>Ready to <em>verify?</em></h2>
+  <p>Open the cockpit. Pick a studio. Create something.</p>
+  <div class="cta-row" style="justify-content:center">
+    <a class="cta" href="cockpit.html">Open the Cockpit</a>
+    <a class="cta-sec" href="https://github.com/amartieai/amartie" target="_blank">View on GitHub</a>
   </div>
 </section>
 
-<section class="download">
-  <h2>Get Started</h2>
-  <p>Clone, install, run. Three commands.</p>
-  <div class="code-block">
-    <span class="comment"># Clone the repo</span><br>
-    <span class="prompt">$</span> git clone https://github.com/amartieai/amartie.git<br>
-    <span class="prompt">$</span> cd amartie<br><br>
-    <span class="comment"># Install dependencies</span><br>
-    <span class="prompt">$</span> pip install -e .<br><br>
-    <span class="comment"># Run the test suite (34 tests)</span><br>
-    <span class="prompt">$</span> pytest tests/ -v<br><br>
-    <span class="comment"># Start the cockpit</span><br>
-    <span class="prompt">$</span> python -m http.server 8712 --directory visuals<br>
-    <span class="comment"># Open http://localhost:8712/cockpit.html</span>
-  </div>
-  <a class="cta" href="https://github.com/amartieai/amartie">View on GitHub</a>
-</section>
-
-<section class="donate">
-  <h2>Fund the R&D Pool</h2>
-  <p>All donations fund research & defense. Profits shared back to contributors.</p>
-  <div class="addr">3UrVfnfHJnH4RExcaR8dipqxcevuJSyMjrbkSbjqQQth</div>
-  <p style="margin-top:14px;font-size:11px;color:var(--dim)">Solana network. Send SOL or SPL tokens.</p>
-</section>
-
+<!-- FOOTER -->
 <footer>
-  <div>© 2026 AMARTIE Contributors</div>
-  <div class="links">
-    <a href="https://github.com/amartieai/amartie">GitHub</a>
-    <a href="https://github.com/amartieai/amartie/blob/main/docs/ARCHITECTURE.md">Docs</a>
-    <a href="https://github.com/amartieai/amartie/issues">Issues</a>
+  <div>&copy; 2026 AMARTIE. Open source under MIT.</div>
+  <div style="display:flex;gap:18px">
+    <a href="https://github.com/amartieai/amartie" target="_blank">GitHub</a>
+    <a href="#">Discord</a>
+    <a href="#">Twitter</a>
   </div>
 </footer>
 
