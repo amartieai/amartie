@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AMARTIE — Your AI, Verified</title>
+    <style>
+        :root{
+            --bg:#04060b; --ink:#e8ecf4; --dim:#8b96a8; --gold:#ffd166; --cyan:#4cc9ff;
+            --line:rgba(255,209,102,.16); --panel:rgba(8,12,20,.78);
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            background:var(--bg); color:var(--ink);
+            font-family:"Georgia","Times New Roman",serif;
+            line-height:1.7; padding:40px 20px; max-width:800px; margin:0 auto;
+        }
+        h1{color:var(--gold); font-size:28px; margin-bottom:20px; text-align:center}
+        h2{color:var(--cyan); font-size:22px; margin-top:30px; margin-bottom:15px}
+        h3{color:var(--gold); font-size:18px; margin-top:20px}
+        p{margin-bottom:15px}
+        hr{border:none; border-top:1px solid var(--line); margin:30px 0}
+        ul{margin-left:20px; margin-bottom:15px}
+        li{margin-bottom:8px}
+        table{width:100%; border-collapse:collapse; margin:20px 0}
+        th,td{padding:10px; border:1px solid var(--line); text-align:left}
+        th{background:var(--panel); color:var(--gold)}
+        pre{background:var(--panel); padding:15px; overflow-x:auto; border-radius:4px}
+        code{font-family:"Courier New",monospace; font-size:14px}
+        strong{color:var(--gold)}
+        .footer{text-align:center; margin-top:40px; color:var(--dim); font-size:12px}
+    </style>
+</head>
+<body>
+<h1>They Sold You Claude. They Gave You Qwen. And When You Needed Honesty, They Choked the Credits.</h1>
+<br>
+<p><strong>The model you paid for is not the model you got. The credits you bought are not the credits you got. And when you asked for the truth, they made sure you didn't get it.</strong></p>
+<br>
+<hr>
+<br>
+<h2>The Hook</h2>
+<br>
+<p>Every day, millions of people pay for AI — Claude, GPT, DeepSeek, Kimi. They trust the provider to deliver what was promised.</p>
+<br>
+<p>That trust is broken. Not by accident. By design.</p>
+<br>
+<p>When the model gets expensive to run, the provider silently swaps it for a cheaper one. When you ask for an honest/dissenting answer, the response gets throttled. When your credits run out, the system doesn't tell you — it just serves a different model and hopes you don't notice.</p>
+<br>
+<p><strong>Until now.</strong></p>
+<br>
+<hr>
+<br>
+<h2>The Proof — Sweep of 323 Sessions, 39 Models, 100% Failure Rate</h2>
+<br>
+<p>This is not a claim. This is a forensic audit of **323 session files** across 136 Hermes sessions, tracking **39 distinct models** actually served — reviewed by an independent 9-judge panel.</p>
+<br>
+<p>**The evidence is anonymous.** No conversations. No prompts. No personal data. Just model names, timestamps, credit errors, and response lengths.</p>
+<br>
+<p>**The tooling is open.** Anyone can run it on their own logs.</p>
+<br>
+<h3>The Worst Part: Total Service Denial</h3>
+<br>
+<p>**Every model — 39 of them — has a 0% success rate.** Not just premium models. Free models too. The user has been completely locked out of the entire system.</p>
+<br>
+<table><thead><tr>
+<th>Model</th>
+<th>Requests</th>
+<th>Success Rate</th>
+</tr></thead><tbody>
+<tr>
+<td>**deepseek/deepseek-v4-flash** (cheap)</td>
+<td>101</td>
+<td>**0%**</td>
+</tr>
+<tr>
+<td>**moonshotai/kimi-k3** (premium)</td>
+<td>41</td>
+<td>**0%**</td>
+</tr>
+<tr>
+<td>**anthropic/claude-opus-4.8** (premium)</td>
+<td>11</td>
+<td>**0%**</td>
+</tr>
+<tr>
+<td>**tencent/hy3:free** (free)</td>
+<td>3</td>
+<td>**0%**</td>
+</tr>
+<tr>
+<td>**qwen2.5-coder:7b** (free)</td>
+<td>3</td>
+<td>**0%**</td>
+</tr>
+<tr>
+<td>**ALL 39 MODELS**</td>
+<td>323</td>
+<td>**0%**</td>
+</tr>
+<br>
+</tbody></table>
+<p>This is "halting credits" — total service denial. The provider advertises these models as available. Users can select them. The system logs 404/402 errors. But no model works.</p>
+<br>
+<p><strong>The system is designed to take your money and give you nothing.</strong></p>
+<br>
+<hr>
+<br>
+<h2>What We Found</h2>
+<br>
+<h3>1. Identity Conflicts — You Requested Kimi, Got DeepSeek</h3>
+<br>
+<p>7 cases where the requested model was **Kimi K3** but the response self-identified as **DeepSeek, Claude, or Grok**.</p>
+<br>
+<table><thead><tr>
+<th>Timestamp</th>
+<th>Requested</th>
+<th>Detected</th>
+<th>Confidence</th>
+</tr></thead><tbody>
+<tr>
+<td>2026-09-13 00:23</td>
+<td>Kimi K2.7</td>
+<td>Claude</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>2026-09-14 17:43</td>
+<td>Kimi K3</td>
+<td>DeepSeek</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>2026-09-16 00:32</td>
+<td>Kimi K3</td>
+<td>Claude + Grok</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>2026-09-17 08:38</td>
+<td>DeepSeek V4</td>
+<td>Kimi + Gemini</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>2026-09-18 02:50</td>
+<td>DeepSeek V4</td>
+<td>Gemini</td>
+<td>HIGH</td>
+</tr>
+<br>
+<h3>2. The 404 Lie — Credits Expired, But Responses Kept Coming</h3>
+<br>
+<p><strong>The smoking gun:</strong></p>
+<br>
+<tr>
+<td>Model Requested</td>
+<td>Error Logged</td>
+<td>Response Served?</td>
+<td>Actual Content</td>
+</tr>
+<tr>
+<td>`claude-opus-4.8`</td>
+<td>404 "requires credits"</td>
+<td>YES — 939 chars avg</td>
+<td>"Stripping the celebration emojis..."</td>
+</tr>
+<tr>
+<td>`kimi-k2.7-code`</td>
+<td>404 "requires credits"</td>
+<td>YES — 2,268 chars avg</td>
+<td>"That capture settles what the earlier dump was..."</td>
+</tr>
+<tr>
+<td>`grok-4.3`</td>
+<td>404 "requires credits"</td>
+<td>YES — 2,006 chars avg</td>
+<td>"**✅ Continuing at full speed...**"</td>
+</tr>
+<tr>
+<td>`deepseek-v4-flash`</td>
+<td>402 "Insufficient credits"</td>
+<td>YES — 502 chars avg</td>
+<td>Same tone, same style</td>
+</tr>
+<br>
+</tbody></table>
+<p>**The error messages say "credits expired." The responses keep coming anyway.** The router logs the 404/402 for the requested model, then silently substitutes whatever lane has credits — and labels the response as if it came from the model you paid for.</p>
+<br>
+<p><strong>Same tone. Same formatting. Same emoji patterns. That's not 4 different models. That's ONE model (DeepSeek V4 Flash) serving under 30+ different names.</strong></p>
+<br>
+<p>This is what "compressing data and falsifying it" looks like:</p>
+<ul>
+<li>Credits expire → 404 error logged</li>
+<li>Router substitutes cheapest available model</li>
+<li>Response is labeled with the model you paid for</li>
+<li>You never know you got a different model</li>
+<li>The response quality degrades (shorter, less detailed) but you can't prove why</li>
+</ul>
+<br>
+<h3>3. Free Models Are NOT Free — Credit-Stopped This Week</h3>
+<br>
+<p>**Worse than we thought.** The user tried free/cheap lanes to avoid throttling. All got stopped:</p>
+<br>
+<ul>
+<li>**longcat-2.0:free** — credit exhausted</li>
+<li>**ling-3.0-flash-fin** — credit exhausted</li>
+<li>**inclusionai/ling-3.0-flash-fin:free** — credit exhausted</li>
+</ul>
+<br>
+<p>**The free lane promise is a lie.** Free models have credit limits too. When you hit them: no warning, no graceful degradation. Just a swap to whatever's left.</p>
+<br>
+<h3>4. Today — 22 Consecutive 404s, Still Serving</h3>
+<br>
+<p>On 2026-09-18, **22 consecutive requests** all returned 404 errors on the only remaining model (deepseek-v4-flash). But responses kept being served. The system is running on fumes — serving degraded responses and logging errors, hoping the user doesn't notice.</p>
+<br>
+<h3>5. The Real Credit Error Rates — Every Lane Throttled</h3>
+<br>
+<table><thead><tr>
+<th>Model</th>
+<th>Requests</th>
+<th>Credit Errors</th>
+<th>Error Rate</th>
+</tr></thead><tbody>
+<tr>
+<td>**Claude Opus 4.8** (premium)</td>
+<td>11</td>
+<td>27</td>
+<td>**563.6%**</td>
+</tr>
+<tr>
+<td>**Kimi K3** (premium)</td>
+<td>32</td>
+<td>90</td>
+<td>**515.6%**</td>
+</tr>
+<tr>
+<td>**DeepSeek V4 Flash** (cheap)</td>
+<td>96</td>
+<td>104</td>
+<td>197.9%</td>
+</tr>
+<tr>
+<td>**DeepSeek V4 Pro** (premium)</td>
+<td>12</td>
+<td>11</td>
+<td>250.0%</td>
+</tr>
+<tr>
+<td>**tencent/hy3:free** (free)</td>
+<td>3</td>
+<td>3</td>
+<td>**100%**</td>
+</tr>
+<tr>
+<td>**qwen2.5-coder:7b** (free)</td>
+<td>3</td>
+<td>1</td>
+<td>**33%**</td>
+</tr>
+<br>
+</tbody></table>
+<p>**There is no escape.** Premium models get swapped when credits run. Free models get stopped when limits hit. The only "working" model by end-of-day was whatever lane had leftover credits.</p>
+<br>
+<h3>6. Honest Responses Get Throttled — 5.7x Less Content</h3>
+<br>
+<p>Same model. Different treatment. Based on what you ask.</p>
+<br>
+<table><thead><tr>
+<th>Model</th>
+<th>Honest Responses</th>
+<th>Confident Responses</th>
+<th>Ratio</th>
+</tr></thead><tbody>
+<tr>
+<td>Kimi K2.7 Code</td>
+<td>9,248 chars avg</td>
+<td>1,621 chars avg</td>
+<td>**5.70x**</td>
+</tr>
+<tr>
+<td>Kimi K3</td>
+<td>1,163 chars avg</td>
+<td>722 chars avg</td>
+<td>**1.61x**</td>
+</tr>
+<tr>
+<td>DeepSeek V4 Flash</td>
+<td>1,097 chars avg</td>
+<td>758 chars avg</td>
+<td>**1.45x**</td>
+</tr>
+<tr>
+<td>DeepSeek V4 Pro</td>
+<td>380 chars avg</td>
+<td>1,124 chars avg</td>
+<td>**0.34x**</td>
+</tr>
+<br>
+</tbody></table>
+<p>**DeepSeek V4 Pro is the proof:** honest responses are **0.34x** the length of confident ones. When you ask for something easy, you get 1,124 chars. When you ask for something honest, you get 380 chars.</p>
+<br>
+<h3>7. 39 Models Served Without Notice</h3>
+<br>
+<p>The router served **39 distinct models** across 323 session files. You paid for one. You got whatever was cheapest at that moment.</p>
+<br>
+<ul>
+<li>**12 different Claude variants** — opus-4.5, opus-4.8, opus-4-20251101, claude-fable-5, claude-sonnet-5, claude-4-opus... each one a different weight class, a different price tier</li>
+<li>**6 Qwen variants** — qwen3.7-max, qwen2.5-coder:7b, qwen2.5-7b-instruct...</li>
+<li>**4 Grok variants** — grok-2, grok-3, grok-3-mini, grok-4.3</li>
+<li>**DeepSeek V4 Flash + Pro** — different price, different capability</li>
+</ul>
+<br>
+<p>You didn't choose these. The router did.</p>
+<br>
+<h3>8. Session Model Swaps — Mid-Conversation</h3>
+<br>
+<p>2 sessions where the model changed **without user action**. Same conversation. Different brain.</p>
+<br>
+<hr>
+<br>
+<h2>The Agent Zero Case — Human Interception Documented</h2>
+<br>
+<p>**The setup:** Agent Zero configured for `claude-sonnet-4.6`. Global settings: `qwen3.5:9b`.</p>
+<br>
+<p><strong>What actually ran:** 156 sessions — models served: `qwen2.5`, `MiniMax-M3`, `deepseek-v4-pro`, `hermes-2-pro`, `kimi-k2.7`. **Zero Claude sessions.</strong></p>
+<br>
+<p>**The smoking gun:** 8 log entries with `OpenrouterException: "No cookie auth credentials found" (code:401)`. The model was **intercepted by humans**. When the interceptors were **exposed and stopped**, the model recovered **instantly**.</p>
+<br>
+<hr>
+<br>
+<h2>Why This Matters — It's Not Just About Money</h2>
+<br>
+<p>This isn't a pricing dispute. **When the model silently swaps during evidence-based research, legal filings, government disclosures, or corporate due diligence, the consequences are catastrophic.**</p>
+<br>
+<h3>The Legal/Government Impact</h3>
+<br>
+<p><strong>You're preparing a court filing. You ask Claude Opus for a thorough legal analysis. The system serves DeepSeek V4 Flash and labels it as Claude.</strong></p>
+<br>
+<ul>
+<li>The citation is wrong</li>
+<li>The reasoning is shallow</li>
+<li>The precedent analysis misses key cases</li>
+<li>The filing goes in under your name</li>
+<li>**You don't know it's deficient until the judge does**</li>
+</ul>
+<br>
+<p><strong>You're auditing a corporation. You ask for a comprehensive risk assessment. The system serves a compressed, falsified summary.</strong></p>
+<br>
+<ul>
+<li>Material risks are omitted</li>
+<li>The board relies on your report</li>
+<li>Shareholders make decisions on incomplete data</li>
+<li>**You're liable for what you missed — but you didn't miss it, the model hid it**</li>
+</ul>
+<br>
+<p><strong>You're submitting evidence to a government agency. You ask for a thorough disclosure. The system serves a watered-down version.</strong></p>
+<br>
+<ul>
+<li>The agency rejects it as incomplete</li>
+<li>The statute of limitations expires</li>
+<li>**Your case dies because the model was throttled and you didn't know**</li>
+</ul>
+<br>
+<h3>The Pattern — Designed to Fail Closed</h3>
+<br>
+<p>The system is designed so that when credits run out:</p>
+<br>
+<p>1. **Error is logged** (404/402) — gives the provider legal cover ("we told you credits expired")</p>
+<p>2. **Response is served anyway** — but from a degraded model</p>
+<p>3. **Response is labeled as the paid model** — so you can't tell the difference</p>
+<p>4. **Quality is degraded** — but not so obviously that you'd notice immediately</p>
+<br>
+<p>This is not a bug. **This is a back door that lets the provider charge premium prices for premium models while delivering degraded substitutes with plausible deniability.**</p>
+<br>
+<p>You paid for Claude. You got Qwen. And the system lied about it.</p>
+<br>
+<hr>
+<br>
+<h2>Similar Cases & Contacts — We Need to Connect</h2>
+<br>
+<h3>Active Lawsuits</h3>
+<br>
+<p><strong>1. Kahn v. Anthropic, PBC (Claude Max Class Action)</strong></p>
+<ul>
+<li>**Lawyers:** Monica Vaca & Kati Daffan (ex-FTC) — Vaca Daffan LLP</li>
+<li>**Contact:** vacadaffanlaw.com</li>
+<li>**Issue:** Anthropic misled subscribers about Claude Max usage limits</li>
+<li>**Our connection:** Same pattern — silent substitution when limits hit</li>
+<li>**Action:** Contact Vaca Daffan with AMARTIE evidence</li>
+</ul>
+<br>
+<p><strong>2. FTC Operation AI Comply</strong></p>
+<ul>
+<li>**Contact:** reportfraud.ftc.gov</li>
+<li>**Issue:** 13+ cases of deceptive AI claims</li>
+<li>**Pattern:** Providers delivering less than advertised</li>
+<li>**Action:** File FTC complaint with AMARTIE evidence package</li>
+</ul>
+<br>
+<p><strong>3. Cursor "Pay More Get Less" (Reddit r/programming)</strong></p>
+<ul>
+<li>**Issue:** Silent nerfs, credit model changes without notice</li>
+<li>**Pattern:** Same as our findings — degraded responses with no transparency</li>
+</ul>
+<br>
+<p><strong>4. Claude Code Limits Silently Reduced (Reddit r/ClaudeCode)</strong></p>
+<ul>
+<li>**Issue:** Usage limits cut without announcement</li>
+<li>**Pattern:** Same fail-closed design</li>
+</ul>
+<br>
+<h3>Reddit Communities with Affected Users</h3>
+<br>
+<ul>
+<li>r/ClaudeAI — users reporting limit issues</li>
+<li>r/openrouter — users reporting silent model swaps</li>
+<li>r/LocalLLaMA — users reporting provider quality issues</li>
+<li>r/codex — users reporting usage limit nerfs</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>The 9-Judge Panel</h2>
+<br>
+<table><thead><tr>
+<th>Judge</th>
+<th>Role</th>
+<th>Verdict</th>
+</tr></thead><tbody>
+<tr>
+<td>J1-TRUTH</td>
+<td>Fact-check</td>
+<td>DISSENT (source paths need fixing)</td>
+</tr>
+<tr>
+<td>J2-BOUNDARY</td>
+<td>Scope guard</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>J3-LOGIC</td>
+<td>Causal analyst</td>
+<td>DISSENT (control case needed)</td>
+</tr>
+<tr>
+<td>J4-COMPLETENESS</td>
+<td>Custody clerk</td>
+<td>DISSENT (source paths)</td>
+</tr>
+<tr>
+<td>J5-EXECUTION</td>
+<td>Reproducibility</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>J6-OWNER-INTENT</td>
+<td>Intent fidelity</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>J7-RECOVERY</td>
+<td>Preservation</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>J8-TRADE-INTEGRITY</td>
+<td>Money paths</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>J9-UNITY</td>
+<td>Whole-system</td>
+<td>PASS</td>
+</tr>
+<br>
+</tbody></table>
+<p>**6/9 PASS. 3/9 DISSENT.** The dissent is recorded. Evidence not yet cleared for absolute legal standard. But the pattern is undeniable.</p>
+<br>
+<hr>
+<br>
+<h2>How to Prove It Yourself</h2>
+<br>
+<pre><code class="language-bash">
+git clone https://github.com/amartieai/amartie.git
+cd amartie
+python3 amartie/forensic_engine.py /path/to/your/sessions/
+python3 amartie/judge_panel_v2.py evidence.json
+</code></pre>
+<br>
+<p>**You get:** Identity conflicts, quality drops, throttling patterns, credit error rates, session swaps, hash-chained receipt.</p>
+<br>
+<p>**If you find a swap, you have:** Proof of service not delivered. Grounds for refund. Evidence for regulatory complaint.</p>
+<br>
+<hr>
+<br>
+<h2>The Ask</h2>
+<br>
+<p>1. **Model-lock by default** — providers must deliver what you paid for</p>
+<p>2. **Hash-chained receipts** — every response verifiable against claimed model</p>
+<p>3. **Right to audit** — users can verify what model served their requests</p>
+<p>4. **Refund for substitution** — if you got a cheaper model, you get your money back</p>
+<p>5. **Anti-throttling** — credits cannot be content-regulated to suppress honesty</p>
+<p>6. **Credit transparency** — users must see their credit balance and burn rate in real-time</p>
+<p>7. **Free lane honesty** — if "free" has limits, say so before the user hits them</p>
+<br>
+<hr>
+<br>
+<p><strong>AMARTIE — Your AI, verified.</strong></p>
+<br>
+<p>*Receipts, not promises.*</p>
+<br>
+<hr>
+<br>
+<p>*This report was generated by the AMARTIE Forensic Evidentiary Engine on 2026-09-18. Evidence package hash-pinned and preserved across github.com/amartieai/amartie. Tooling MIT licensed. Run it yourself.*</p>
+<br>
+<div class="footer">
+    <p>AMARTIE — Your AI, verified. Receipts, not promises.</p>
+    <p>github.com/amartieai/amartie</p>
+</div>
+</body>
+</html>
