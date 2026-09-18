@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMARTIE v0.1.0 — Your AI, Verified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06080d;--surface:#0f1319;--surface-2:#161b22;--ink:#f0f2f5;--ink-2:#c9d1d9;--dim:#8b949e;--line:rgba(255,255,255,.06);--line-2:rgba(255,255,255,.10);--gold:#ffd166;--gold-dim:rgba(255,209,102,.15);--accent:#58a6ff;--accent-dim:rgba(88,166,255,.15);--green:#3fb950;--purple:#bc8cff;--red:#f85149;--serif:'Instrument Serif',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(60% 40% at 15% 20%,rgba(255,209,102,.07) 0%,transparent 100%),radial-gradient(50% 35% at 85% 80%,rgba(88,166,255,.05) 0%,transparent 100%);animation:drift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+@keyframes drift{0%{opacity:.6}100%{opacity:1}}
+.wrap{max-width:800px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+header{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:-.01em}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--bg);font-size:13px}
+nav{display:flex;gap:22px}
+nav a{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);transition:color .2s;text-decoration:none}
+nav a:hover{color:var(--ink)}
+.hero{padding:80px 0 60px;text-align:center}
+.hero h1{font-family:var(--serif);font-size:48px;font-weight:400;line-height:1.08;letter-spacing:-.03em;margin-bottom:16px}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero p{font-size:16px;color:var(--dim);max-width:580px;margin:0 auto 32px;line-height:1.7}
+.cta{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--bg);font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;border-radius:10px;font-weight:700;transition:transform .15s;text-decoration:none}
+.cta:hover{transform:translateY(-1px)}
+.section{padding:60px 0}
+.section h2{font-family:var(--serif);font-size:32px;font-weight:400;letter-spacing:-.02em;margin-bottom:16px}
+.section h3{font-size:18px;font-weight:600;margin-bottom:8px}
+.section p{color:var(--ink-2);margin-bottom:16px}
+.judge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+.judge{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.judge .id{font-size:10px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.judge .name{font-size:13px;font-weight:700;margin-bottom:4px}
+.judge .desc{font-size:11px;color:var(--dim);line-height:1.6}
+.studios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+.studio-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+.studio-card .emoji{font-size:28px;margin-bottom:8px}
+.studio-card h4{font-size:14px;font-weight:600;margin-bottom:4px}
+.studio-card p{font-size:11px;color:var(--dim);line-height:1.5}
+.receipt{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:16px;font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);line-height:1.7;margin:16px 0}
+.receipt .hash{color:var(--accent)}
+.receipt .ok{color:var(--green)}
+.receipt .fail{color:var(--red)}
+.code-block{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;font-family:ui-monospace,monospace;font-size:13px;color:var(--ink-2);line-height:1.8;overflow-x:auto}
+.code-block .prompt{color:var(--gold)}
+.code-block .comment{color:var(--dim)}
+footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+@media(max-width:700px){.hero h1{font-size:34px}.judge-grid,.studios-grid{grid-template-columns:1fr}nav{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo"><div class="logo-mark">A</div>AMARTIE</div>
+  <nav>
+    <a href="https://amartie.com">Home</a>
+    <a href="https://github.com/amartieai/amartie">GitHub</a>
+    <a href="https://github.com/amartieai/amartie/issues">Issues</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>AMARTIE v0.1.0 — <em>Your AI, Verified.</em></h1>
+  <p>The open-source framework that proves your AI wasn't swapped. Nine independent judges. Hash-chained receipts. Zero trust required.</p>
+  <a class="cta" href="https://amartie.com">Try the Live Demo</a>
+</section>
+
+<section class="section">
+  <h2>The Problem</h2>
+  <p>The biggest problem in AI today isn't intelligence. <strong>It's trust.</strong></p>
+  <p>You pay for Claude. You might get GPT. Aggregators silently route to cheaper models. No receipts. No proof. No recourse.</p>
+</section>
+
+<section class="section" style="border-top:1px solid var(--line)">
+  <h2>The Solution</h2>
+  <p>AMARTIE is a verification gate that sits between you and AI models. Every outbound action passes through <strong>9 independent judges</strong>. Every verdict is <strong>hash-chained</strong>. Every receipt is <strong>tamper-evident</strong>.</p>
+  <p>If the model was swapped — you'll have the proof.</p>
+</section>
+
+<section class="section" style="border-top:1px solid var(--line)">
+  <h2>The 9 Judges</h2>
+  <div class="judge-grid">
+    <div class="judge"><div class="id">J1</div><div class="name">TRUTH</div><div class="desc">Verify every factual claim against the live machine.</div></div>
+    <div class="judge"><div class="id">J2</div><div class="name">BOUNDARY</div><div class="desc">Perimeter integrity. Nothing improper crosses.</div></div>
+    <div class="judge"><div class="id">J3</div><div class="name">LOGIC</div><div class="desc">Internal consistency, step ordering, version-chain.</div></div>
+    <div class="judge"><div class="id">J4</div><div class="name">COMPLETENESS</div><div class="desc">Discovers omissions the others missed.</div></div>
+    <div class="judge"><div class="id">J5</div><div class="name">EXECUTION</div><div class="desc">Every step is a literal, runnable procedure.</div></div>
+    <div class="judge"><div class="id">J6</div><div class="name">OWNER-INTENT</div><div class="desc">Maps every owner directive verbatim.</div></div>
+    <div class="judge"><div class="id">J7</div><div class="name">RECOVERY</div><div class="desc">Rollback path at every destructive step.</div></div>
+    <div class="judge"><div class="id">J8</div><div class="name">TRADE</div><div class="desc">Financial soundness of money actions.</div></div>
+    <div class="judge"><div class="id">J9</div><div class="name">UNITY</div><div class="desc">Whole-machine integrity. End-to-end dataflow.</div></div>
+  </div>
+  <p style="text-align:center;font-weight:600;color:var(--gold)">Unanimous or bounce. No exceptions.</p>
+</section>
+
+<section class="section" style="border-top:1px solid var(--line)">
+  <h2>9 Plugin Studios</h2>
+  <p>Each plugin transforms the cockpit into a full creative environment:</p>
+  <div class="studios-grid">
+    <div class="studio-card"><div class="emoji">🎵</div><h4>Suno Studio</h4><p>AI music (21 genres)</p></div>
+    <div class="studio-card"><div class="emoji">🎬</div><h4>Luma Studio</h4><p>AI video (Ray 3)</p></div>
+    <div class="studio-card"><div class="emoji">🎨</div><h4>Leonardo Studio</h4><p>AI image generation</p></div>
+    <div class="studio-card"><div class="emoji">🎥</div><h4>Runway Studio</h4><p>AI video synthesis</p></div>
+    <div class="studio-card"><div class="emoji">🗣️</div><h4>ElevenLabs Studio</h4><p>Voice synthesis & TTS</p></div>
+    <div class="studio-card"><div class="emoji">🏗️</div><h4>CAD Studio</h4><p>3D modeling (FreeCAD)</p></div>
+    <div class="studio-card"><div class="emoji">📖</div><h4>Storytelling Studio</h4><p>Interactive fiction (Twine)</p></div>
+    <div class="studio-card"><div class="emoji">🎬</div><h4>Video Edit Studio</h4><p>Video production (FFmpeg)</p></div>
+    <div class="studio-card"><div class="emoji">🎮</div><h4>Game Dev Studio</h4><p>2D/3D games (Godot)</p></div>
+  </div>
+</section>
+
+<section class="section" style="border-top:1px solid var(--line)">
+  <h2>Proof It Works</h2>
+  <h3>Valid Receipt</h3>
+  <div class="receipt">
+    <span class="hash">sha256:a3f8b2c1...</span><br>
+    JUDGE 1 (TRUTH): <span class="ok">PASS</span><br>
+    JUDGE 2 (BOUNDARY): <span class="ok">PASS</span><br>
+    JUDGE 3 (LOGIC): <span class="ok">PASS</span><br>
+    JUDGE 4 (COMPLETENESS): <span class="ok">PASS</span><br>
+    JUDGE 5 (EXECUTION): <span class="ok">PASS</span><br>
+    JUDGE 6 (OWNER-INTENT): <span class="ok">PASS</span><br>
+    JUDGE 7 (RECOVERY): <span class="ok">PASS</span><br>
+    JUDGE 8 (TRADE): <span class="ok">PASS</span><br>
+    JUDGE 9 (UNITY): <span class="ok">PASS</span><br>
+    STATUS: <span class="ok">UNANIMOUS</span>
+  </div>
+  <h3>Tampered Response (Rejected)</h3>
+  <div class="receipt">
+    <span class="hash">sha256:e7d4a9f2...</span><br>
+    JUDGE 1 (TRUTH): <span class="fail">FAIL — claim unverified</span><br>
+    JUDGE 2 (BOUNDARY): <span class="ok">PASS</span><br>
+    JUDGE 3 (LOGIC): <span class="ok">PASS</span><br>
+    JUDGE 4 (COMPLETENESS): <span class="ok">PASS</span><br>
+    JUDGE 5 (EXECUTION): <span class="ok">PASS</span><br>
+    JUDGE 6 (OWNER-INTENT): <span class="fail">FAIL — directive diluted</span><br>
+    JUDGE 7 (RECOVERY): <span class="ok">PASS</span><br>
+    JUDGE 8 (TRADE): <span class="ok">PASS</span><br>
+    JUDGE 9 (UNITY): <span class="ok">PASS</span><br>
+    STATUS: <span class="fail">REJECTED — 2 dissents</span>
+  </div>
+</section>
+
+<section class="section" style="border-top:1px solid var(--line)">
+  <h2>Quick Start</h2>
+  <div class="code-block">
+    <span class="comment"># Clone the repo</span><br>
+    <span class="prompt">$</span> git clone https://github.com/amartieai/amartie.git<br>
+    <span class="prompt">$</span> cd amartie<br><br>
+    <span class="comment"># Install dependencies</span><br>
+    <span class="prompt">$</span> pip install -e .<br><br>
+    <span class="comment"># Run the test suite (34 tests)</span><br>
+    <span class="prompt">$</span> pytest tests -v
+  </div>
+</section>
+
+<section class="section" style="border-top:1px solid var(--line)">
+  <h2>Get Involved</h2>
+  <p>⭐ Star the repo: <a href="https://github.com/amartieai/amartie" style="color:var(--gold)">github.com/amartieai/amartie</a></p>
+  <p>🔀 Fork and contribute</p>
+  <p>🐛 Report bugs via <a href="https://github.com/amartieai/amartie/issues" style="color:var(--gold)">Issues</a></p>
+  <p>💡 Suggest new plugins/studios</p>
+</section>
+
+<footer>
+  <p>© 2026 AMARTIE Contributors — MIT Licensed</p>
+</footer>
+
+</div>
+</body>
+</html>
