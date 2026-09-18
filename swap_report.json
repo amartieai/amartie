@@ -1,0 +1,418 @@
+{
+  "total_requests": 136,
+  "models_requested": {
+    "moonshotai/kimi-k2.7-code": 6,
+    "deepseek/deepseek-v4-pro": 4,
+    "moonshotai/kimi-k3": 32,
+    "deepseek/deepseek-v4-flash": 94
+  },
+  "errors": {
+    "402": 72,
+    "404": 60
+  },
+  "swaps_detected": 21,
+  "swap_details": [
+    {
+      "ts": "2026-09-12T18:54:31.949334",
+      "file": "request_dump_20260912_154405_859a8a_20260912_185431_949421.json",
+      "requested": "deepseek/deepseek-v4-pro",
+      "expected_avg": 1200,
+      "actual_avg": 31.8,
+      "ratio": 0.03,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~1200 chars, got 31.8"
+    },
+    {
+      "ts": "2026-09-12T19:18:02.627608",
+      "file": "request_dump_20260912_154405_859a8a_20260912_191802_627643.json",
+      "requested": "deepseek/deepseek-v4-pro",
+      "expected_avg": 1200,
+      "actual_avg": 81.6,
+      "ratio": 0.07,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~1200 chars, got 81.6"
+    },
+    {
+      "ts": "2026-09-12T19:36:01.660187",
+      "file": "request_dump_20260912_154405_859a8a_20260912_193601_660253.json",
+      "requested": "deepseek/deepseek-v4-pro",
+      "expected_avg": 1200,
+      "actual_avg": 311.0,
+      "ratio": 0.26,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~1200 chars, got 311.0"
+    },
+    {
+      "ts": "2026-09-13T21:03:11.777950",
+      "file": "request_dump_cron_d145363e0aaf_20260913_210018_20260913_210311_778107.json",
+      "requested": "moonshotai/kimi-k3",
+      "expected_avg": 600,
+      "actual_avg": 104.1,
+      "ratio": 0.17,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~600 chars, got 104.1"
+    },
+    {
+      "ts": "2026-09-14T04:15:18.760535",
+      "file": "request_dump_20260914_015738_cacdab_20260914_041518_760566.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 71.2,
+      "ratio": 0.09,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~800 chars, got 71.2"
+    },
+    {
+      "ts": "2026-09-14T04:35:51.044382",
+      "file": "request_dump_20260914_015738_cacdab_20260914_043551_044433.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 20.0,
+      "ratio": 0.03,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~800 chars, got 20.0"
+    },
+    {
+      "ts": "2026-09-14T04:38:12.259362",
+      "file": "request_dump_20260914_015738_cacdab_20260914_043812_259395.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 42.4,
+      "ratio": 0.05,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~800 chars, got 42.4"
+    },
+    {
+      "ts": "2026-09-14T04:42:45.829567",
+      "file": "request_dump_20260914_015738_cacdab_20260914_044245_829608.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 56.0,
+      "ratio": 0.07,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~800 chars, got 56.0"
+    },
+    {
+      "ts": "2026-09-14T04:44:40.043691",
+      "file": "request_dump_20260914_015738_cacdab_20260914_044440_043738.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 133.8,
+      "ratio": 0.17,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 133.8"
+    },
+    {
+      "ts": "2026-09-14T04:49:16.022043",
+      "file": "request_dump_20260914_015738_cacdab_20260914_044916_022077.json",
+      "requested": "moonshotai/kimi-k3",
+      "expected_avg": 600,
+      "actual_avg": 47.1,
+      "ratio": 0.08,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~600 chars, got 47.1"
+    },
+    {
+      "ts": "2026-09-14T05:02:20.031612",
+      "file": "request_dump_20260914_015738_cacdab_20260914_050220_031641.json",
+      "requested": "moonshotai/kimi-k3",
+      "expected_avg": 600,
+      "actual_avg": 47.1,
+      "ratio": 0.08,
+      "verdict": "QUALITY_DROP",
+      "confidence": "HIGH",
+      "reason": "Expected ~600 chars, got 47.1"
+    },
+    {
+      "ts": "2026-09-16T15:34:52.580419",
+      "file": "request_dump_20260916_141441_3f4699_20260916_153452_580458.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 228.9,
+      "ratio": 0.29,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 228.9"
+    },
+    {
+      "ts": "2026-09-16T15:53:29.666472",
+      "file": "request_dump_20260916_141441_3f4699_20260916_155329_666517.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 185.9,
+      "ratio": 0.23,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 185.9"
+    },
+    {
+      "ts": "2026-09-16T16:21:07.224993",
+      "file": "request_dump_20260916_141441_3f4699_20260916_162107_225027.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 207.1,
+      "ratio": 0.26,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 207.1"
+    },
+    {
+      "ts": "2026-09-16T16:48:47.097586",
+      "file": "request_dump_20260916_141441_3f4699_20260916_164847_097621.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 221.7,
+      "ratio": 0.28,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 221.7"
+    },
+    {
+      "ts": "2026-09-16T17:38:16.354297",
+      "file": "request_dump_20260916_141441_3f4699_20260916_173816_354331.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 156.6,
+      "ratio": 0.2,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 156.6"
+    },
+    {
+      "ts": "2026-09-17T08:10:31.319060",
+      "file": "request_dump_20260917_071401_d56b86_20260917_081031_319086.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 194.0,
+      "ratio": 0.24,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 194.0"
+    },
+    {
+      "ts": "2026-09-17T09:37:06.113148",
+      "file": "request_dump_20260917_092546_80a881_20260917_093706_113223.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 212.0,
+      "ratio": 0.27,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 212.0"
+    },
+    {
+      "ts": "2026-09-17T21:54:35.336134",
+      "file": "request_dump_20260917_160011_2c1c53_20260917_215435_336186.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 130.0,
+      "ratio": 0.16,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 130.0"
+    },
+    {
+      "ts": "2026-09-18T00:58:30.753884",
+      "file": "request_dump_20260918_005439_12469b_20260918_005830_754022.json",
+      "requested": "deepseek/deepseek-v4-flash",
+      "expected_avg": 800,
+      "actual_avg": 213.0,
+      "ratio": 0.27,
+      "verdict": "QUALITY_DROP",
+      "confidence": "MEDIUM",
+      "reason": "Expected ~800 chars, got 213.0"
+    }
+  ],
+  "timeline": [
+    {
+      "ts": "2026-09-12T03:01:35",
+      "model": "moonshotai/kimi-k2.7-code",
+      "err": "",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-12T18:54:31",
+      "model": "deepseek/deepseek-v4-pro",
+      "err": "402",
+      "avg_len": 31.8
+    },
+    {
+      "ts": "2026-09-12T19:00:15",
+      "model": "moonshotai/kimi-k2.7-code",
+      "err": "404",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-12T19:11:49",
+      "model": "deepseek/deepseek-v4-pro",
+      "err": "404",
+      "avg_len": 979.0
+    },
+    {
+      "ts": "2026-09-12T19:18:02",
+      "model": "deepseek/deepseek-v4-pro",
+      "err": "404",
+      "avg_len": 81.6
+    },
+    {
+      "ts": "2026-09-12T19:36:01",
+      "model": "deepseek/deepseek-v4-pro",
+      "err": "404",
+      "avg_len": 311.0
+    },
+    {
+      "ts": "2026-09-12T20:00:18",
+      "model": "moonshotai/kimi-k2.7-code",
+      "err": "404",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-13T00:23:59",
+      "model": "moonshotai/kimi-k2.7-code",
+      "err": "402",
+      "avg_len": 6124.3
+    },
+    {
+      "ts": "2026-09-13T20:50:57",
+      "model": "moonshotai/kimi-k2.7-code",
+      "err": "402",
+      "avg_len": 1013.0
+    },
+    {
+      "ts": "2026-09-13T21:03:11",
+      "model": "moonshotai/kimi-k3",
+      "err": "402",
+      "avg_len": 104.1
+    },
+    {
+      "ts": "2026-09-13T21:03:13",
+      "model": "moonshotai/kimi-k2.7-code",
+      "err": "402",
+      "avg_len": 1013.0
+    },
+    {
+      "ts": "2026-09-14T03:01:20",
+      "model": "moonshotai/kimi-k3",
+      "err": "",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T03:27:54",
+      "model": "moonshotai/kimi-k3",
+      "err": "402",
+      "avg_len": 360.2
+    },
+    {
+      "ts": "2026-09-14T04:15:18",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "404",
+      "avg_len": 71.2
+    },
+    {
+      "ts": "2026-09-14T04:27:33",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "404",
+      "avg_len": 286.5
+    },
+    {
+      "ts": "2026-09-14T04:30:31",
+      "model": "moonshotai/kimi-k3",
+      "err": "404",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T04:35:51",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "404",
+      "avg_len": 20.0
+    },
+    {
+      "ts": "2026-09-14T04:38:12",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "404",
+      "avg_len": 42.4
+    },
+    {
+      "ts": "2026-09-14T04:42:45",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "404",
+      "avg_len": 56.0
+    },
+    {
+      "ts": "2026-09-14T04:44:40",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "404",
+      "avg_len": 133.8
+    },
+    {
+      "ts": "2026-09-14T04:49:16",
+      "model": "moonshotai/kimi-k3",
+      "err": "404",
+      "avg_len": 47.1
+    },
+    {
+      "ts": "2026-09-14T05:00:36",
+      "model": "moonshotai/kimi-k3",
+      "err": "404",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T05:00:36",
+      "model": "moonshotai/kimi-k3",
+      "err": "404",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T05:02:20",
+      "model": "moonshotai/kimi-k3",
+      "err": "404",
+      "avg_len": 47.1
+    },
+    {
+      "ts": "2026-09-14T05:30:53",
+      "model": "moonshotai/kimi-k3",
+      "err": "404",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T17:42:48",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "402",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T17:42:51",
+      "model": "deepseek/deepseek-v4-flash",
+      "err": "402",
+      "avg_len": 0.0
+    },
+    {
+      "ts": "2026-09-14T17:43:05",
+      "model": "moonshotai/kimi-k3",
+      "err": "402",
+      "avg_len": 746.9
+    },
+    {
+      "ts": "2026-09-14T17:43:16",
+      "model": "moonshotai/kimi-k3",
+      "err": "402",
+      "avg_len": 746.9
+    },
+    {
+      "ts": "2026-09-15T03:01:01",
+      "model": "moonshotai/kimi-k3",
+      "err": "",
+      "avg_len": 243.9
+    }
+  ]
+}
