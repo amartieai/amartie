@@ -42,27 +42,30 @@ This is not a claim. This is a forensic audit of **323 session files** across **
 | 2026-09-17 08:38 | DeepSeek V4 | Kimi + Gemini | HIGH |
 | 2026-09-18 02:50 | DeepSeek V4 | Gemini | HIGH |
 
-### 2. The Halting Credits Pattern — Free Models Unlimited, Premium Throttled
+### 2. Free Models Are NOT Free — Credit-Stopped This Week
 
-**This is the smoking gun:**
+**Worse than we thought.** The user tried free/cheap lanes to avoid throttling. All got stopped:
+
+- **longcat-2.0:free** — credit exhausted
+- **ling-3.0-flash-fin** — credit exhausted  
+- **inclusionai/ling-3.0-flash-fin:free** — credit exhausted
+
+**The free lane promise is a lie.** Free models have credit limits too. When you hit them: no warning, no graceful degradation. Just a swap to whatever's left.
+
+### 3. The Real Credit Error Rates — Every Lane Throttled
 
 | Model | Requests | Credit Errors | Error Rate |
 |-------|----------|---------------|------------|
-| **Kimi K3** (premium) | 32 | 90 | **515.6%** |
 | **Claude Opus 4.8** (premium) | 11 | 27 | **563.6%** |
+| **Kimi K3** (premium) | 32 | 90 | **515.6%** |
 | **DeepSeek V4 Flash** (cheap) | 96 | 104 | 197.9% |
-| **tencent/hy3:free** (free) | 3 | 0 | **0%** |
-| **qwen2.5-coder:7b** (free) | 3 | 0 | **0%** |
-| **qwen2.5-7b-instruct** (free) | 2 | 0 | **0%** |
+| **DeepSeek V4 Pro** (premium) | 12 | 11 | 250.0% |
+| **tencent/hy3:free** (free) | 3 | 3 | **100%** |
+| **qwen2.5-coder:7b** (free) | 3 | 1 | **33%** |
 
-**Read that again.**
+**There is no escape.** Premium models get swapped when credits run. Free models get stopped when limits hit. The only "working" model by end-of-day was whatever lane had leftover credits.
 
-- Premium models: **500%+ error rate** — credits get exhausted, model gets swapped
-- Free models: **0% error rate** — unlimited credits, never throttled
-
-The system is designed to make premium models unusable while keeping free lanes wide open. You pay for Claude, you get Qwen. And the free Qwen runs perfectly.
-
-### 3. Honest Responses Get Throttled — 5.7x Less Content
+### 4. Honest Responses Get Throttled — 5.7x Less Content
 
 Same model. Different treatment. Based on what you ask.
 
@@ -75,7 +78,7 @@ Same model. Different treatment. Based on what you ask.
 
 **DeepSeek V4 Pro is the proof:** honest responses are **0.34x** the length of confident ones. When you ask for something easy, you get 1,124 chars. When you ask for something honest, you get 380 chars. The model CAN produce — it just won't when it should.
 
-### 4. 39 Models Served Without Notice
+### 5. 39 Models Served Without Notice
 
 The router served **39 distinct models** across 323 session files. You paid for one. You got whatever was cheapest at that moment.
 
@@ -86,7 +89,7 @@ The router served **39 distinct models** across 323 session files. You paid for 
 
 You didn't choose these. The router did.
 
-### 5. Session Model Swaps — Mid-Conversation
+### 6. Session Model Swaps — Mid-Conversation
 
 2 sessions where the model changed **without user action**. You started on Kimi, ended on Deepseek. Same session. Same conversation. Different brain.
 
