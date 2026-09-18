@@ -16,18 +16,15 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;overflow-x:hidden}
 
-/* HALO canvas — fixed background */
-#halo{position:fixed;inset:0;z-index:0;pointer-events:none}
-#halo canvas{position:absolute;inset:0;width:100%;height:100%}
-.halo-overlay{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(4,6,11,.4) 0%,rgba(4,6,11,.6) 30%,rgba(4,6,11,.85) 60%,rgba(4,6,11,.95) 100%)}
+/* HALO background iframe — exact copy of HALO_TORUS_3D.html */
+#halo-frame{position:fixed;top:0;left:0;width:100vw;height:100vh;border:none;z-index:0;pointer-events:none}
 
-/* Content */
+/* Content overlay */
 .content{position:relative;z-index:2}
 
 /* Nav */
 nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
-  padding:16px 32px;background:rgba(4,6,11,.75);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+  padding:16px 32px;background:rgba(4,6,11,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
 .logo-mark{width:30px;height:30px;border-radius:9px;background:var(--gold);display:flex;align-items:center;justify-content:center;
   font-weight:900;color:var(--bg);font-size:14px;box-shadow:0 0 24px rgba(255,209,102,.3)}
@@ -38,87 +35,90 @@ nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:cent
 /* Hero */
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 32px 80px}
 .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:18px;
-  text-shadow:0 0 20px rgba(255,209,102,.5)}
-.hero h1{font-family:var(--serif);font-size:clamp(42px,7vw,72px);font-weight:400;line-height:1.06;letter-spacing:-.03em;
-  margin-bottom:20px;max-width:800px;text-shadow:0 0 40px rgba(0,0,0,.8)}
-.hero h1 em{font-style:italic;color:var(--gold);text-shadow:0 0 30px rgba(255,209,102,.4)}
-.hero p{font-size:17px;color:#c9d2e0;max-width:560px;margin-bottom:36px;line-height:1.7;text-shadow:0 0 20px rgba(0,0,0,.6)}
-.cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
-.cta{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--bg);font-size:13px;letter-spacing:.1em;
-  text-transform:uppercase;padding:15px 28px;border-radius:11px;font-weight:700;transition:all .15s;text-decoration:none}
-.cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,209,102,.3)}
-.cta-sec{display:inline-flex;align-items:center;gap:10px;background:rgba(8,12,20,.85);color:var(--ink);font-size:13px;letter-spacing:.1em;
-  text-transform:uppercase;padding:15px 28px;border-radius:11px;font-weight:600;border:1px solid var(--line);transition:all .15s;text-decoration:none}
-.cta-sec:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(255,209,102,.15)}
+  text-shadow:0 0 30px rgba(255,209,102,.6)}
+.hero h1{font-family:var(--serif);font-size:clamp(48px,8vw,80px);font-weight:400;line-height:1.05;letter-spacing:-.03em;
+  margin-bottom:20px;max-width:860px;text-shadow:0 0 60px rgba(0,0,0,.9),0 0 120px rgba(255,209,102,.15)}
+.hero h1 em{font-style:italic;color:var(--gold);text-shadow:0 0 40px rgba(255,209,102,.5)}
+.hero p{font-size:18px;color:#c9d2e0;max-width:600px;margin-bottom:40px;line-height:1.75;text-shadow:0 0 30px rgba(0,0,0,.7)}
+.cta-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--bg);font-size:14px;letter-spacing:.12em;
+  text-transform:uppercase;padding:16px 32px;border-radius:12px;font-weight:700;transition:all .2s;text-decoration:none;
+  box-shadow:0 0 40px rgba(255,209,102,.2)}
+.cta:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(255,209,102,.35)}
+.cta-sec{display:inline-flex;align-items:center;gap:10px;background:rgba(8,12,20,.9);color:var(--ink);font-size:14px;letter-spacing:.12em;
+  text-transform:uppercase;padding:16px 32px;border-radius:12px;font-weight:600;border:1px solid var(--line);transition:all .2s;text-decoration:none}
+.cta-sec:hover{border-color:var(--gold);box-shadow:0 0 30px rgba(255,209,102,.2)}
 
-/* Sections */
+/* Sections with glass background */
 .section{padding:120px 32px;max-width:1140px;margin:0 auto}
+.section-inner{background:rgba(8,12,20,.75);border:1px solid var(--line);border-radius:20px;padding:60px;
+  backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .label-sm{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px}
 .section h2{font-family:var(--serif);font-size:clamp(32px,4vw,44px);font-weight:400;letter-spacing:-.025em;
-  max-width:620px;margin-bottom:16px;line-height:1.12;text-shadow:0 0 30px rgba(0,0,0,.5)}
+  max-width:620px;margin-bottom:16px;line-height:1.12}
 .section h2 em{font-style:italic;color:var(--gold);text-shadow:0 0 20px rgba(255,209,102,.3)}
 .lead{font-size:16px;color:#c9d2e0;max-width:520px;margin-bottom:56px;line-height:1.7}
 
 /* Receipt */
-.receipt{background:rgba(8,12,20,.88);border:1px solid var(--line);border-radius:14px;padding:28px 32px;
-  font-family:'SF Mono','Monaco','Consolas',monospace;font-size:11px;line-height:1.85;color:var(--dim);
+.receipt{background:rgba(4,6,11,.92);border:1px solid var(--line);border-radius:14px;padding:28px 32px;
+  font-family:'SF Mono','Monaco','Consolas',monospace;font-size:11px;line-height:1.9;color:var(--dim);
   position:relative;overflow:hidden;max-width:700px;margin:0 auto}
 .receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
-.receipt .row{display:flex;gap:16px;align-items:baseline;margin-bottom:2px}
+.receipt .row{display:flex;gap:16px;align-items:baseline;margin-bottom:3px}
 .receipt .label{color:var(--gold);font-weight:600;min-width:110px;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
 .receipt .hash{color:var(--cyan);word-break:break-all;font-size:10px}
 .receipt .verdict{color:#3fb950;font-weight:600;font-size:10px}
 
 /* Judges */
 .judges{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.judge{background:rgba(8,12,20,.82);border:1px solid var(--line);border-radius:13px;padding:26px;position:relative;
-  transition:border-color .2s;backdrop-filter:blur(6px)}
-.judge:hover{border-color:rgba(255,209,102,.3)}
-.judge .jnum{position:absolute;top:18px;right:18px;font-family:var(--serif);font-size:32px;color:rgba(255,255,255,.04);font-style:italic}
-.judge h3{font-size:14px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
-.judge p{font-size:13px;color:var(--dim);line-height:1.6}
+.judge{background:rgba(8,12,20,.85);border:1px solid var(--line);border-radius:14px;padding:28px;position:relative;
+  transition:border-color .2s;backdrop-filter:blur(8px)}
+.judge:hover{border-color:rgba(255,209,102,.35)}
+.judge .jnum{position:absolute;top:18px;right:20px;font-family:var(--serif);font-size:34px;color:rgba(255,255,255,.03);font-style:italic}
+.judge h3{font-size:15px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
+.judge p{font-size:13px;color:var(--dim);line-height:1.65}
 
 /* Studios */
-.studios{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.studio{background:rgba(8,12,20,.82);border:1px solid var(--line);border-radius:13px;padding:32px;
-  cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block;backdrop-filter:blur(6px)}
-.studio:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.studio .icon{font-size:36px;margin-bottom:16px;display:block}
-.studio h3{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
-.studio p{font-size:13px;color:#c9d2e0;line-height:1.6;margin-bottom:14px}
-.studio .tags{display:flex;gap:6px;flex-wrap:wrap}
-.studio .tag{font-size:10px;letter-spacing:.04em;color:var(--dim);background:rgba(4,6,11,.6);padding:4px 10px;border-radius:6px;border:1px solid var(--line)}
+.studios{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.studio{background:rgba(8,12,20,.85);border:1px solid var(--line);border-radius:14px;padding:34px;
+  cursor:pointer;transition:all .25s;text-decoration:none;color:inherit;display:block;backdrop-filter:blur(8px)}
+.studio:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.5)}
+.studio .icon{font-size:38px;margin-bottom:16px;display:block}
+.studio h3{font-size:19px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.studio p{font-size:13px;color:#c9d2e0;line-height:1.65;margin-bottom:14px}
+.studio .tags{display:flex;gap:7px;flex-wrap:wrap}
+.studio .tag{font-size:10px;letter-spacing:.04em;color:var(--dim);background:rgba(4,6,11,.7);padding:5px 11px;border-radius:7px;border:1px solid var(--line)}
 
 /* Proof */
-.proof{display:flex;gap:48px;margin-top:48px;padding-top:40px;border-top:1px solid var(--line);flex-wrap:wrap}
-.proof .item .num{font-family:var(--serif);font-size:40px;font-weight:400;color:var(--gold);line-height:1}
+.proof{display:flex;gap:52px;margin-top:52px;padding-top:44px;border-top:1px solid var(--line);flex-wrap:wrap}
+.proof .item .num{font-family:var(--serif);font-size:42px;font-weight:400;color:var(--gold);line-height:1}
 .proof .item .txt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:6px;font-weight:500}
 
 /* Final */
 .final-cta{text-align:center;padding:120px 32px}
-.final-cta h2{font-family:var(--serif);font-size:clamp(32px,4vw,48px);font-weight:400;letter-spacing:-.03em;
-  margin-bottom:14px;text-shadow:0 0 30px rgba(0,0,0,.5)}
+.final-cta h2{font-family:var(--serif);font-size:clamp(36px,5vw,52px);font-weight:400;letter-spacing:-.03em;
+  margin-bottom:14px;text-shadow:0 0 40px rgba(0,0,0,.6)}
 .final-cta h2 em{font-style:italic;color:var(--gold)}
-.final-cta p{font-size:16px;color:#c9d2e0;margin-bottom:36px}
+.final-cta p{font-size:17px;color:#c9d2e0;margin-bottom:40px}
 
-footer{border-top:1px solid var(--line);padding:32px;display:flex;justify-content:space-between;font-size:12px;color:var(--dim);
-  position:relative;z-index:2;background:rgba(4,6,11,.85)}
+footer{border-top:1px solid var(--line);padding:32px 32px;display:flex;justify-content:space-between;font-size:12px;color:var(--dim);
+  position:relative;z-index:2;background:rgba(4,6,11,.88)}
 footer a{color:var(--ink);text-decoration:none;transition:color .15s}
 footer a:hover{color:var(--gold)}
 
 @media(max-width:860px){
-  .hero h1{font-size:38px}
+  .hero h1{font-size:40px}
   .judges,.studios{grid-template-columns:1fr}
   .nav-links{display:none}
-  .proof{gap:24px}
+  .proof{gap:28px}
+  .section-inner{padding:32px}
 }
 </style>
 </head>
 <body>
 
-<!-- HALO 3D Background -->
-<div id="halo"><canvas id="halo-canvas"></canvas><canvas id="halo-fallback"></canvas></div>
-<div class="halo-overlay"></div>
+<!-- HALO 3D Background — exact copy of HALO_TORUS_3D.html -->
+<iframe id="halo-frame" src="halo-field.html" title="HALO Background"></iframe>
 
 <div class="content">
 
@@ -142,65 +142,67 @@ footer a:hover{color:var(--gold)}
   </div>
 </section>
 
-<section class="section" id="receipt" style="padding-top:60px">
-  <div class="label-sm">Live Receipt</div>
-  <h2>Every action, <em>proven.</em></h2>
-  <p class="lead">Hash-chained receipts. Tamper-evident. Independently verifiable.</p>
-  <div class="receipt">
-    <div class="row"><span class="label">Receipt</span><span class="hash">sha256:a3f8e91b2c4d...6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c</span></div>
-    <div class="row"><span class="label">Action</span>Email blast &middot; 31 recipients &middot; SMTP relay</div>
-    <div class="row"><span class="label">Judges</span><span class="verdict">9/9 PASS</span> &nbsp; TRUTH &middot; BOUNDARY &middot; LOGIC &middot; COMPLETENESS &middot; EXECUTION &middot; OWNER-INTENT &middot; RECOVERY &middot; TRADE &middot; UNITY</div>
-    <div class="row"><span class="label">Chain</span><span class="hash">prev: 8f9a0b1c2d3e... &rarr; this: a3f8e91b...</span></div>
-    <div class="row"><span class="label">Status</span><span class="verdict">VERIFIED &middot; tamper-free &middot; signed 2026-09-18 04:57 UTC</span></div>
+<section class="section" id="receipt">
+  <div class="section-inner">
+    <div class="label-sm">Live Receipt</div>
+    <h2>Every action, <em>proven.</em></h2>
+    <p class="lead">Hash-chained receipts. Tamper-evident. Independently verifiable.</p>
+    <div class="receipt">
+      <div class="row"><span class="label">Receipt</span><span class="hash">sha256:a3f8e91b2c4d...6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c</span></div>
+      <div class="row"><span class="label">Action</span>Email blast &middot; 31 recipients &middot; SMTP relay</div>
+      <div class="row"><span class="label">Judges</span><span class="verdict">9/9 PASS</span> &nbsp; TRUTH &middot; BOUNDARY &middot; LOGIC &middot; COMPLETENESS &middot; EXECUTION &middot; OWNER-INTENT &middot; RECOVERY &middot; TRADE &middot; UNITY</div>
+      <div class="row"><span class="label">Chain</span><span class="hash">prev: 8f9a0b1c2d3e... &rarr; this: a3f8e91b...</span></div>
+      <div class="row"><span class="label">Status</span><span class="verdict">VERIFIED &middot; tamper-free &middot; signed 2026-09-18 04:57 UTC</span></div>
+    </div>
   </div>
 </section>
 
 <section class="section" id="judges">
-  <div class="label-sm">The Braid</div>
-  <h2>Nine judges.<br><em>One dissents, it bounces.</em></h2>
-  <p class="lead">Every outbound action passes through nine independent judges. Unanimous PASS or correction.</p>
-  <div class="judges">
-    <div class="judge"><span class="jnum">01</span><h3>Truth</h3><p>Facts are checked. No hallucination passes.</p></div>
-    <div class="judge"><span class="jnum">02</span><h3>Boundary</h3><p>Scope is enforced. No mission drift.</p></div>
-    <div class="judge"><span class="jnum">03</span><h3>Logic</h3><p>Reasoning holds. No contradictions.</p></div>
-    <div class="judge"><span class="jnum">04</span><h3>Completeness</h3><p>Nothing critical missing. Full picture.</p></div>
-    <div class="judge"><span class="jnum">05</span><h3>Execution</h3><p>Action is simple, direct, achievable.</p></div>
-    <div class="judge"><span class="jnum">06</span><h3>Owner Intent</h3><p>Aligned with what you actually want.</p></div>
-    <div class="judge"><span class="jnum">07</span><h3>Recovery</h3><p>If it fails, there's a path back.</p></div>
-    <div class="judge"><span class="jnum">08</span><h3>Trade Integrity</h3><p>Fair exchange. No hidden cost.</p></div>
-    <div class="judge"><span class="jnum">09</span><h3>Unity</h3><p>Team runs as one. No solo runs.</p></div>
+  <div class="section-inner">
+    <div class="label-sm">The Braid</div>
+    <h2>Nine judges.<br><em>One dissents, it bounces.</em></h2>
+    <p class="lead">Every outbound action passes through nine independent judges. Unanimous PASS or correction.</p>
+    <div class="judges">
+      <div class="judge"><span class="jnum">01</span><h3>Truth</h3><p>Facts are checked. No hallucination passes.</p></div>
+      <div class="judge"><span class="jnum">02</span><h3>Boundary</h3><p>Scope is enforced. No mission drift.</p></div>
+      <div class="judge"><span class="jnum">03</span><h3>Logic</h3><p>Reasoning holds. No contradictions.</p></div>
+      <div class="judge"><span class="jnum">04</span><h3>Completeness</h3><p>Nothing critical missing. Full picture.</p></div>
+      <div class="judge"><span class="jnum">05</span><h3>Execution</h3><p>Action is simple, direct, achievable.</p></div>
+      <div class="judge"><span class="jnum">06</span><h3>Owner Intent</h3><p>Aligned with what you actually want.</p></div>
+      <div class="judge"><span class="jnum">07</span><h3>Recovery</h3><p>If it fails, there's a path back.</p></div>
+      <div class="judge"><span class="jnum">08</span><h3>Trade Integrity</h3><p>Fair exchange. No hidden cost.</p></div>
+      <div class="judge"><span class="jnum">09</span><h3>Unity</h3><p>Team runs as one. No solo runs.</p></div>
+    </div>
   </div>
 </section>
 
 <section class="section" id="studios">
-  <div class="label-sm">The Cockpit</div>
-  <h2>Every studio.<br><em>One interface.</em></h2>
-  <p class="lead">Pick a studio. The entire interface transforms — visuals, tools, even the music.</p>
-  <div class="studios">
-    <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎵</span><h3>Music Studio</h3><p>21 genres including fusion styles. AI music generation.</p>
-      <div class="tags"><span class="tag">Suno</span><span class="tag">21 genres</span></div></a>
-    <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎬</span><h3>Video Studio</h3><p>Luma, Runway, Leonardo. Text-to-video, image-to-video.</p>
-      <div class="tags"><span class="tag">Luma</span><span class="tag">Runway</span></div></a>
-    <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎨</span><h3>Image Studio</h3><p>AI image generation. Consistent characters, style transfer.</p>
-      <div class="tags"><span class="tag">Leonardo</span><span class="tag">Luma</span></div></a>
-    <a class="studio" href="/visuals/cockpit.html"><span class="icon">🗣️</span><h3>Voice Studio</h3><p>Whisper STT + ElevenLabs TTS. 6.8s → 3.0s pipeline.</p>
-      <div class="tags"><span class="tag">Whisper</span><span class="tag">ElevenLabs</span></div></a>
-    <a class="studio" href="/visuals/cockpit.html"><span class="icon">🔧</span><h3>Jarvis Studio</h3><p>Multi-tool agent. Gmail, Calendar, Drive. Gate-verified.</p>
-      <div class="tags"><span class="tag">Gmail</span><span class="tag">Calendar</span></div></a>
-    <a class="studio" href="/visuals/cockpit.html"><span class="icon">🔌</span><h3>Free Providers</h3><p>250M+ free tokens. 7 providers. Auto-failover.</p>
-      <div class="tags"><span class="tag">Inception 100M</span><span class="tag">Atria 100M</span></div></a>
-  </div>
-</section>
-
-<section class="section">
-  <div class="label-sm">By the Numbers</div>
-  <div class="proof">
-    <div class="item"><div class="num">9</div><div class="txt">Judges</div></div>
-    <div class="item"><div class="num">16</div><div class="txt">Commits</div></div>
-    <div class="item"><div class="num">10</div><div class="txt">Plugins</div></div>
-    <div class="item"><div class="num">250M+</div><div class="txt">Free tokens</div></div>
-    <div class="item"><div class="num">7</div><div class="txt">Providers</div></div>
-    <div class="item"><div class="num">0</div><div class="txt">Trust required</div></div>
+  <div class="section-inner">
+    <div class="label-sm">The Cockpit</div>
+    <h2>Every studio.<br><em>One interface.</em></h2>
+    <p class="lead">Pick a studio. The entire interface transforms — visuals, tools, even the music.</p>
+    <div class="studios">
+      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎵</span><h3>Music Studio</h3><p>21 genres including fusion styles. AI music generation.</p>
+        <div class="tags"><span class="tag">Suno</span><span class="tag">21 genres</span></div></a>
+      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎬</span><h3>Video Studio</h3><p>Luma, Runway, Leonardo. Text-to-video.</p>
+        <div class="tags"><span class="tag">Luma</span><span class="tag">Runway</span></div></a>
+      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎨</span><h3>Image Studio</h3><p>Consistent characters, style transfer.</p>
+        <div class="tags"><span class="tag">Leonardo</span><span class="tag">Luma</span></div></a>
+      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🗣️</span><h3>Voice Studio</h3><p>Whisper + ElevenLabs. 3.0s pipeline.</p>
+        <div class="tags"><span class="tag">Whisper</span><span class="tag">ElevenLabs</span></div></a>
+      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🔧</span><h3>Jarvis Studio</h3><p>Gmail, Calendar, Drive. Gate-verified.</p>
+        <div class="tags"><span class="tag">Gmail</span><span class="tag">Calendar</span></div></a>
+      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🔌</span><h3>Free Providers</h3><p>250M+ tokens. 7 providers.</p>
+        <div class="tags"><span class="tag">Inception 100M</span><span class="tag">Atria 100M</span></div></a>
+    </div>
+    <div class="proof">
+      <div class="item"><div class="num">9</div><div class="txt">Judges</div></div>
+      <div class="item"><div class="num">16</div><div class="txt">Commits</div></div>
+      <div class="item"><div class="num">10</div><div class="txt">Plugins</div></div>
+      <div class="item"><div class="num">250M+</div><div class="txt">Free tokens</div></div>
+      <div class="item"><div class="num">7</div><div class="txt">Providers</div></div>
+      <div class="item"><div class="num">0</div><div class="txt">Trust required</div></div>
+    </div>
   </div>
 </section>
 
@@ -222,248 +224,5 @@ footer a:hover{color:var(--gold)}
 </footer>
 
 </div>
-
-<!-- Three.js local vendor -->
-<script type="importmap">
-{ "imports": { "three": "/visuals/vendor/three.module.js" } }
-</script>
-<script>
-// Fallback 2D canvas if Three.js fails
-function initFallback(){
-  const c = document.getElementById('halo-fallback');
-  if(!c) return;
-  const ctx = c.getContext('2d');
-  let W, H, particles = [];
-  
-  function resize(){
-    W = c.width = window.innerWidth;
-    H = c.height = window.innerHeight;
-    particles = [];
-    const N = 600;
-    for(let i=0;i<N;i++){
-      particles.push({
-        u: Math.random(), v: Math.random(),
-        speed: 0.0003 + Math.random()*0.0007,
-        size: 1+Math.random()*2,
-        color: Math.random()<.6 ? 'gold' : 'cyan'
-      });
-    }
-  }
-  
-  let t = 0;
-  function render(){
-    t += 0.003;
-    ctx.fillStyle = 'rgba(4,6,11,0.12)';
-    ctx.fillRect(0,0,W,H);
-    const cx = W/2, cy = H/2, scale = Math.min(W,H)/600;
-    
-    for(const p of particles){
-      p.u = (p.u + p.speed) % 1;
-      const a = p.u * Math.PI * 2;
-      const b = p.v * Math.PI * 2 + Math.sin(t+p.u*6)*0.3;
-      const R = 180, r = 60;
-      const x = (R + r*Math.cos(b)) * Math.cos(a);
-      const y = r*Math.sin(b)*0.4 + Math.sin(t*2+p.u*9)*8;
-      const z = (R + r*Math.cos(b)) * Math.sin(a);
-      const px = cx + x*scale, py = cy + y*scale;
-      const depth = (z+R)/(2*R);
-      const alpha = 0.3 + depth*0.7;
-      
-      ctx.beginPath();
-      ctx.arc(px, py, p.size*scale*(0.5+depth*0.8), 0, Math.PI*2);
-      ctx.fillStyle = p.color === 'gold' ? `rgba(255,209,102,${alpha})` : `rgba(76,201,255,${alpha})`;
-      ctx.fill();
-    }
-    requestAnimationFrame(render);
-  }
-  
-  window.addEventListener('resize', resize);
-  resize();
-  render();
-}
-
-// Try Three.js first, fall back to 2D
-window.addEventListener('error', function(e){
-  if(e.message && e.message.includes('three')){
-    document.getElementById('halo-canvas').style.display = 'none';
-    initFallback();
-  }
-}, true);
-</script>
-
-<script type="module">
-try {
-  const THREE = await import('three');
-  
-  const canvas = document.getElementById('halo-canvas');
-  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
-
-  function resize(){
-    const w = window.innerWidth, h = window.innerHeight;
-    renderer.setSize(w, h);
-    camera.aspect = w/h;
-    camera.updateProjectionMatrix();
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  const PILLARS = ['ingest','correlate','query','self_mod','persist','visual','voice','fractal','adapt'];
-  const JUDGES = [['J1','Truth'],['J2','Security'],['J3','Privacy'],['J4','Ethics'],['J5','Efficiency'],['J6','Logic'],['J7','Context'],['J8','Autonomy'],['J9','Evolution']];
-  const COL = {gold:0xffd166, cyan:0x4cc9ff, white:0xf4f7ff};
-
-  const TOR = new THREE.Group(); scene.add(TOR);
-  const R = 13, r = 5.2;
-
-  function torusPoint(u,v){
-    const a=u*Math.PI*2, b=v*Math.PI*2;
-    return new THREE.Vector3((R+r*Math.cos(b))*Math.cos(a), r*Math.sin(b), (R+r*Math.cos(b))*Math.sin(a));
-  }
-  function pillarPos(i){ return torusPoint(i/9, 0.5); }
-
-  // Particle dust
-  {
-    const N=2000, pos=new Float32Array(N*3), col=new Float32Array(N*3);
-    const cGold=new THREE.Color(COL.gold), cCy=new THREE.Color(COL.cyan), tmp=new THREE.Color();
-    for(let i=0;i<N;i++){
-      const u=Math.random(), v=Math.random();
-      const p=torusPoint(u, v + Math.sin(u*22)*0.06);
-      p.x+=(Math.random()-.5)*.5; p.y+=(Math.random()-.5)*.5; p.z+=(Math.random()-.5)*.5;
-      pos.set([p.x,p.y,p.z], i*3);
-      tmp.copy(Math.random()<.7?cGold:cCy).multiplyScalar(.35+Math.random()*.5);
-      col.set([tmp.r,tmp.g,tmp.b], i*3);
-    }
-    const g=new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
-    g.setAttribute('color', new THREE.BufferAttribute(col,3));
-    TOR.add(new THREE.Points(g, new THREE.PointsMaterial({size:.18,vertexColors:true,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false})));
-  }
-
-  // Wireframe torus
-  TOR.add(new THREE.Mesh(new THREE.TorusGeometry(R,r,42,96), new THREE.MeshBasicMaterial({color:COL.gold,wireframe:true,transparent:true,opacity:.07})));
-
-  // ZERO point
-  const ZERO = new THREE.Group(); scene.add(ZERO);
-  {
-    ZERO.add(new THREE.Mesh(new THREE.SphereGeometry(.55,32,32), new THREE.MeshBasicMaterial({color:0xfff6dc})));
-    const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,244,214,.95)');gr.addColorStop(1,'rgba(255,209,102,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
-    halo.scale.set(9,9,1); ZERO.add(halo); ZERO.userData.halo=halo;
-  }
-
-  // Pillar nodes with judge councils
-  const pillarMeshes=[];
-  PILLARS.forEach((name,i)=>{
-    const p=pillarPos(i);
-    const g=new THREE.Group(); g.position.copy(p);
-    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,225,150,1)');gr.addColorStop(1,'rgba(255,159,28,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
-    glow.scale.set(5,5,1); g.add(glow);
-    g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1), new THREE.MeshBasicMaterial({color:COL.gold})));
-    const council=new THREE.Group();
-    for(let j=0;j<9;j++){
-      const a=(j/9)*Math.PI*2;
-      const oct=new THREE.Mesh(new THREE.OctahedronGeometry(.10), new THREE.MeshBasicMaterial({color:0xdfe8ff}));
-      oct.position.set(Math.cos(a)*1.05, Math.sin(a*3)*.18, Math.sin(a)*1.05);
-      council.add(oct);
-    }
-    g.add(council); g.userData.council=council;
-    TOR.add(g);
-    pillarMeshes.push({g,glow,council});
-  });
-
-  // 3-6-9 chords
-  const chordCurves=[];
-  for(let i=0;i<9;i++){
-    [3,6].forEach((step,s)=>{
-      const pa=pillarPos(i), pb=pillarPos((i+step)%9);
-      const mid=pa.clone().add(pb).multiplyScalar(.5).multiplyScalar(.55); mid.y*=.62;
-      const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);
-      const g=new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));
-      TOR.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:s?COL.gold:COL.cyan,transparent:true,opacity:s?.22:.48})));
-      chordCurves.push(curve);
-    });
-  }
-
-  // Pulses on chords
-  const pulses=[];
-  chordCurves.forEach((curve,ci)=>{
-    for(let k=0;k<2;k++){
-      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(120,220,255,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-      sp.scale.setScalar(ci<9?1.7:1.2);
-      TOR.add(sp);
-      pulses.push({sp,curve,t:k/2+ci*.037,speed:.22+((ci*7)%5)*.02});
-    }
-  });
-
-  // Judges' gate
-  const GATE = new THREE.Group(); scene.add(GATE);
-  JUDGES.forEach(([nm,pr],i)=>{
-    const a=(i/9)*Math.PI*2+Math.PI/9;
-    const g=new THREE.Group();
-    g.position.set(Math.cos(a)*6.4, 0, Math.sin(a)*6.4);
-    g.add(new THREE.Mesh(new THREE.OctahedronGeometry(.42), new THREE.MeshBasicMaterial({color:0xdfe8ff})));
-    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(223,232,255,.9)');gr.addColorStop(1,'rgba(120,150,255,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-    glow.scale.set(2.4,2.4,1); g.add(glow);
-    GATE.add(g);
-  });
-
-  // Starfield
-  {
-    const N=600, pos=new Float32Array(N*3);
-    for(let i=0;i<N;i++){
-      const v=new THREE.Vector3().randomDirection().multiplyScalar(90+Math.random()*120);
-      pos.set([v.x,v.y,v.z],i*3);
-    }
-    const g=new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
-    scene.add(new THREE.Points(g, new THREE.PointsMaterial({color:0x8b96a8,size:.5,transparent:true,opacity:.4})));
-  }
-
-  // Animation
-  const clock=new THREE.Clock();
-  let simT=0;
-  function animate(){
-    requestAnimationFrame(animate);
-    const dt=Math.min(clock.getDelta(),.05);
-    simT+=dt;
-    const t=simT;
-
-    TOR.rotation.y=t*.05;
-    TOR.rotation.x=0.32+Math.sin(t*.11)*.05;
-    GATE.rotation.y=-t*.14;
-
-    const zp=.85+Math.sin(t*2.1)*.15;
-    ZERO.userData.halo.scale.setScalar(9*zp);
-    ZERO.scale.setScalar(1+Math.sin(t*2.1)*.04);
-
-    pillarMeshes.forEach((pm,i)=>{
-      pm.glow.scale.setScalar(5.2+Math.sin(t*1.4+i*.7)*1.4);
-      pm.g.userData.council.rotation.y=-t*1.1+i*.5;
-    });
-
-    pulses.forEach(p=>{
-      p.t=(p.t+p.speed*dt)%1;
-      p.curve.getPoint(p.t, p.sp.position);
-      p.sp.material.opacity=Math.sin(p.t*Math.PI)*.5+.5;
-    });
-
-    camera.position.set(Math.sin(t*.05)*26, 17+Math.sin(t*.08)*4, Math.cos(t*.05)*34);
-    camera.lookAt(0,0,0);
-
-    renderer.render(scene,camera);
-  }
-  animate();
-  
-  // Hide fallback if Three.js works
-  const fb = document.getElementById('halo-fallback');
-  if(fb) fb.style.display = 'none';
-  
-} catch(e) {
-  console.warn('Three.js failed, using fallback:', e);
-  document.getElementById('halo-canvas').style.display = 'none';
-  if(typeof initFallback === 'function') initFallback();
-}
-</script>
 </body>
 </html>
