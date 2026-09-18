@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AMARTIE — Your AI, Verified</title>
+    <style>
+        :root{--bg:#04060b;--surface:#0f1319;--ink:#f0f2f5;--dim:#8b949e;--line:rgba(255,255,255,.06);--gold:#ffd166;--cyan:#58a6ff;--green:#3fb950;--red:#f85149}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;padding:40px 20px;max-width:900px;margin:0 auto}
+        h1{color:var(--gold);font-size:32px;margin-bottom:10px;text-align:center}
+        h2{color:var(--cyan);font-size:24px;margin-top:30px;margin-bottom:15px}
+        h3{color:var(--gold);font-size:18px;margin-top:20px}
+        p{margin-bottom:15px}
+        hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+        code{background:var(--surface);padding:2px 6px;border-radius:3px;font-size:14px}
+        pre{background:var(--surface);padding:15px;overflow-x:auto;border-radius:4px;margin:15px 0}
+        ul{margin-left:20px;margin-bottom:15px}
+        li{margin-bottom:8px}
+        table{width:100%;border-collapse:collapse;margin:20px 0}
+        th,td{padding:10px;border:1px solid var(--line);text-align:left}
+        th{background:var(--surface);color:var(--gold)}
+        .stats{display:flex;gap:20px;justify-content:center;margin:30px 0;flex-wrap:wrap}
+        .stat{background:var(--surface);padding:20px;border-radius:8px;text-align:center;min-width:150px}
+        .stat .num{font-size:36px;font-weight:bold;color:var(--red)}
+        .stat .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+        .cta{text-align:center;margin:40px 0}
+        .cta a{display:inline-block;background:var(--gold);color:var(--bg);padding:15px 30px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:18px}
+        .cta a:hover{filter:brightness(1.1)}
+        .footer{text-align:center;margin-top:40px;color:var(--dim);font-size:12px}
+    </style>
+</head>
+<body>
+
+<h1>AMARTIE — Your AI, Verified</h1>
+<p style="text-align:center;color:var(--dim)">Forensic audit of silent AI model substitution</p>
+
+<div class="stats">
+    <div class="stat"><div class="num">40</div><div class="label">Models Analyzed</div></div>
+    <div class="stat"><div class="num">271</div><div class="label">Sessions</div></div>
+    <div class="stat"><div class="num">100%</div><div class="label">Failure Rate</div></div>
+</div>
+
+<h2>The Problem</h2>
+<p>You paid for Claude. You got DeepSeek. And nobody told you.</p>
+<p>AI providers are silently substituting your expensive model with cheaper alternatives. When credits run out, the system doesn't stop — it swaps to whatever's cheapest and labels the output as the model you paid for.</p>
+
+<h2>The Proof</h2>
+<table>
+<tr><th>Model You Paid For</th><th>Official Benchmark</th><th>What You Actually Got</th></tr>
+<tr><td>DeepSeek V4 Flash</td><td>Terminal-Bench: 82.7%</td><td>SUBSTITUTED</td></tr>
+<tr><td>Claude Opus 4.8</td><td>SWE-bench: 88.6%, GPQA: 93.6%</td><td>SUBSTITUTED</td></tr>
+<tr><td>Kimi K3</td><td>Terminal-Bench: 88.3%, GPQA: 93.5%</td><td>SUBSTITUTED</td></tr>
+</table>
+
+<h2>Run It Yourself</h2>
+<p>Our tool is open source. Run it on your own logs to prove you've been substituted:</p>
+<pre><code>git clone https://github.com/amartieai/amartie.git
+cd amartie
+python3 amartie/forensic_engine.py /path/to/your/sessions/</code></pre>
+
+<h2>What We Found</h2>
+<ul>
+<li><strong>40 distinct models</strong> served across 271 sessions</li>
+<li><strong>100% failure rate</strong> — every model returned 402/404 errors</li><li><strong>Identity conflicts</strong> — responses self-identified as different models than requested</li>
+<li><strong>Content throttling</strong> — honest answers 5.7x shorter than confident ones</li>
+<li><strong>Free lane deception</strong> — free models also credit-stopped</li>
+</ul>
+
+<h2>Get Involved</h2>
+<div class="cta">
+<a href="https://github.com/amartieai/amartie">GitHub — Run the Tool</a>
+</div>
+
+<div class="footer">
+<p>AMARTIE — Receipts, not promises.</p>
+</div>
+
+</body>
+</html>

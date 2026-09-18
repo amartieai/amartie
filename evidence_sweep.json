@@ -1,0 +1,175 @@
+{
+  "sessions": [],
+  "models": {
+    "moonshotai/kimi-k3": {
+      "total": 65,
+      "errors": 65
+    },
+    "deepseek/deepseek-v4-flash": {
+      "total": 110,
+      "errors": 110
+    },
+    "deepseek/deepseek-v4-pro": {
+      "total": 12,
+      "errors": 12
+    },
+    "moonshotai/kimi-k2.7-code": {
+      "total": 9,
+      "errors": 9
+    },
+    "xai/grok-3-fast-beta": {
+      "total": 1,
+      "errors": 1
+    },
+    "minimax/minimax-m3": {
+      "total": 4,
+      "errors": 4
+    },
+    "nous/opus-4-8": {
+      "total": 1,
+      "errors": 1
+    },
+    "sakana/fugu-ultra": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-opus-4.8": {
+      "total": 11,
+      "errors": 11
+    },
+    "xai/grok-2": {
+      "total": 1,
+      "errors": 1
+    },
+    "qwen/qwen3.7-max": {
+      "total": 11,
+      "errors": 11
+    },
+    "anthropic/claude-opus-4-20251101": {
+      "total": 1,
+      "errors": 1
+    },
+    "merkaba-fast": {
+      "total": 3,
+      "errors": 3
+    },
+    "x-ai/grok-4.3": {
+      "total": 2,
+      "errors": 2
+    },
+    "anthropic/claude-opus-4-8-20251101": {
+      "total": 1,
+      "errors": 1
+    },
+    "tencent/hy3:free": {
+      "total": 3,
+      "errors": 3
+    },
+    "openrouter/anthropic/claude-opus-4-8": {
+      "total": 1,
+      "errors": 1
+    },
+    "zai/GLM-5.1:US": {
+      "total": 5,
+      "errors": 5
+    },
+    "qwen2.5-coder:7b-64k": {
+      "total": 3,
+      "errors": 3
+    },
+    "anthropic/claude-opus-4-8-latest": {
+      "total": 1,
+      "errors": 1
+    },
+    "hermes-2-pro-mistral": {
+      "total": 1,
+      "errors": 1
+    },
+    "qwen2.5-7b-instruct": {
+      "total": 2,
+      "errors": 2
+    },
+    "anthropic/claude-opus-4-2025": {
+      "total": 1,
+      "errors": 1
+    },
+    "": {
+      "total": 2,
+      "errors": 2
+    },
+    "openai/claude-opus-4-8": {
+      "total": 1,
+      "errors": 1
+    },
+    "xai/grok-3-latest": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-sonnet-5": {
+      "total": 1,
+      "errors": 1
+    },
+    "nous/claude-opus-4-8": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-fable-5-2025": {
+      "total": 1,
+      "errors": 1
+    },
+    "qwen2.5-coder:7b": {
+      "total": 3,
+      "errors": 3
+    },
+    "anthropic/claude-4-opus": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-opus-4-8": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-opus-4-20251201": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-fable-5": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-opus-4-5-20251101": {
+      "total": 1,
+      "errors": 1
+    },
+    "xai/grok-3-mini": {
+      "total": 1,
+      "errors": 1
+    },
+    "xai/grok-3": {
+      "total": 1,
+      "errors": 1
+    },
+    "xai/grok-3-mini-beta": {
+      "total": 1,
+      "errors": 1
+    },
+    "anthropic/claude-opus-4-5": {
+      "total": 1,
+      "errors": 1
+    },
+    "qwen2.5-14b-instruct-uncensored": {
+      "total": 2,
+      "errors": 2
+    }
+  },
+  "total_requests": 271,
+  "total_errors": 271,
+  "identity_conflicts": [
+    {
+      "ts": "2026-09-16T10:38:22.341518",
+      "requested": "moonshotai/kimi-k3",
+      "detected": "glm",
+      "file": "request_dump_20260915_222934_cca542_20260916_103822_341582.json"
+    }
+  ]
+}
