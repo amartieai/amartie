@@ -162,8 +162,13 @@ class AMARTIEHandler(SimpleHTTPRequestHandler):
         ct = 'text/html'
         if path.endswith('.css'): ct = 'text/css'
         elif path.endswith('.js'): ct = 'application/javascript'
+        elif path.endswith('.mjs'): ct = 'application/javascript'
+        elif path.endswith('.json'): ct = 'application/json'
         elif path.endswith('.png'): ct = 'image/png'
         elif path.endswith('.svg'): ct = 'image/svg+xml'
+        elif path.endswith('.ico'): ct = 'image/x-icon'
+        elif path.endswith('.woff2'): ct = 'font/woff2'
+        elif path.endswith('.woff'): ct = 'font/woff'
         try:
             with open(path, 'rb') as f:
                 content = f.read()

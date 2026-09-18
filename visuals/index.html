@@ -117,7 +117,7 @@ footer a:hover{color:var(--gold)}
 <body>
 
 <!-- HALO 3D Background -->
-<div id="halo"><canvas id="halo-canvas"></canvas></div>
+<div id="halo"><canvas id="halo-canvas"></canvas><canvas id="halo-fallback"></canvas></div>
 <div class="halo-overlay"></div>
 
 <div class="content">
@@ -223,172 +223,247 @@ footer a:hover{color:var(--gold)}
 
 </div>
 
-<!-- Three.js from CDN -->
+<!-- Three.js local vendor -->
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+{ "imports": { "three": "/visuals/vendor/three.module.js" } }
 </script>
+<script>
+// Fallback 2D canvas if Three.js fails
+function initFallback(){
+  const c = document.getElementById('halo-fallback');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  let W, H, particles = [];
+  
+  function resize(){
+    W = c.width = window.innerWidth;
+    H = c.height = window.innerHeight;
+    particles = [];
+    const N = 600;
+    for(let i=0;i<N;i++){
+      particles.push({
+        u: Math.random(), v: Math.random(),
+        speed: 0.0003 + Math.random()*0.0007,
+        size: 1+Math.random()*2,
+        color: Math.random()<.6 ? 'gold' : 'cyan'
+      });
+    }
+  }
+  
+  let t = 0;
+  function render(){
+    t += 0.003;
+    ctx.fillStyle = 'rgba(4,6,11,0.12)';
+    ctx.fillRect(0,0,W,H);
+    const cx = W/2, cy = H/2, scale = Math.min(W,H)/600;
+    
+    for(const p of particles){
+      p.u = (p.u + p.speed) % 1;
+      const a = p.u * Math.PI * 2;
+      const b = p.v * Math.PI * 2 + Math.sin(t+p.u*6)*0.3;
+      const R = 180, r = 60;
+      const x = (R + r*Math.cos(b)) * Math.cos(a);
+      const y = r*Math.sin(b)*0.4 + Math.sin(t*2+p.u*9)*8;
+      const z = (R + r*Math.cos(b)) * Math.sin(a);
+      const px = cx + x*scale, py = cy + y*scale;
+      const depth = (z+R)/(2*R);
+      const alpha = 0.3 + depth*0.7;
+      
+      ctx.beginPath();
+      ctx.arc(px, py, p.size*scale*(0.5+depth*0.8), 0, Math.PI*2);
+      ctx.fillStyle = p.color === 'gold' ? `rgba(255,209,102,${alpha})` : `rgba(76,201,255,${alpha})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(render);
+  }
+  
+  window.addEventListener('resize', resize);
+  resize();
+  render();
+}
+
+// Try Three.js first, fall back to 2D
+window.addEventListener('error', function(e){
+  if(e.message && e.message.includes('three')){
+    document.getElementById('halo-canvas').style.display = 'none';
+    initFallback();
+  }
+}, true);
+</script>
+
 <script type="module">
-import * as THREE from 'three';
+try {
+  const THREE = await import('three');
+  
+  const canvas = document.getElementById('halo-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
 
-const canvas = document.getElementById('halo-canvas');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
-
-function resize(){
-  const w = window.innerWidth, h = window.innerHeight;
-  renderer.setSize(w, h);
-  camera.aspect = w/h;
-  camera.updateProjectionMatrix();
-}
-window.addEventListener('resize', resize);
-resize();
-
-const PILLARS = ['ingest','correlate','query','self_mod','persist','visual','voice','fractal','adapt'];
-const JUDGES = [['J1','Truth'],['J2','Security'],['J3','Privacy'],['J4','Ethics'],['J5','Efficiency'],['J6','Logic'],['J7','Context'],['J8','Autonomy'],['J9','Evolution']];
-const COL = {gold:0xffd166, cyan:0x4cc9ff, white:0xf4f7ff};
-
-const TOR = new THREE.Group(); scene.add(TOR);
-const R = 13, r = 5.2;
-
-function torusPoint(u,v){
-  const a=u*Math.PI*2, b=v*Math.PI*2;
-  return new THREE.Vector3((R+r*Math.cos(b))*Math.cos(a), r*Math.sin(b), (R+r*Math.cos(b))*Math.sin(a));
-}
-function pillarPos(i){ return torusPoint(i/9, 0.5); }
-
-// Particle dust
-{
-  const N=2000, pos=new Float32Array(N*3), col=new Float32Array(N*3);
-  const cGold=new THREE.Color(COL.gold), cCy=new THREE.Color(COL.cyan), tmp=new THREE.Color();
-  for(let i=0;i<N;i++){
-    const u=Math.random(), v=Math.random();
-    const p=torusPoint(u, v + Math.sin(u*22)*0.06);
-    p.x+=(Math.random()-.5)*.5; p.y+=(Math.random()-.5)*.5; p.z+=(Math.random()-.5)*.5;
-    pos.set([p.x,p.y,p.z], i*3);
-    tmp.copy(Math.random()<.7?cGold:cCy).multiplyScalar(.35+Math.random()*.5);
-    col.set([tmp.r,tmp.g,tmp.b], i*3);
+  function resize(){
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
   }
-  const g=new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  g.setAttribute('color', new THREE.BufferAttribute(col,3));
-  TOR.add(new THREE.Points(g, new THREE.PointsMaterial({size:.18,vertexColors:true,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false})));
-}
+  window.addEventListener('resize', resize);
+  resize();
 
-// Wireframe torus
-TOR.add(new THREE.Mesh(new THREE.TorusGeometry(R,r,42,96), new THREE.MeshBasicMaterial({color:COL.gold,wireframe:true,transparent:true,opacity:.07})));
+  const PILLARS = ['ingest','correlate','query','self_mod','persist','visual','voice','fractal','adapt'];
+  const JUDGES = [['J1','Truth'],['J2','Security'],['J3','Privacy'],['J4','Ethics'],['J5','Efficiency'],['J6','Logic'],['J7','Context'],['J8','Autonomy'],['J9','Evolution']];
+  const COL = {gold:0xffd166, cyan:0x4cc9ff, white:0xf4f7ff};
 
-// ZERO point
-const ZERO = new THREE.Group(); scene.add(ZERO);
-{
-  ZERO.add(new THREE.Mesh(new THREE.SphereGeometry(.55,32,32), new THREE.MeshBasicMaterial({color:0xfff6dc})));
-  const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,244,214,.95)');gr.addColorStop(1,'rgba(255,209,102,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
-  halo.scale.set(9,9,1); ZERO.add(halo); ZERO.userData.halo=halo;
-}
+  const TOR = new THREE.Group(); scene.add(TOR);
+  const R = 13, r = 5.2;
 
-// Pillar nodes with judge councils
-const pillarMeshes=[];
-PILLARS.forEach((name,i)=>{
-  const p=pillarPos(i);
-  const g=new THREE.Group(); g.position.copy(p);
-  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,225,150,1)');gr.addColorStop(1,'rgba(255,159,28,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
-  glow.scale.set(5,5,1); g.add(glow);
-  g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1), new THREE.MeshBasicMaterial({color:COL.gold})));
-  const council=new THREE.Group();
-  for(let j=0;j<9;j++){
-    const a=(j/9)*Math.PI*2;
-    const oct=new THREE.Mesh(new THREE.OctahedronGeometry(.10), new THREE.MeshBasicMaterial({color:0xdfe8ff}));
-    oct.position.set(Math.cos(a)*1.05, Math.sin(a*3)*.18, Math.sin(a)*1.05);
-    council.add(oct);
+  function torusPoint(u,v){
+    const a=u*Math.PI*2, b=v*Math.PI*2;
+    return new THREE.Vector3((R+r*Math.cos(b))*Math.cos(a), r*Math.sin(b), (R+r*Math.cos(b))*Math.sin(a));
   }
-  g.add(council); g.userData.council=council;
-  TOR.add(g);
-  pillarMeshes.push({g,glow,council});
-});
+  function pillarPos(i){ return torusPoint(i/9, 0.5); }
 
-// 3-6-9 chords
-const chordCurves=[];
-for(let i=0;i<9;i++){
-  [3,6].forEach((step,s)=>{
-    const pa=pillarPos(i), pb=pillarPos((i+step)%9);
-    const mid=pa.clone().add(pb).multiplyScalar(.5).multiplyScalar(.55); mid.y*=.62;
-    const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);
-    const g=new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));
-    TOR.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:s?COL.gold:COL.cyan,transparent:true,opacity:s?.22:.48})));
-    chordCurves.push(curve);
-  });
-}
-
-// Pulses on chords
-const pulses=[];
-chordCurves.forEach((curve,ci)=>{
-  for(let k=0;k<2;k++){
-    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(120,220,255,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-    sp.scale.setScalar(ci<9?1.7:1.2);
-    TOR.add(sp);
-    pulses.push({sp,curve,t:k/2+ci*.037,speed:.22+((ci*7)%5)*.02});
+  // Particle dust
+  {
+    const N=2000, pos=new Float32Array(N*3), col=new Float32Array(N*3);
+    const cGold=new THREE.Color(COL.gold), cCy=new THREE.Color(COL.cyan), tmp=new THREE.Color();
+    for(let i=0;i<N;i++){
+      const u=Math.random(), v=Math.random();
+      const p=torusPoint(u, v + Math.sin(u*22)*0.06);
+      p.x+=(Math.random()-.5)*.5; p.y+=(Math.random()-.5)*.5; p.z+=(Math.random()-.5)*.5;
+      pos.set([p.x,p.y,p.z], i*3);
+      tmp.copy(Math.random()<.7?cGold:cCy).multiplyScalar(.35+Math.random()*.5);
+      col.set([tmp.r,tmp.g,tmp.b], i*3);
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    g.setAttribute('color', new THREE.BufferAttribute(col,3));
+    TOR.add(new THREE.Points(g, new THREE.PointsMaterial({size:.18,vertexColors:true,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false})));
   }
-});
 
-// Judges' gate
-const GATE = new THREE.Group(); scene.add(GATE);
-JUDGES.forEach(([nm,pr],i)=>{
-  const a=(i/9)*Math.PI*2+Math.PI/9;
-  const g=new THREE.Group();
-  g.position.set(Math.cos(a)*6.4, 0, Math.sin(a)*6.4);
-  g.add(new THREE.Mesh(new THREE.OctahedronGeometry(.42), new THREE.MeshBasicMaterial({color:0xdfe8ff})));
-  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(223,232,255,.9)');gr.addColorStop(1,'rgba(120,150,255,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
-  glow.scale.set(2.4,2.4,1); g.add(glow);
-  GATE.add(g);
-});
+  // Wireframe torus
+  TOR.add(new THREE.Mesh(new THREE.TorusGeometry(R,r,42,96), new THREE.MeshBasicMaterial({color:COL.gold,wireframe:true,transparent:true,opacity:.07})));
 
-// Starfield
-{
-  const N=600, pos=new Float32Array(N*3);
-  for(let i=0;i<N;i++){
-    const v=new THREE.Vector3().randomDirection().multiplyScalar(90+Math.random()*120);
-    pos.set([v.x,v.y,v.z],i*3);
+  // ZERO point
+  const ZERO = new THREE.Group(); scene.add(ZERO);
+  {
+    ZERO.add(new THREE.Mesh(new THREE.SphereGeometry(.55,32,32), new THREE.MeshBasicMaterial({color:0xfff6dc})));
+    const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,244,214,.95)');gr.addColorStop(1,'rgba(255,209,102,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
+    halo.scale.set(9,9,1); ZERO.add(halo); ZERO.userData.halo=halo;
   }
-  const g=new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({color:0x8b96a8,size:.5,transparent:true,opacity:.4})));
-}
 
-// Animation
-const clock=new THREE.Clock();
-let simT=0;
-function animate(){
-  requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),.05);
-  simT+=dt;
-  const t=simT;
-
-  TOR.rotation.y=t*.05;
-  TOR.rotation.x=0.32+Math.sin(t*.11)*.05;
-  GATE.rotation.y=-t*.14;
-
-  const zp=.85+Math.sin(t*2.1)*.15;
-  ZERO.userData.halo.scale.setScalar(9*zp);
-  ZERO.scale.setScalar(1+Math.sin(t*2.1)*.04);
-
-  pillarMeshes.forEach((pm,i)=>{
-    pm.glow.scale.setScalar(5.2+Math.sin(t*1.4+i*.7)*1.4);
-    pm.g.userData.council.rotation.y=-t*1.1+i*.5;
+  // Pillar nodes with judge councils
+  const pillarMeshes=[];
+  PILLARS.forEach((name,i)=>{
+    const p=pillarPos(i);
+    const g=new THREE.Group(); g.position.copy(p);
+    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,225,150,1)');gr.addColorStop(1,'rgba(255,159,28,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
+    glow.scale.set(5,5,1); g.add(glow);
+    g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1), new THREE.MeshBasicMaterial({color:COL.gold})));
+    const council=new THREE.Group();
+    for(let j=0;j<9;j++){
+      const a=(j/9)*Math.PI*2;
+      const oct=new THREE.Mesh(new THREE.OctahedronGeometry(.10), new THREE.MeshBasicMaterial({color:0xdfe8ff}));
+      oct.position.set(Math.cos(a)*1.05, Math.sin(a*3)*.18, Math.sin(a)*1.05);
+      council.add(oct);
+    }
+    g.add(council); g.userData.council=council;
+    TOR.add(g);
+    pillarMeshes.push({g,glow,council});
   });
 
-  pulses.forEach(p=>{
-    p.t=(p.t+p.speed*dt)%1;
-    p.curve.getPoint(p.t, p.sp.position);
-    p.sp.material.opacity=Math.sin(p.t*Math.PI)*.5+.5;
+  // 3-6-9 chords
+  const chordCurves=[];
+  for(let i=0;i<9;i++){
+    [3,6].forEach((step,s)=>{
+      const pa=pillarPos(i), pb=pillarPos((i+step)%9);
+      const mid=pa.clone().add(pb).multiplyScalar(.5).multiplyScalar(.55); mid.y*=.62;
+      const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);
+      const g=new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));
+      TOR.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:s?COL.gold:COL.cyan,transparent:true,opacity:s?.22:.48})));
+      chordCurves.push(curve);
+    });
+  }
+
+  // Pulses on chords
+  const pulses=[];
+  chordCurves.forEach((curve,ci)=>{
+    for(let k=0;k<2;k++){
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(120,220,255,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+      sp.scale.setScalar(ci<9?1.7:1.2);
+      TOR.add(sp);
+      pulses.push({sp,curve,t:k/2+ci*.037,speed:.22+((ci*7)%5)*.02});
+    }
   });
 
-  camera.position.set(Math.sin(t*.05)*26, 17+Math.sin(t*.08)*4, Math.cos(t*.05)*34);
-  camera.lookAt(0,0,0);
+  // Judges' gate
+  const GATE = new THREE.Group(); scene.add(GATE);
+  JUDGES.forEach(([nm,pr],i)=>{
+    const a=(i/9)*Math.PI*2+Math.PI/9;
+    const g=new THREE.Group();
+    g.position.set(Math.cos(a)*6.4, 0, Math.sin(a)*6.4);
+    g.add(new THREE.Mesh(new THREE.OctahedronGeometry(.42), new THREE.MeshBasicMaterial({color:0xdfe8ff})));
+    const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;const g=cv.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,'rgba(223,232,255,.9)');gr.addColorStop(1,'rgba(120,150,255,0)');g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);})(),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    glow.scale.set(2.4,2.4,1); g.add(glow);
+    GATE.add(g);
+  });
 
-  renderer.render(scene,camera);
+  // Starfield
+  {
+    const N=600, pos=new Float32Array(N*3);
+    for(let i=0;i<N;i++){
+      const v=new THREE.Vector3().randomDirection().multiplyScalar(90+Math.random()*120);
+      pos.set([v.x,v.y,v.z],i*3);
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({color:0x8b96a8,size:.5,transparent:true,opacity:.4})));
+  }
+
+  // Animation
+  const clock=new THREE.Clock();
+  let simT=0;
+  function animate(){
+    requestAnimationFrame(animate);
+    const dt=Math.min(clock.getDelta(),.05);
+    simT+=dt;
+    const t=simT;
+
+    TOR.rotation.y=t*.05;
+    TOR.rotation.x=0.32+Math.sin(t*.11)*.05;
+    GATE.rotation.y=-t*.14;
+
+    const zp=.85+Math.sin(t*2.1)*.15;
+    ZERO.userData.halo.scale.setScalar(9*zp);
+    ZERO.scale.setScalar(1+Math.sin(t*2.1)*.04);
+
+    pillarMeshes.forEach((pm,i)=>{
+      pm.glow.scale.setScalar(5.2+Math.sin(t*1.4+i*.7)*1.4);
+      pm.g.userData.council.rotation.y=-t*1.1+i*.5;
+    });
+
+    pulses.forEach(p=>{
+      p.t=(p.t+p.speed*dt)%1;
+      p.curve.getPoint(p.t, p.sp.position);
+      p.sp.material.opacity=Math.sin(p.t*Math.PI)*.5+.5;
+    });
+
+    camera.position.set(Math.sin(t*.05)*26, 17+Math.sin(t*.08)*4, Math.cos(t*.05)*34);
+    camera.lookAt(0,0,0);
+
+    renderer.render(scene,camera);
+  }
+  animate();
+  
+  // Hide fallback if Three.js works
+  const fb = document.getElementById('halo-fallback');
+  if(fb) fb.style.display = 'none';
+  
+} catch(e) {
+  console.warn('Three.js failed, using fallback:', e);
+  document.getElementById('halo-canvas').style.display = 'none';
+  if(typeof initFallback === 'function') initFallback();
 }
-animate();
 </script>
 </body>
 </html>
