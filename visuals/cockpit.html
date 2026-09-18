@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMARTIE Cockpit</title>
+<style>
+:root{--bg:#04060c;--surface:#0a0f1a;--ink:#e8ecf4;--dim:#8b96a8;--gold:#ffd166;--cyan:#4cc9ff;--line:rgba(255,209,102,.12);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:ui-monospace,Consolas,monospace;height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--line)}
+.logo{color:var(--gold);font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.health{display:flex;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;border-right:1px solid var(--line);padding:16px;overflow-y:auto}
+.plugin-btn{display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;background:var(--surface);border:1px solid var(--line);border-radius:4px;color:var(--dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.plugin-btn:hover{border-color:var(--gold);color:var(--ink)}
+.plugin-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
+.content{flex:1;padding:24px;overflow-y:auto}
+.studio-video h2,.studio-image h2{font-family:Georgia,serif;font-size:22px;margin-bottom:4px}
+.muted{color:var(--dim);font-size:12px;margin-bottom:20px}
+.row{margin-bottom:14px}
+.row label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.row textarea,.row input,.row select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:10px;color:var(--ink);font-family:inherit;font-size:12px}
+.row textarea{min-height:60px;resize:vertical}
+button{background:var(--gold);color:var(--bg);border:none;padding:10px 20px;border-radius:4px;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+button:hover{opacity:.9}
+button:disabled{opacity:.5;cursor:not-allowed}
+#luma-status,#leo-status,#rw-status{margin-top:12px;font-size:12px;color:var(--dim)}
+#luma-result,#leo-result,#rw-result{margin-top:16px;display:flex;flex-wrap:wrap;gap:12px}
+#luma-result img,#leo-result img,#rw-result img{max-width:300px;border-radius:4px}
+#luma-result video,#rw-result video{max-width:400px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">AMARTIE Cockpit</div>
+  <div class="health"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</header>
+<main>
+  <aside class="sidebar" id="sidebar"></aside>
+  <section class="content" id="content"><p style="color:var(--dim)">Select a plugin from the sidebar</p></section>
+</main>
+<script>
+const cockpit = {
+  plugins: {},
+  active: null,
+  async init() {
+    const res = await fetch('/api/plugins');
+    this.plugins = await res.json();
+    const sb = document.getElementById('sidebar');
+    sb.innerHTML = '';
+    this.plugins.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'plugin-btn';
+      btn.textContent = p.name;
+      btn.onclick = () => this.load(p.name);
+      sb.appendChild(btn);
+    });
+    if (this.plugins.length > 0) this.load(this.plugins[0].name);
+  },
+  async load(name) {
+    const res = await fetch(`/api/plugins/${name}/render`);
+    const html = await res.json();
+    document.getElementById('content').innerHTML = html.html;
+    if (html.scripts) {
+      const s = document.createElement('script');
+      s.textContent = html.scripts;
+      document.body.appendChild(s);
+    }
+    this.active = name;
+    document.querySelectorAll('.plugin-btn').forEach(b => b.classList.toggle('active', b.textContent === name));
+  },
+  async pluginAction(name, action, data) {
+    const res = await fetch(`/api/plugins/${name}/handle`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action, data})
+    });
+    return await res.json();
+  }
+};
+cockpit.init();
+</script>
+</body>
+</html>

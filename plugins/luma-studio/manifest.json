@@ -1,0 +1,14 @@
+{
+  "name": "luma-studio",
+  "version": "0.1.0",
+  "description": "Luma Dream Machine - AI image and video generation studio",
+  "entrypoint": "__init__.py",
+  "permissions": ["api_call", "file_write", "network"],
+  "api_endpoints": {
+    "generate_image": "POST https://api.lumalabs.ai/dream-machine/v1/generations/image",
+    "generate_video": "POST https://api.lumalabs.ai/dream-machine/v1/generations/video",
+    "get_status": "GET https://api.lumalabs.ai/dream-machine/v1/generations/{id}"
+  },
+  "studio_type": "video_generation",
+  "ui_template": "studio_video.html"
+}
