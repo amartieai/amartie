@@ -11,6 +11,7 @@ import sys
 import json
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, parse_qs
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,15 +57,15 @@ class AMARTIEHandler(SimpleHTTPRequestHandler):
         
         # Static files — serve from visuals/
         if path == '/' or path == '':
-            path = '/visuals/landing.html'
-        if not path.startswith('/api'):
-            if path.startswith('/visuals/'):
-                filepath = os.path.join(BASE, path)
-            else:
-                filepath = os.path.join(BASE, 'visuals', path.lstrip('/'))
-            if os.path.exists(filepath):
-                return self._serve_file(filepath)
-            return self._json(404, {"error": "not found"})
+            filepath = os.path.join(BASE, 'visuals', 'landing.html')
+        elif path.startswith('/visuals/'):
+            filepath = os.path.join(BASE, 'visuals', path[len('/visuals/'):])
+        else:
+            filepath = os.path.join(BASE, 'visuals', path.lstrip('/'))
+        
+        if os.path.exists(filepath):
+            return self._serve_file(filepath)
+        return self._json(404, {"error": "not found"})
         
         return self._json(404, {"error": "unknown endpoint"})
     
@@ -180,12 +181,16 @@ class AMARTIEHandler(SimpleHTTPRequestHandler):
         return datetime.now(timezone.utc).isoformat()
 
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+
 def run_server(port=8715):
-    server = HTTPServer(('127.0.0.1', port), AMARTIEHandler)
-    print(f"AMARTIE server running at http://127.0.0.1:{port}")
+    server = ThreadedHTTPServer(('127.0.0.1', port), AMARTIEHandler)
+    print(f"AMARTIE threaded server running at http://127.0.0.1:{port}")
     print(f"Landing page: http://127.0.0.1:{port}/visuals/landing.html")
     print(f"Cockpit: http://127.0.0.1:{port}/visuals/cockpit.html")
-    print(f"Health check: http://127.0.0.1:{port}/api/health")
     server.serve_forever()
 
 
