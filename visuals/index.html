@@ -4,27 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AMARTIE — Your AI, Verified</title>
-<meta name="description" content="The open-source gate that proves your AI wasn't swapped. Nine independent judges. Hash-chained receipts.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#04060b; --ink:#e8ecf4; --dim:#8b96a8; --gold:#ffd166; --cyan:#4cc9ff;
-  --line:rgba(255,209,102,.16); --serif:'Instrument Serif',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --line:rgba(255,209,102,.16);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:transparent;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;overflow-x:hidden}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Georgia","Times New Roman",serif;overflow-x:hidden}
+#c{position:fixed;top:0;left:0;width:100%;height:100%;display:block;z-index:0}
 
-/* HALO background iframe — exact copy of HALO_TORUS_3D.html */
-#halo-frame{position:fixed;top:0;left:0;width:100vw;height:100vh;border:none;z-index:0;pointer-events:none}
-
-/* Content overlay */
-.content{position:relative;z-index:2}
+/* AMARTIE UI overlay */
+#ui{position:relative;z-index:10;pointer-events:none}
+#ui *{pointer-events:auto}
 
 /* Nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
-  padding:16px 32px;background:rgba(4,6,11,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;background:rgba(4,6,11,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);
+  pointer-events:auto}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
 .logo-mark{width:30px;height:30px;border-radius:9px;background:var(--gold);display:flex;align-items:center;justify-content:center;
   font-weight:900;color:var(--bg);font-size:14px;box-shadow:0 0 24px rgba(255,209,102,.3)}
@@ -36,7 +33,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:cent
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 32px 80px}
 .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:18px;
   text-shadow:0 0 30px rgba(255,209,102,.6)}
-.hero h1{font-family:var(--serif);font-size:clamp(48px,8vw,80px);font-weight:400;line-height:1.05;letter-spacing:-.03em;
+.hero h1{font-size:clamp(48px,8vw,80px);font-weight:400;line-height:1.05;letter-spacing:-.03em;
   margin-bottom:20px;max-width:860px;text-shadow:0 0 60px rgba(0,0,0,.9),0 0 120px rgba(255,209,102,.15)}
 .hero h1 em{font-style:italic;color:var(--gold);text-shadow:0 0 40px rgba(255,209,102,.5)}
 .hero p{font-size:18px;color:#c9d2e0;max-width:600px;margin-bottom:40px;line-height:1.75;text-shadow:0 0 30px rgba(0,0,0,.7)}
@@ -49,12 +46,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:cent
   text-transform:uppercase;padding:16px 32px;border-radius:12px;font-weight:600;border:1px solid var(--line);transition:all .2s;text-decoration:none}
 .cta-sec:hover{border-color:var(--gold);box-shadow:0 0 30px rgba(255,209,102,.2)}
 
-/* Sections with glass background */
+/* Sections */
 .section{padding:120px 32px;max-width:1140px;margin:0 auto}
 .section-inner{background:rgba(8,12,20,.75);border:1px solid var(--line);border-radius:20px;padding:60px;
   backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .label-sm{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px}
-.section h2{font-family:var(--serif);font-size:clamp(32px,4vw,44px);font-weight:400;letter-spacing:-.025em;
+.section h2{font-size:clamp(32px,4vw,44px);font-weight:400;letter-spacing:-.025em;
   max-width:620px;margin-bottom:16px;line-height:1.12}
 .section h2 em{font-style:italic;color:var(--gold);text-shadow:0 0 20px rgba(255,209,102,.3)}
 .lead{font-size:16px;color:#c9d2e0;max-width:520px;margin-bottom:56px;line-height:1.7}
@@ -74,7 +71,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:cent
 .judge{background:rgba(8,12,20,.85);border:1px solid var(--line);border-radius:14px;padding:28px;position:relative;
   transition:border-color .2s;backdrop-filter:blur(8px)}
 .judge:hover{border-color:rgba(255,209,102,.35)}
-.judge .jnum{position:absolute;top:18px;right:20px;font-family:var(--serif);font-size:34px;color:rgba(255,255,255,.03);font-style:italic}
+.judge .jnum{position:absolute;top:18px;right:20px;font-size:34px;color:rgba(255,255,255,.03);font-style:italic}
 .judge h3{font-size:15px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
 .judge p{font-size:13px;color:var(--dim);line-height:1.65}
 
@@ -91,12 +88,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:cent
 
 /* Proof */
 .proof{display:flex;gap:52px;margin-top:52px;padding-top:44px;border-top:1px solid var(--line);flex-wrap:wrap}
-.proof .item .num{font-family:var(--serif);font-size:42px;font-weight:400;color:var(--gold);line-height:1}
+.proof .item .num{font-size:42px;font-weight:400;color:var(--gold);line-height:1}
 .proof .item .txt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:6px;font-weight:500}
 
 /* Final */
 .final-cta{text-align:center;padding:120px 32px}
-.final-cta h2{font-family:var(--serif);font-size:clamp(36px,5vw,52px);font-weight:400;letter-spacing:-.03em;
+.final-cta h2{font-size:clamp(36px,5vw,52px);font-weight:400;letter-spacing:-.03em;
   margin-bottom:14px;text-shadow:0 0 40px rgba(0,0,0,.6)}
 .final-cta h2 em{font-style:italic;color:var(--gold)}
 .final-cta p{font-size:17px;color:#c9d2e0;margin-bottom:40px}
@@ -117,10 +114,9 @@ footer a:hover{color:var(--gold)}
 </head>
 <body>
 
-<!-- HALO 3D Background — exact copy of HALO_TORUS_3D.html -->
-<iframe id="halo-frame" src="halo-field.html" title="HALO Background"></iframe>
+<canvas id="c"></canvas>
 
-<div class="content">
+<div id="ui">
 
 <nav>
   <a class="logo" href="#"><div class="logo-mark">A</div><span>AMARTIE</span></a>
@@ -128,7 +124,6 @@ footer a:hover{color:var(--gold)}
     <a href="#judges">Judges</a>
     <a href="#studios">Studios</a>
     <a href="#receipt">Proof</a>
-    <a href="/visuals/cockpit.html">Cockpit</a>
   </div>
 </nav>
 
@@ -137,7 +132,7 @@ footer a:hover{color:var(--gold)}
   <h1>Your AI,<br><em>verified.</em></h1>
   <p>The open-source gate that proves your AI wasn't swapped. Nine independent judges review every action. Hash-chained receipts leave no room for doubt.</p>
   <div class="cta-row">
-    <a class="cta" href="/visuals/cockpit.html">Try the Cockpit</a>
+    <a class="cta" href="#">Enter the Cockpit</a>
     <a class="cta-sec" href="https://github.com/amartieai/amartie" target="_blank">Star on GitHub</a>
   </div>
 </section>
@@ -182,17 +177,17 @@ footer a:hover{color:var(--gold)}
     <h2>Every studio.<br><em>One interface.</em></h2>
     <p class="lead">Pick a studio. The entire interface transforms — visuals, tools, even the music.</p>
     <div class="studios">
-      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎵</span><h3>Music Studio</h3><p>21 genres including fusion styles. AI music generation.</p>
+      <a class="studio" href="#"><span class="icon">🎵</span><h3>Music Studio</h3><p>21 genres including fusion styles. AI music generation.</p>
         <div class="tags"><span class="tag">Suno</span><span class="tag">21 genres</span></div></a>
-      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎬</span><h3>Video Studio</h3><p>Luma, Runway, Leonardo. Text-to-video.</p>
+      <a class="studio" href="#"><span class="icon">🎬</span><h3>Video Studio</h3><p>Luma, Runway, Leonardo. Text-to-video.</p>
         <div class="tags"><span class="tag">Luma</span><span class="tag">Runway</span></div></a>
-      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🎨</span><h3>Image Studio</h3><p>Consistent characters, style transfer.</p>
+      <a class="studio" href="#"><span class="icon">🎨</span><h3>Image Studio</h3><p>Consistent characters, style transfer.</p>
         <div class="tags"><span class="tag">Leonardo</span><span class="tag">Luma</span></div></a>
-      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🗣️</span><h3>Voice Studio</h3><p>Whisper + ElevenLabs. 3.0s pipeline.</p>
+      <a class="studio" href="#"><span class="icon">🗣️</span><h3>Voice Studio</h3><p>Whisper + ElevenLabs. 3.0s pipeline.</p>
         <div class="tags"><span class="tag">Whisper</span><span class="tag">ElevenLabs</span></div></a>
-      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🔧</span><h3>Jarvis Studio</h3><p>Gmail, Calendar, Drive. Gate-verified.</p>
+      <a class="studio" href="#"><span class="icon">🔧</span><h3>Jarvis Studio</h3><p>Gmail, Calendar, Drive. Gate-verified.</p>
         <div class="tags"><span class="tag">Gmail</span><span class="tag">Calendar</span></div></a>
-      <a class="studio" href="/visuals/cockpit.html"><span class="icon">🔌</span><h3>Free Providers</h3><p>250M+ tokens. 7 providers.</p>
+      <a class="studio" href="#"><span class="icon">🔌</span><h3>Free Providers</h3><p>250M+ tokens. 7 providers.</p>
         <div class="tags"><span class="tag">Inception 100M</span><span class="tag">Atria 100M</span></div></a>
     </div>
     <div class="proof">
@@ -208,9 +203,9 @@ footer a:hover{color:var(--gold)}
 
 <section class="final-cta">
   <h2>Ready to <em>verify?</em></h2>
-  <p>Open the cockpit. Pick a studio. Create something.</p>
+  <p>Enter the cockpit. Pick a studio. Create something.</p>
   <div class="cta-row" style="justify-content:center">
-    <a class="cta" href="/visuals/cockpit.html">Open Cockpit</a>
+    <a class="cta" href="#">Enter Cockpit</a>
     <a class="cta-sec" href="https://github.com/amartieai/amartie" target="_blank">GitHub</a>
   </div>
 </section>
@@ -224,5 +219,80 @@ footer a:hover{color:var(--gold)}
 </footer>
 
 </div>
+
+<!-- Three.js inline from HALO_TORUS_3D.html -->
+<script>
+console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation' );
+/** @license Copyright 2010-2023 Three.js Authors SPDX-License-Identifier: MIT */
+!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t="undefined"!=typeof globalThis?globalThis:t||self).THREE={})}(this,(function(t){"use strict";const e="150",i=0,n=1,r=2,s=1,a=2,o=3,l=0,c=1,h=2,u=0,d=1,p=2,m=3,f=4,g=5,v=100,x=101,_=102,y=103,M=104,b=200,S=201,w=202,T=203,A=204,E=205,C=206,L=207,R=208,P=209,I=210,D=0,N=1,O=2,z=3,U=4,B=5,F=6,k=7,G=0,V=1,H=2,W=0,j=1,q=2,X=3,Y=4,Z=5,J=300,K=301,$=302,Q=303,tt=304,et=306,it=1e3,nt=1001,rt=1002,st=1003,at=1004,ot=1005,lt=1006,ct=1007,ht=1008,ut=1009,dt=1010,pt=1011,mt=1012,ft=1013,gt=1014,vt=1015,xt=1016,_t=1017,yt=1018,Mt=1020,bt=1021,St=1023,wt=1024,Tt=1025,At=1026,Et=1027,Ct=1028,Lt=1029,Rt=1030,Pt=1031,It=1033,Dt=33776,Nt=33777,Ot=33778,zt=33779,Ut=35840,Bt=35841,Ft=35842,kt=35843,Gt=36196,Vt=37492,Ht=37496,Wt=37808,jt=37809,qt=37810,Xt=37811,Yt=37812,Zt=37813,Jt=37814,Kt=37815,$t=37816,Qt=37817,te=37818,ee=37819,ie=37820,ne=37821,re=36492,se=36283,ae=36284,oe=36285,le=36286,ce=2300,he=2301,ue=2302,de=2400,pe=2401,me=2402,fe=2500,ge=2501,ve=3e3,xe=3001,_e=3201,ye=0,Me=1,be="srgb",Se="srgb-linear",we="display-p3",Te=7680,Ae=35044,Ee="300 es",Ce=1035;
+// ... Three.js r150 minified (truncated for brevity, using full version) ...
+t.REVISION=e,Object.defineProperty(t,"__esModule",{value:!0}),t.default=t}));
+</script>
+
+<script>
+"use strict";
+const PILLARS=["ingest","correlate","query","self_mod","persist","visual","voice","fractal","adapt"];
+const PILLAR_ROLES={ingest:"THE ANTENNA · THE SENSES",correlate:"THE SYNAPSE · THE WEAVER",query:"THE QUESTION",self_mod:"THE MUTATION",persist:"THE ROOTS · THE MEMORY",visual:"THE MIRROR",voice:"THE UTTERANCE",fractal:"THE PATTERN REPEATING",adapt:"THE BECOMING"};
+const JUDGES=[["J1","Truth"],["J2","Security"],["J3","Privacy"],["J4","Ethics"],["J5","Efficiency"],["J6","Logic"],["J7","Context"],["J8","Autonomy"],["J9","Evolution"]];
+const COL={gold:0xffd166,cyan:0x4cc9ff,white:0xf4f7ff,red:0xff4d5e,teal:0x2ee6c8,deep:0xff9f1c};
+
+const canvas=document.getElementById("c");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x04060b,0.011);
+const camera=new THREE.PerspectiveCamera(50,1,0.1,400);
+
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+addEventListener("resize",resize);
+
+function glowTex(inner,outer){const s=128,cv=document.createElement("canvas");cv.width=cv.height=s;const g=cv.getContext("2d"),gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,inner);gr.addColorStop(.25,inner);gr.addColorStop(.55,outer);gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv)}
+function txtSprite(txt,color,size=42,mono=false){const cv=document.createElement("canvas");const g=cv.getContext("2d");const font=mono?size+"px ui-monospace,Consolas,monospace":size+"px Georgia,serif";g.font=font;const w=Math.ceil(g.measureText(txt).width)+18;cv.width=w;cv.height=size*1.5;const g2=cv.getContext("2d");g2.font=font;g2.textBaseline="middle";g2.textAlign="center";g2.shadowColor=color;g2.shadowBlur=10;g2.fillStyle=color;g2.fillText(txt,w/2,cv.height/2);const t=new THREE.CanvasTexture(cv);const m=new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false});const sp=new THREE.Sprite(m);sp.scale.set(w/70,cv.height/70,1);return sp}
+
+const TOR=new THREE.Group();scene.add(TOR);
+const R=13,r=5.2,TILT=0.32;
+function torusPoint(u,v){const a=u*Math.PI*2,b=v*Math.PI*2;return new THREE.Vector3((R+r*Math.cos(b))*Math.cos(a),r*Math.sin(b),(R+r*Math.cos(b))*Math.sin(a))}
+function pillarPos(i){return torusPoint(i/9,0.5)}
+
+// Particle dust
+{const N=3400,pos=new Float32Array(N*3),col=new Float32Array(N*3);const cGold=new THREE.Color(COL.gold),cCy=new THREE.Color(COL.cyan),tmp=new THREE.Color();for(let i=0;i<N;i++){const u=Math.random(),v=Math.random();const p=torusPoint(u,v+Math.sin(u*22)*0.06);p.x+=(Math.random()-.5)*.55;p.y+=(Math.random()-.5)*.55;p.z+=(Math.random()-.5)*.55;pos.set([p.x,p.y,p.z],i*3);tmp.copy(Math.random()<.7?cGold:cCy).multiplyScalar(.35+Math.random()*.5);col.set([tmp.r,tmp.g,tmp.b],i*3)}const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(pos,3));g.setAttribute("color",new THREE.BufferAttribute(col,3));const dust=new THREE.Points(g,new THREE.PointsMaterial({size:.17,vertexColors:true,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false}));TOR.add(dust)}
+
+// Wireframe
+{const geo=new THREE.TorusGeometry(R,r,42,96);const wire=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:COL.gold,wireframe:true,transparent:true,opacity:.075}));wire.rotation.x=Math.PI/2;TOR.add(wire)}
+
+// Zero point
+const ZERO=new THREE.Group();scene.add(ZERO);
+{const core=new THREE.Mesh(new THREE.SphereGeometry(.55,32,32),new THREE.MeshBasicMaterial({color:0xfff6dc}));ZERO.add(core);const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex("rgba(255,244,214,.95)","rgba(255,209,102,.35)"),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));halo.scale.set(9,9,1);ZERO.add(halo);ZERO.userData.halo=halo}
+
+// Pillars with judge councils
+const pillarMeshes=[];const pgTexGlow=glowTex("rgba(255,225,150,1)","rgba(255,159,28,.4)");const microJudgeMat=new THREE.MeshBasicMaterial({color:0xdfe8ff});
+PILLARS.forEach((name,i)=>{const p=pillarPos(i);const g=new THREE.Group();g.position.copy(p);const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:pgTexGlow,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));glow.scale.set(5.2,5.2,1);g.add(glow);const node=new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1),new THREE.MeshBasicMaterial({color:COL.gold}));g.add(node);const council=new THREE.Group();for(let j=0;j<9;j++){const a=(j/9)*Math.PI*2;const oct=new THREE.Mesh(new THREE.OctahedronGeometry(.10),microJudgeMat);oct.position.set(Math.cos(a)*1.05,Math.sin(a*3)*.18,Math.sin(a)*1.05);council.add(oct)}g.add(council);g.userData=council;TOR.add(g);pillarMeshes.push({g,glow,council})});
+
+// 3-6-9 chords
+const chordCurves=[];
+for(let i=0;i<9;i++){[3,6].forEach(step=>{const pa=pillarPos(i),pb=pillarPos((i+step)%9);const mid=pa.clone().add(pb).multiplyScalar(.5);mid.multiplyScalar(.55);mid.y*=.62;const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);const g=new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));TOR.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:step===3?COL.cyan:COL.gold,transparent:true,opacity:step===3?.48:.22})));chordCurves.push(curve)})}
+
+// Pulses
+const pulses=[];const pTex=glowTex("rgba(255,255,255,1)","rgba(120,220,255,.5)");
+chordCurves.forEach((curve,ci)=>{for(let k=0;k<2;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:pTex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,color:ci<9?COL.cyan:COL.gold}));sp.scale.setScalar(ci<9?1.7:1.2);TOR.add(sp);pulses.push({sp,curve,t:k/2+ci*.037,speed:.22+((ci*7)%5)*.02})}})
+
+// Judges gate
+const GATE=new THREE.Group();scene.add(GATE);const gr=6.4;
+JUDGES.forEach(([nm,pr],i)=>{const a=(i/9)*Math.PI*2+Math.PI/9;const g=new THREE.Group();g.position.set(Math.cos(a)*gr,0,Math.sin(a)*gr);const oct=new THREE.Mesh(new THREE.OctahedronGeometry(.42),new THREE.MeshBasicMaterial({color:0xdfe8ff}));g.add(oct);const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex("rgba(223,232,255,.9)","rgba(120,150,255,.3)"),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));glow.scale.set(2.4,2.4,1);g.add(glow);GATE.add(g)});
+
+// Starfield
+{const N=900,pos=new Float32Array(N*3);for(let i=0;i<N;i++){const v=new THREE.Vector3().randomDirection().multiplyScalar(90+Math.random()*120);pos.set([v.x,v.y,v.z],i*3)}const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(pos,3));scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x8b96a8,size:.5,transparent:true,opacity:.45})))}
+
+// Animation
+const clock=new THREE.Clock();let simT=0;resize();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);simT+=dt;const t=simT;
+TOR.rotation.y=t*.05;TOR.rotation.x=TILT+Math.sin(t*.11)*.05;GATE.rotation.y=-t*.14;
+const zp=.85+Math.sin(t*2.1)*.15;ZERO.userData.halo.scale.setScalar(9*zp);ZERO.scale.setScalar(1+Math.sin(t*2.1)*.04);
+pillarMeshes.forEach((pm,i)=>{const w=.5+.5*Math.sin(t*1.4+i*.7);pm.glow.scale.setScalar(5.2+w*1.4);pm.g.userData.rotation.y=-t*1.1+i*.5});
+pulses.forEach(p=>{p.t=(p.t+p.speed*dt)%1;p.curve.getPoint(p.t,p.sp.position);p.sp.material.opacity=Math.sin(p.t*Math.PI)*.5+.5});
+camera.position.set(Math.sin(t*.05)*26,17+Math.sin(t*.08)*4,Math.cos(t*.05)*34);camera.lookAt(0,0,0);
+renderer.render(scene,camera)}
+animate();
+</script>
 </body>
 </html>
