@@ -1,0 +1,21 @@
+{
+  "name": "storytelling-studio",
+  "version": "0.1.0",
+  "description": "Interactive fiction and narrative design",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "execute",
+    "file_write",
+    "network"
+  ],
+  "api_endpoints": {},
+  "studio_type": "storytelling",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "Twine",
+  "tool_url": "https://twinery.org"
+}

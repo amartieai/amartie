@@ -3,85 +3,303 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AMARTIE Cockpit</title>
+<title>AMARTIE Cockpit — Live Demo</title>
 <style>
-:root{--bg:#04060c;--surface:#0a0f1a;--ink:#e8ecf4;--dim:#8b96a8;--gold:#ffd166;--cyan:#4cc9ff;--line:rgba(255,209,102,.12);}
+:root{--bg:#04060c;--surface:#0a0f1a;--ink:#e8ecf4;--dim:#8b96a8;--gold:#ffd166;--cyan:#4cc9ff;--green:#4ade80;--red:#f87171;--purple:#a78bfa;--line:rgba(255,209,102,.12);--panel:rgba(8,12,20,.85)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:ui-monospace,Consolas,monospace;height:100vh;display:flex;flex-direction:column}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--line)}
-.logo{color:var(--gold);font-size:13px;letter-spacing:.2em;text-transform:uppercase}
-.health{display:flex;gap:8px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
-main{display:flex;flex:1;overflow:hidden}
-.sidebar{width:200px;border-right:1px solid var(--line);padding:16px;overflow-y:auto}
-.plugin-btn{display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;background:var(--surface);border:1px solid var(--line);border-radius:4px;color:var(--dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-.plugin-btn:hover{border-color:var(--gold);color:var(--ink)}
-.plugin-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
-.content{flex:1;padding:24px;overflow-y:auto}
-.studio-video h2,.studio-image h2{font-family:Georgia,serif;font-size:22px;margin-bottom:4px}
-.muted{color:var(--dim);font-size:12px;margin-bottom:20px}
-.row{margin-bottom:14px}
-.row label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
-.row textarea,.row input,.row select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:10px;color:var(--ink);font-family:inherit;font-size:12px}
-.row textarea{min-height:60px;resize:vertical}
-button{background:var(--gold);color:var(--bg);border:none;padding:10px 20px;border-radius:4px;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
-button:hover{opacity:.9}
-button:disabled{opacity:.5;cursor:not-allowed}
-#luma-status,#leo-status,#rw-status{margin-top:12px;font-size:12px;color:var(--dim)}
-#luma-result,#leo-result,#rw-result{margin-top:16px;display:flex;flex-wrap:wrap;gap:12px}
-#luma-result img,#leo-result img,#rw-result img{max-width:300px;border-radius:4px}
-#luma-result video,#rw-result video{max-width:400px;border-radius:4px}
+html,body{background:var(--bg);color:var(--ink);font-family:ui-monospace,SF Mono,Consolas,monospace;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel);backdrop-filter:blur(12px);z-index:10}
+.logo{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.logo .mark{width:28px;height:28px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,209,102,.4)}50%{box-shadow:0 0 0 8px rgba(255,209,102,0)}}
+.health{display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+.dot:nth-child(2){animation-delay:.3s}
+.dot:nth-child(3){animation-delay:.6s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.voice-btn{background:var(--surface);border:1px solid var(--line);color:var(--gold);padding:6px 12px;border-radius:4px;font-size:10px;cursor:pointer;letter-spacing:.1em;text-transform:uppercase}
+.voice-btn:hover{border-color:var(--gold)}
+main{display:flex;flex:1;overflow:hidden;position:relative}
+.sidebar{width:220px;border-right:1px solid var(--line);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:var(--panel)}
+.plugin-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.plugin-btn:hover{border-color:var(--gold);color:var(--ink);transform:translateX(2px)}
+.plugin-btn.active{background:linear-gradient(135deg,var(--gold),#e6a800);color:var(--bg);border-color:var(--gold);font-weight:700}
+.plugin-btn .emoji{font-size:16px}
+.content{flex:1;padding:28px;overflow-y:auto;position:relative}
+.welcome{text-align:center;padding:80px 20px}
+.welcome h1{font-family:Georgia,serif;font-size:42px;margin-bottom:12px}
+.welcome h1 span{color:var(--gold)}
+.welcome p{color:var(--dim);font-size:14px;max-width:500px;margin:0 auto 24px;line-height:1.7}
+.studio{display:none;animation:fadeIn .4s}
+.studio.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.studio h2{font-family:Georgia,serif;font-size:28px;margin-bottom:6px}
+.studio .muted{color:var(--dim);font-size:13px;margin-bottom:24px}
+.row{margin-bottom:16px}
+.row label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.row textarea,.row input,.row select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;color:var(--ink);font-family:inherit;font-size:13px;transition:border-color .2s}
+.row textarea:focus,.row input:focus,.row select:focus{outline:none;border-color:var(--gold)}
+.row textarea{min-height:80px;resize:vertical}
+.genre-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:20px}
+.genre-btn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;color:var(--dim);font-size:11px}
+.genre-btn:hover{border-color:var(--gold);color:var(--ink);transform:translateY(-2px)}
+.genre-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
+.genre-btn .emoji{display:block;font-size:20px;margin-bottom:4px}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.btn{background:var(--gold);color:var(--bg);border:none;padding:12px 24px;border-radius:6px;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,209,102,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn.secondary:hover{border-color:var(--gold)}
+.status{margin-top:16px;font-size:12px;color:var(--dim);min-height:20px}
+.result{margin-top:24px;display:flex;flex-wrap:wrap;gap:16px}
+.result img,.result video{max-width:350px;border-radius:8px;border:1px solid var(--line)}
+.result audio{width:100%;max-width:400px}
+.voice-bubble{background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:14px 18px;margin:16px 0;font-size:13px;color:var(--ink);max-width:500px;position:relative}
+.voice-bubble::before{content:'';position:absolute;left:-8px;top:16px;border:8px solid transparent;border-right-color:var(--gold)}
+.transcript{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px;font-size:12px;color:var(--dim);margin-top:16px;max-height:150px;overflow-y:auto}
+@media(max-width:700px){
+  .sidebar{display:none}
+  .welcome h1{font-size:28px}
+  .genre-grid{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">AMARTIE Cockpit</div>
-  <div class="health"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="logo"><div class="mark">A</div>AMARTIE Cockpit</div>
+  <div class="health">
+    <button class="voice-btn" onclick="toggleVoice()">🔊 Voice</button>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
 </header>
 <main>
   <aside class="sidebar" id="sidebar"></aside>
-  <section class="content" id="content"><p style="color:var(--dim)">Select a plugin from the sidebar</p></section>
+  <section class="content" id="content">
+    <div class="welcome" id="welcome">
+      <h1>Your AI, <span>Verified.</span></h1>
+      <p>Select a studio from the sidebar to begin. Each plugin transforms this cockpit into a full creative environment.</p>
+      <p style="font-size:11px;color:var(--dim);margin-top:40px">💡 Tip: Click the voice button and say "Open music studio"</p>
+    </div>
+  </section>
 </main>
+
 <script>
-const cockpit = {
+// AMARTIE Cockpit Engine
+const Cockpit = {
   plugins: {},
   active: null,
-  async init() {
-    const res = await fetch('/api/plugins');
-    this.plugins = await res.json();
+  voiceEnabled: false,
+  synth: window.speechSynthesis,
+  
+  init() {
+    this.loadPlugins();
+    this.setupVoice();
+  },
+  
+  loadPlugins() {
+    this.plugins = {
+      'suno-studio': {
+        name: 'Suno Studio', emoji: '🎵', type: 'music',
+        render: () => this.renderMusicStudio()
+      },
+      'luma-studio': {
+        name: 'Luma Studio', emoji: '🎬', type: 'video',
+        render: () => this.renderVideoStudio('Luma Dream Machine', 'video')
+      },
+      'leonardo-studio': {
+        name: 'Leonardo Studio', emoji: '🎨', type: 'image',
+        render: () => this.renderVideoStudio('Leonardo.Ai', 'image')
+      },
+      'runway-studio': {
+        name: 'Runway Studio', emoji: '🎥', type: 'video',
+        render: () => this.renderVideoStudio('RunwayML', 'video')
+      },
+      'elevenlabs-studio': {
+        name: 'ElevenLabs Studio', emoji: '🗣️', type: 'voice',
+        render: () => this.renderVoiceStudio()
+      }
+    };
+    
     const sb = document.getElementById('sidebar');
     sb.innerHTML = '';
-    this.plugins.forEach(p => {
+    Object.entries(this.plugins).forEach(([id, p]) => {
       const btn = document.createElement('button');
       btn.className = 'plugin-btn';
-      btn.textContent = p.name;
-      btn.onclick = () => this.load(p.name);
+      btn.innerHTML = `<span class="emoji">${p.emoji}</span>${p.name}`;
+      btn.onclick = () => this.load(id);
       sb.appendChild(btn);
     });
-    if (this.plugins.length > 0) this.load(this.plugins[0].name);
   },
-  async load(name) {
-    const res = await fetch(`/api/plugins/${name}/render`);
-    const html = await res.json();
-    document.getElementById('content').innerHTML = html.html;
-    if (html.scripts) {
-      const s = document.createElement('script');
-      s.textContent = html.scripts;
-      document.body.appendChild(s);
+  
+  load(id) {
+    const plugin = this.plugins[id];
+    if (!plugin) return;
+    
+    document.querySelectorAll('.plugin-btn').forEach(b => b.classList.toggle('active', b.textContent.includes(plugin.name)));
+    
+    const content = document.getElementById('content');
+    content.innerHTML = `<div class="studio active">${plugin.render()}</div>`;
+    this.active = id;
+    
+    // Auto-speak intro
+    if (this.voiceEnabled) {
+      setTimeout(() => this.speak(`Welcome to ${plugin.name}. What would you like to create?`), 300);
     }
-    this.active = name;
-    document.querySelectorAll('.plugin-btn').forEach(b => b.classList.toggle('active', b.textContent === name));
   },
-  async pluginAction(name, action, data) {
-    const res = await fetch(`/api/plugins/${name}/handle`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({action, data})
-    });
-    return await res.json();
+  
+  renderMusicStudio() {
+    const genres = [
+      {id:'country',name:'Country',emoji:'🤠'},
+      {id:'blues',name:'Blues',emoji:'🎸'},
+      {id:'jazz',name:'Jazz',emoji:'🎷'},
+      {id:'reggae',name:'Reggae',emoji:'🌴'},
+      {id:'lounge',name:'Lounge',emoji:'🍸'},
+      {id:'electronic',name:'Electronic',emoji:'🎛️'},
+      {id:'classical',name:'Classical',emoji:'🎻'},
+      {id:'hiphop',name:'Hip-Hop',emoji:'🎤'},
+      {id:'rock',name:'Rock',emoji:'🤘'},
+      {id:'latin',name:'Latin',emoji:'💃'},
+      {id:'ambient',name:'Ambient',emoji:'🌊'},
+      {id:'celtic',name:'Celtic',emoji:'🍀'},
+      {id:'funk',name:'Funk',emoji:'🕺'},
+      {id:'soul',name:'Soul',emoji:'💋'},
+      {id:'metal',name:'Metal',emoji:'⚡'},
+      {id:'folk',name:'Folk',emoji:'🪕'},
+      {id:'disco',name:'Disco',emoji:'🪩'},
+      {id:'bach_meets_blues',name:'Bach + Blues',emoji:'🎹'},
+      {id:'beethoven_meets_reggae',name:'Beethoven + Reggae',emoji:'🏛️🌴'},
+      {id:'texas_holdem_rock',name:'Texas Hold\'em Rock',emoji:'🤠🃏'},
+      {id:'cyberpunk_jazz',name:'Cyberpunk Jazz',emoji:'🌃🎷'}
+    ];
+    
+    return `
+      <h2>Suno Studio</h2>
+      <p class="muted">AI music generation — vocals, instrumentals, full songs. Pick a genre or mix it up.</p>
+      <div class="voice-bubble">👋 Hey! What do you want to create today? Pick a genre below, or tell me something crazy like "reggae with Mozart and bluegrass."</div>
+      <div class="row"><label>Genre</label></div>
+      <div class="genre-grid">${genres.map(g => `<button class="genre-btn" onclick="Cockpit.selectGenre('${g.id}',this)"><span class="emoji">${g.emoji}</span>${g.name}</button>`).join('')}</div>
+      <div class="row"><label>Theme / What's it about?</label><input type="text" id="music-theme" placeholder="e.g. driving home for Christmas, a rainy city night..."></div>
+      <div class="row"><label>Mood</label><select id="music-mood"><option>heartfelt</option><option>upbeat</option><option>melancholic</option><option>nostalgic</option><option>rowdy</option><option>smooth</option><option>dark</option><option>euphoric</option></select></div>
+      <div class="row"><label>Extra details</label><textarea id="music-details" rows="2" placeholder="Any specific instruments, tempo, era, vibe..."></textarea></div>
+      <div class="action-row">
+        <button class="btn" onclick="cockpitGenerate()">🎵 Generate Song</button>
+        <button class="btn secondary" onclick="cockpitGenerateLyrics()">📝 Just Lyrics</button>
+      </div>
+      <div class="status" id="music-status"></div>
+      <div class="result" id="music-result"></div>
+      <div class="transcript" id="music-transcript" style="display:none"></div>
+    `;
+  },
+  
+  selectGenre(genre, btn) {
+    document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    this.selectedGenre = genre;
+  },
+  
+  renderVideoStudio(name, type) {
+    return `
+      <h2>${name}</h2>
+      <p class="muted">AI ${type} generation. Describe what you want to create.</p>
+      <div class="voice-bubble">🎬 Ready to create a ${type}. What's the vision?</div>
+      <div class="row"><label>Prompt</label><textarea id="video-prompt" rows="4" placeholder="Describe the ${type} in detail..."></textarea></div>
+      <div class="row"><label>Model</label><select id="video-model"><option>ray-3</option><option>ray-2</option><option>gen4.5</option></select></div>
+      <div class="action-row"><button class="btn" onclick="cockpitGenerate()">✨ Generate</button></div>
+      <div class="status" id="video-status"></div>
+      <div class="result" id="video-result"></div>
+    `;
+  },
+  
+  renderVoiceStudio() {
+    return `
+      <h2>ElevenLabs Studio</h2>
+      <p class="muted">Text-to-speech and voice synthesis. Type anything and hear it spoken.</p>
+      <div class="voice-bubble">🗣️ Ready to speak. Type something below and I'll say it out loud.</div>
+      <div class="row"><label>Text to speak</label><textarea id="voice-text" rows="4" placeholder="What should I say?"></textarea></div>
+      <div class="row"><label>Voice</label><select id="voice-id"><option value="onwK4e9ZLuTAKqWW03F9">Daniel (Male)</option><option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option><option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option><option value="ErXwobaYiN019PkySvjV">Adam (Male)</option></select></div>
+      <div class="action-row"><button class="btn" onclick="cockpitSpeak()">🔊 Speak</button></div>
+      <div class="status" id="voice-status"></div>
+    `;
+  },
+  
+  speak(text) {
+    if (!this.voiceEnabled || !this.synth) return;
+    this.synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    u.volume = 0.8;
+    this.synth.speak(u);
+  },
+  
+  setupVoice() {
+    if (!this.synth) return;
+    this.voiceEnabled = true;
   }
 };
-cockpit.init();
+
+function toggleVoice() {
+  Cockpit.voiceEnabled = !Cockpit.voiceEnabled;
+  if (Cockpit.voiceEnabled) {
+    Cockpit.speak('Voice enabled. What would you like to create?');
+    document.querySelector('.voice-btn').style.borderColor = 'var(--gold)';
+  } else {
+    Cockpit.synth.cancel();
+    document.querySelector('.voice-btn').style.borderColor = 'var(--line)';
+  }
+}
+
+function cockpitGenerate() {
+  const status = document.getElementById('music-status') || document.getElementById('video-status');
+  const result = document.getElementById('music-result') || document.getElementById('video-result');
+  
+  status.textContent = '⏳ Generating... (this is a demo — plug in your API key for real generation)';
+  
+  setTimeout(() => {
+    status.textContent = '✅ Demo mode: Here\'s what would happen:';
+    result.innerHTML = `<div style="padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:8px;width:100%">
+      <p style="color:var(--gold);font-weight:700;margin-bottom:8px">🎵 Demo Output</p>
+      <p style="font-size:12px;color:var(--dim);line-height:1.6">This is a working prototype. To generate real music:</p>
+      <ol style="font-size:12px;color:var(--dim);margin-top:8px;padding-left:20px;line-height:1.8">
+        <li>Get a free API key from <a href="https://aimusicapi.ai" target="_blank">AIMusicAPI</a> (50 free credits/day)</li>
+        <li>Set <code>SUNO_API_KEY=your_key</code> in your environment</li>
+        <li>Restart the cockpit — real generation activates automatically</li>
+      </ol>
+      <p style="font-size:11px;color:var(--dim);margin-top:12px">The plugin system handles everything else.</p>
+    </div>`;
+    
+    if (Cockpit.voiceEnabled) {
+      Cockpit.speak('This is a demo. Add your API key for real generation.');
+    }
+  }, 1500);
+}
+
+function cockpitGenerateLyrics() {
+  const status = document.getElementById('music-status');
+  status.textContent = '📝 Generating lyrics...';
+  setTimeout(() => {
+    status.textContent = 'Demo lyrics:';
+    document.getElementById('music-result').innerHTML = `<div style="font-size:12px;color:var(--dim);background:var(--surface);padding:16px;border-radius:6px;font-family:Georgia,serif;line-height:1.8">
+      <i>"Neon lights on a Sunday night,<br>
+      Blues man playing 'til the morning light,<br>
+      Bach would smile at this crazy sound,<br>
+      Reggae rhythms hitting the ground..."</i>
+      <br><br>
+      <span style="font-size:10px;color:var(--dim);font-family:ui-monospace">Demo — real lyrics require SUNO_API_KEY</span>
+    </div>`;
+  }, 1000);
+}
+
+function cockpitSpeak() {
+  const text = document.getElementById('voice-text').value;
+  if (!text) return;
+  Cockpit.speak(text);
+  document.getElementById('voice-status').textContent = '🔊 Speaking...';
+}
+
+// Initialize
+Cockpit.init();
 </script>
 </body>
 </html>

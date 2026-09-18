@@ -1,0 +1,21 @@
+{
+  "name": "video_edit-studio",
+  "version": "0.1.0",
+  "description": "Video production and editing",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "execute",
+    "file_write",
+    "network"
+  ],
+  "api_endpoints": {},
+  "studio_type": "video_edit",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "FFmpeg",
+  "tool_url": "https://ffmpeg.org"
+}

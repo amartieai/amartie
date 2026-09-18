@@ -1,0 +1,14 @@
+{
+  "name": "runway-studio",
+  "version": "0.1.0",
+  "description": "RunwayML - AI video generation studio",
+  "entrypoint": "__init__.py",
+  "permissions": ["api_call", "file_write", "network"],
+  "api_endpoints": {
+    "text_to_video": "POST https://api.runwayml.com/v1/video",
+    "image_to_video": "POST https://api.runwayml.com/v1/video",
+    "status": "GET https://api.runwayml.com/v1/task/{id}"
+  },
+  "studio_type": "video_generation",
+  "ui_template": "studio_video.html"
+}

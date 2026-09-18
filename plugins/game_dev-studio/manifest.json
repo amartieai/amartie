@@ -1,0 +1,21 @@
+{
+  "name": "game_dev-studio",
+  "version": "0.1.0",
+  "description": "2D and 3D game development",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "execute",
+    "file_write",
+    "network"
+  ],
+  "api_endpoints": {},
+  "studio_type": "game_dev",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "Godot",
+  "tool_url": "https://godotengine.org"
+}

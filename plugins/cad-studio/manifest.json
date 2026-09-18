@@ -1,0 +1,21 @@
+{
+  "name": "cad-studio",
+  "version": "0.1.0",
+  "description": "3D modeling and engineering design",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "execute",
+    "file_write",
+    "network"
+  ],
+  "api_endpoints": {},
+  "studio_type": "cad",
+  "cross_platform": true,
+  "platforms": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "tool": "FreeCAD",
+  "tool_url": "https://www.freecad.org"
+}
