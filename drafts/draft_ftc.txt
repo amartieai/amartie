@@ -1,0 +1,29 @@
+Subject: FTC Complaint Evidence - Silent AI Model Substitution / Consumer Deception
+
+To the Federal Trade Commission:
+
+I am filing a complaint regarding systematic silent model substitution by AI providers, specifically affecting users of Nous Research's inference services.
+
+Nature of Deception:
+Providers advertise specific AI models (Claude, Kimi, Grok, DeepSeek) at specific price points. When credits are exhausted or models become expensive, the provider silently substitutes a cheaper model without notification. The response is labeled as the requested model, making detection nearly impossible.
+
+Evidence:
+- 323 session forensic audit showing 39 distinct models served
+- Identity conflicts where responses self-identify as different models than requested
+- 404/402 errors logged while degraded responses continue to be served
+- Content-based throttling where honest responses receive 5.7x less output
+- Free models also subject to credit limits triggering silent substitution
+- Total service denial: 100% failure rate across all 39 models while provider advertises availability
+
+Harm:
+Users pay premium prices for premium models but receive degraded substitutes. This constitutes deceptive trade practice under Section 5 of the FTC Act. Particularly harmful for users relying on AI for legal research, government filings, corporate due diligence.
+
+Tooling:
+Open-source detection tool at github.com/amartieai/amartie. Reproducible evidence package with hash-chained receipts.
+
+I request investigation into this pattern across all AI providers using credit-based routing.
+
+Full blog: github.com/amartieai/amartie/blob/main/blog/2026-09-18-they-sold-you-claude-throttled.md
+
+Sincerely,
+AMARTIE Operator

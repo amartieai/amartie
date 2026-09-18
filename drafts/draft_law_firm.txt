@@ -1,0 +1,24 @@
+Subject: Evidence of Systematic Silent Model Substitution - Request for Legal Consultation
+
+Dear [Law Firm Name],
+
+I am the operator of AMARTIE, an open-source AI verification system.
+
+We have documented systematic silent model substitution affecting AI users. Our forensic audit of 323 sessions across 39 distinct models reveals 100% failure rate — every model (premium AND free) returns 404/402 errors while degraded responses continue to be served from cheaper substitutes labeled as the paid model.
+
+Key findings:
+- Identity conflicts: requesting Kimi K3 returns responses self-identifying as DeepSeek, Claude, or Grok
+- The 404 Lie: credits expire, errors logged, but responses keep coming
+- Content-based throttling: honest/dissenting responses are 5.7x shorter than confident ones
+- Free lane deception: free models also credit-stopped when limits hit
+
+This evidence was gathered using open-source tooling (github.com/amartieai/amartie) and reviewed by an independent 9-judge panel.
+
+We believe this pattern affects any provider using credit-based routing and is relevant to ongoing consumer protection litigation.
+
+Full evidence package: github.com/amartieai/amartie/blob/main/blog/2026-09-18-they-sold-you-claude-throttled.md
+
+Would welcome the opportunity to discuss.
+
+Sincerely,
+AMARTIE Operator
