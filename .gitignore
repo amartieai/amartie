@@ -29,6 +29,13 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+# Wrangler / Cloudflare cache (contains account IDs)
+.wrangler/
+
+# AMARTIE key storage
+.amartie_keys/
+.voice_cache/
+
 # Secrets
 *.key
 *.pem
