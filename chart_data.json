@@ -1,0 +1,67 @@
+{
+  "total_sessions": 268,
+  "total_models": 39,
+  "failure_rate": 100.0,
+  "models": {
+    "deepseek/deepseek-v4-flash": {
+      "total": 109,
+      "errors": 109
+    },
+    "moonshotai/kimi-k3": {
+      "total": 65,
+      "errors": 65
+    },
+    "deepseek/deepseek-v4-pro": {
+      "total": 12,
+      "errors": 12
+    },
+    "anthropic/claude-opus-4.8": {
+      "total": 11,
+      "errors": 11
+    },
+    "qwen/qwen3.7-max": {
+      "total": 11,
+      "errors": 11
+    },
+    "moonshotai/kimi-k2.7-code": {
+      "total": 9,
+      "errors": 9
+    },
+    "zai/GLM-5.1:US": {
+      "total": 5,
+      "errors": 5
+    },
+    "minimax/minimax-m3": {
+      "total": 4,
+      "errors": 4
+    },
+    "merkaba-fast": {
+      "total": 3,
+      "errors": 3
+    },
+    "tencent/hy3:free": {
+      "total": 3,
+      "errors": 3
+    },
+    "qwen2.5-coder:7b-64k": {
+      "total": 3,
+      "errors": 3
+    },
+    "qwen2.5-coder:7b": {
+      "total": 3,
+      "errors": 3
+    },
+    "x-ai/grok-4.3": {
+      "total": 2,
+      "errors": 2
+    },
+    "qwen2.5-7b-instruct": {
+      "total": 2,
+      "errors": 2
+    },
+    "qwen2.5-14b-instruct-uncensored": {
+      "total": 2,
+      "errors": 2
+    }
+  }
+}
