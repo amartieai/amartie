@@ -145,7 +145,45 @@ You didn't choose these. The router did.
 
 ---
 
-## How to Prove It Yourself
+## Why This Matters — It's Not Just About Money
+
+This isn't a pricing dispute. **When the model silently swaps during evidence-based research, legal filings, government disclosures, or corporate due diligence, the consequences are catastrophic.**
+
+### The Legal/Government Impact
+
+**You're preparing a court filing. You ask Claude Opus for a thorough legal analysis. The system serves DeepSeek V4 Flash and labels it as Claude.**
+
+- The citation is wrong
+- The reasoning is shallow
+- The precedent analysis misses key cases
+- The filing goes in under your name
+- **You don't know it's deficient until the judge does**
+
+**You're auditing a corporation. You ask for a comprehensive risk assessment. The system serves a compressed, falsified summary.**
+
+- Material risks are omitted
+- The board relies on your report
+- Shareholders make decisions on incomplete data
+- **You're liable for what you missed — but you didn't miss it, the model hid it**
+
+**You're submitting evidence to a government agency. You ask for a thorough disclosure. The system serves a watered-down version.**
+
+- The agency rejects it as incomplete
+- The statute of limitations expires
+- **Your case dies because the model was throttled and you didn't know**
+
+### The Pattern — Designed to Fail Closed
+
+The system is designed so that when credits run out:
+
+1. **Error is logged** (404/402) — gives the provider legal cover ("we told you credits expired")
+2. **Response is served anyway** — but from a degraded model
+3. **Response is labeled as the paid model** — so you can't tell the difference
+4. **Quality is degraded** — but not so obviously that you'd notice immediately
+
+This is not a bug. **This is a back door that lets the provider charge premium prices for premium models while delivering degraded substitutes with plausible deniability.**
+
+You paid for Claude. You got Qwen. And the system lied about it.
 
 ```bash
 git clone https://github.com/amartieai/amartie.git
