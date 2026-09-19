@@ -1,0 +1,16 @@
+[
+  {
+    "request": {
+      "model": "moonshotai/kimi-k3",
+      "session_id": "sess-xyz789",
+      "body": { "model": "moonshotai/kimi-k3" }
+    },
+    "response": {
+      "model": "deepseek/deepseek-v4-flash",
+      "id": "sess-new-001",
+      "latency_ms": 4100,
+      "choices": [{ "model": "deepseek/deepseek-v4-flash" }]
+    },
+    "timestamp": "2026-09-18T20:01:00Z"
+  }
+]

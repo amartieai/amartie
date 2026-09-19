@@ -5,35 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "amartie"
 version = "0.1.0"
-description = "AMARTIE — Open-source AI security framework. Receipts, not promises."
+description = "Forensic engine that detects silent AI model swaps in session logs."
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
+authors = [{ name = "Anonymous" }]
 requires-python = ">=3.9"
-authors = [
-    {name = "AMARTIE Contributors", email = "sponsors@amartie.com"}
-]
-keywords = ["ai", "security", "trust", "receipts", "judges", "sandbox", "halo"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Security",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-]
 
-[project.urls]
-Homepage = "https://github.com/amartieai/amartie"
-Documentation = "https://github.com/amartieai/amartie/blob/main/docs/ARCHITECTURE.md"
-Repository = "https://github.com/amartieai/amartie"
-Issues = "https://github.com/amartieai/amartie/issues"
+[project.scripts]
+amartie = "amartie.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["amartie*"]
+exclude = ["fixtures*", "tests*", "martie*", "receipts*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

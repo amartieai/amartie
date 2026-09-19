@@ -1,0 +1,15 @@
+[Unit]
+Description=MARTIE gate monitor
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/martie/ebpf/loader.py
+Restart=always
+RestartSec=5
+User=root
+AmbientCapabilities=CAP_SYS_ADMIN CAP_BPF
+NoNewPrivileges=false
+
+[Install]
+WantedBy=multi-user.target

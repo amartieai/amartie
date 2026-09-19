@@ -1,0 +1,16 @@
+[
+  {
+    "request": {
+      "model": "moonshotai/kimi-k3",
+      "session_id": "sess-abc123",
+      "body": { "model": "moonshotai/kimi-k3" }
+    },
+    "response": {
+      "model": "moonshotai/kimi-k3",
+      "id": "sess-abc123",
+      "latency_ms": 420,
+      "choices": []
+    },
+    "timestamp": "2026-09-18T20:00:00Z"
+  }
+]
