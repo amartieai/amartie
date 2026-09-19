@@ -1,0 +1,40 @@
+review_id: pr-19-465cd8e7
+repository: amartieai/amartie
+subject:
+  type: pull_request
+  number: 19
+  title: "docs: add Windows setup guide"
+  head_sha: 465cd8e71b019aef19d7801ebbe29e35f2d8a056
+  base_sha: d7162286697dba0e3cb4e4fc813e7b0339e13ba4
+roster_version: "0.1.0"
+decision: REVIEW_REQUIRED
+judges:
+  - id: truth
+    decision: PASS
+    evidence: "Documentation-only change. Claims about Windows setup are checkable."
+  - id: boundary-integrity
+    decision: PASS
+    evidence: "No runtime code or permission boundary changed. Docs only."
+  - id: logic
+    decision: REVIEW_REQUIRED
+    evidence: "Five test failures are reported but not enumerated. Cannot verify baseline."
+  - id: completeness
+    decision: REVIEW_REQUIRED
+    evidence: "PR reports 38 passed, 5 failed. Failing test names and baseline comparison missing."
+  - id: execution-and-simplicity
+    decision: PASS
+    evidence: "Two focused documentation files. Clear step-by-step instructions."
+  - id: owner-intent
+    decision: PASS
+    evidence: "Directly addresses issue #7 scope: Windows install notes."
+  - id: recovery
+    decision: PASS
+    evidence: "Documentation-only change is fully reversible."
+  - id: trade-integrity
+    decision: PASS
+    evidence: "No claims of public exposure or production security. Firewall warning included."
+  - id: unity
+    decision: REVIEW_REQUIRED
+    evidence: "Final decision depends on test-baseline evidence from logic and completeness judges."
+final_decision: REVIEW_REQUIRED
+human_approval_required: true
