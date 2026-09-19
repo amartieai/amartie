@@ -14,6 +14,9 @@ It is **not** a hosted security service, a guarantee that a provider cannot swap
 
 ## Try it
 
+For PowerShell and Command Prompt instructions, including virtual-environment
+activation and firewall guidance, see the [Windows setup guide](docs/WINDOWS_SETUP.md).
+
 ```bash
 git clone https://github.com/amartieai/amartie.git
 cd amartie
