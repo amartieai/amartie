@@ -81,6 +81,36 @@ never lands in a public repo by accident. To archive a session's custody
 records, bundle them yourself: the receipts, HASHES.txt, frames.jsonl,
 ledger, diff, and verdict.
 
+## The community census — why this exists
+
+One operator's receipts are an anecdote. A thousand operators' receipts,
+graded with the same ruler, are a census. TAPE-WITNESS is built so the
+community can answer the population question itself:
+
+    does the action-conditional anomaly reproduce across accounts,
+    brokers, assets, and time — or is it one screen's story?
+
+How it works, end to end:
+
+1. You grade YOUR OWN session with the pipeline above. Your raw data
+   never leaves your machine.
+2. `witness/review.py submit verdict.json --asset micro-futures \
+      --window "2026-01-05T01:30/04:30" --out my_submission.json`
+   strips the verdict down to structured COUNTS only — no account
+   numbers, no names, no paths, no raw records. The sanitizer REJECTS
+   any submission carrying identity fields or raw data.
+3. Anyone can aggregate: `witness/review.py census submissions/*.json`
+   produces the population report: flagged-session rate with Wilson 95%
+   bounds, stratified by asset class, with population-wide pattern
+   totals.
+
+The census never aggregates raw data — only already-anonymized counts.
+It makes no causal claims and names no platforms. It answers exactly one
+question: does the pattern reproduce? If it does, at scale, across
+independent operators who never shared a byte of raw data — that is a
+fact worth knowing. If it doesn't, that is worth knowing too, and the
+census will show it honestly.
+
 ## Tests
 
 ```
