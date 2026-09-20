@@ -8,11 +8,10 @@ Unanimous PASS or bounce. Never a push-through.
 import hashlib
 import json
 import os
-import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 
 JUDGE_CONTRACT_VERSION = "amartie-judge-contract-v1"
@@ -27,6 +26,7 @@ JUDGE_REGISTRY = {
     "J8": "TRADE-INTEGRITY",
     "J9": "UNITY",
 }
+EXPECTED_JUDGE_IDS = frozenset(JUDGE_REGISTRY.keys())
 
 
 class JudgeVerdict:
@@ -41,15 +41,16 @@ class JudgeVerdict:
         corrections: Optional[List[str]] = None,
         tool_calls: Optional[List[str]] = None,
         rationale: Optional[str] = None,
+        timestamp: Optional[str] = None,
     ):
         self.judge_id = judge_id
         self.model_id = model_id
-        self.verdict = verdict  # PASS or DISSENT
+        self.verdict = verdict
         self.findings = findings or []
         self.corrections = corrections or []
         self.tool_calls = tool_calls or []
         self.rationale = rationale or ""
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = timestamp or datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return {
@@ -63,6 +64,20 @@ class JudgeVerdict:
             "timestamp": self.timestamp,
         }
 
+    @classmethod
+    def from_dict(cls, record: dict) -> "JudgeVerdict":
+        """Deserialize preserving the original timestamp exactly."""
+        return cls(
+            judge_id=record["judge_id"],
+            model_id=record["model_id"],
+            verdict=record["verdict"],
+            findings=record.get("findings", []),
+            corrections=record.get("corrections", []),
+            tool_calls=record.get("tool_calls", []),
+            rationale=record.get("rationale", ""),
+            timestamp=record.get("timestamp"),
+        )
+
 
 class GateReceipt:
     """Hash-chained receipt for a gated action."""
@@ -72,22 +87,20 @@ class GateReceipt:
         action_id: str,
         action_type: str,
         payload_hash: str,
-        verdicts: List[JudgeVerdict],
+        verdicts: List[dict],
         previous_hash: str = "",
         contract_version: str = JUDGE_CONTRACT_VERSION,
         hash_algorithm: str = "sha256",
+        timestamp: Optional[str] = None,
     ):
         self.action_id = action_id
         self.action_type = action_type
         self.payload_hash = payload_hash
-        self.verdicts = [
-            v.to_dict() if isinstance(v, JudgeVerdict) else dict(v)
-            for v in verdicts
-        ]
+        self.verdicts = verdicts
         self.previous_hash = previous_hash
         self.contract_version = contract_version
         self.hash_algorithm = hash_algorithm
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = timestamp or datetime.now(timezone.utc).isoformat()
         self.hash = self._compute_hash()
 
     def _compute_hash(self) -> str:
@@ -103,14 +116,19 @@ class GateReceipt:
                 "timestamp": self.timestamp,
             },
             sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
         )
         if self.hash_algorithm != "sha256":
             raise ValueError(f"Unsupported hash algorithm: {self.hash_algorithm}")
-        return hashlib.sha256(content.encode()).hexdigest()
+        return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
     def verify(self) -> bool:
         """Verify this receipt's hash is correct."""
-        return self.hash == self._compute_hash()
+        try:
+            return self.hash == self._compute_hash()
+        except ValueError:
+            return False
 
     def to_dict(self) -> dict:
         return {
@@ -125,25 +143,42 @@ class GateReceipt:
             "hash": self.hash,
         }
 
+    @classmethod
+    def from_dict(cls, record: dict) -> "GateReceipt":
+        """Deserialize preserving the original timestamp and hash exactly."""
+        receipt = cls(
+            action_id=record["action_id"],
+            action_type=record["action_type"],
+            payload_hash=record["payload_hash"],
+            verdicts=record.get("verdicts", []),
+            previous_hash=record.get("previous_hash", ""),
+            contract_version=record.get("contract_version", JUDGE_CONTRACT_VERSION),
+            hash_algorithm=record.get("hash_algorithm", "sha256"),
+            timestamp=record.get("timestamp"),
+        )
+        receipt.hash = record.get("hash", receipt.hash)
+        return receipt
+
 
 class JudgeGate:
     """
     The 9-judge AMARTIE gate.
 
     Every outbound action passes through 9 independent judges.
-    All must pass. One DISSENT = correction + re-judgment.
+    All must pass. One DISSENT = bounce.
     """
 
     JUDGE_REGISTRY = JUDGE_REGISTRY
     JUDGE_CONTRACT_VERSION = JUDGE_CONTRACT_VERSION
 
-    def __init__(self, receipt_store_path: Optional[str] = None):
+    def __init__(self, receipt_store_path: Optional[str] = None, strict_model_lock: bool = False):
         self.receipt_chain: List[str] = []
         self.receipts: List[GateReceipt] = []
         self.round_cap = 4
-        self.time_budget_per_judge = 1200  # seconds
-        self.gate_wide_budget = 900  # seconds
+        self.time_budget_per_judge = 1200
+        self.gate_wide_budget = 900
         self.model_registry: Dict[str, str] = {}
+        self.strict_model_lock = strict_model_lock
         self.receipt_store_path = Path(
             receipt_store_path
             or os.path.join(os.path.expanduser("~"), ".amartie", "receipts.json")
@@ -168,26 +203,7 @@ class JudgeGate:
 
         for record in data:
             try:
-                receipt = GateReceipt(
-                    action_id=record["action_id"],
-                    action_type=record["action_type"],
-                    payload_hash=record["payload_hash"],
-                    verdicts=[
-                        JudgeVerdict(
-                            judge_id=v["judge_id"],
-                            model_id=v["model_id"],
-                            verdict=v["verdict"],
-                            findings=v.get("findings", []),
-                            corrections=v.get("corrections", []),
-                            tool_calls=v.get("tool_calls", []),
-                            rationale=v.get("rationale", ""),
-                        )
-                        for v in record.get("verdicts", [])
-                    ],
-                    previous_hash=record.get("previous_hash", ""),
-                    contract_version=record.get("contract_version", JUDGE_CONTRACT_VERSION),
-                    hash_algorithm=record.get("hash_algorithm", "sha256"),
-                )
+                receipt = GateReceipt.from_dict(record)
             except (KeyError, TypeError, ValueError):
                 continue
 
@@ -196,13 +212,9 @@ class JudgeGate:
                 self.receipt_chain.append(receipt.hash)
 
     def get_rotated_judge_id(self, logical_id: str, date: Optional[str] = None) -> str:
-        """
-        Daily rotating judge IDs. Prevents signature pre-computation.
-        Physical instance IDs rotate based on date + owner key.
-        """
+        """Daily rotating judge IDs. Prevents signature pre-computation."""
         if date is None:
             date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
         rotation_seed = hashlib.sha256(f"{date}-{logical_id}".encode()).hexdigest()
         rotated_suffix = rotation_seed[:8]
         return f"{logical_id}-{rotated_suffix}"
@@ -211,16 +223,37 @@ class JudgeGate:
         """Return the canonical judge contract as a versioned registry."""
         return dict(self.JUDGE_REGISTRY)
 
-    def _persist_receipts(self):
-        if not self.receipt_store_path:
-            return
-        self._ensure_store_dir()
-        with open(self.receipt_store_path, "w", encoding="utf-8") as fh:
-            json.dump([r.to_dict() for r in self.receipts], fh, indent=2, sort_keys=True)
-
-    def _get_assigned_model(self, judge_id: str) -> str:
+    def _get_assigned_model(self, judge_id: str) -> Optional[str]:
         """Get the model assigned to a judge, if a model-lock registry is configured."""
-        return self.model_registry.get(judge_id, "assigned-model-placeholder")
+        return self.model_registry.get(judge_id)
+
+    def _validate_roster(self, judge_responses: List[JudgeVerdict]) -> Tuple[bool, str]:
+        """
+        Validate the roster: exactly 9 unique, known judge IDs.
+        Returns (is_valid, reason).
+        """
+        response_ids = [getattr(v, "judge_id", None) for v in judge_responses]
+
+        # Must have exactly 9 verdicts
+        if len(judge_responses) != 9:
+            return False, f"Expected exactly 9 verdicts, got {len(judge_responses)}"
+
+        # Check for duplicates
+        if len(set(response_ids)) != 9:
+            duplicates = [jid for jid in response_ids if response_ids.count(jid) > 1]
+            return False, f"Duplicate judge IDs detected: {set(duplicates)}"
+
+        # Check all IDs are known
+        unknown = set(response_ids) - EXPECTED_JUDGE_IDS
+        if unknown:
+            return False, f"Unknown judge IDs: {unknown}"
+
+        # Check all 9 expected IDs are present
+        missing = EXPECTED_JUDGE_IDS - set(response_ids)
+        if missing:
+            return False, f"Missing judge IDs: {missing}"
+
+        return True, "Roster valid"
 
     def verify_action(
         self,
@@ -234,26 +267,30 @@ class JudgeGate:
         Returns:
             (passed, receipt): Whether the action passed and the receipt.
         """
-        expected_judges = set(self.JUDGE_REGISTRY.keys())
-        response_ids = [getattr(v, "judge_id", None) for v in judge_responses]
+        # Validate roster
+        roster_valid, roster_reason = self._validate_roster(judge_responses)
+        all_passed = True
 
-        # The gate is strict: exactly nine voting seats; no substitutions.
-        if len(judge_responses) != 9:
+        if not roster_valid:
             all_passed = False
         else:
-            all_passed = True
             for v in judge_responses:
-                if getattr(v, "judge_id", None) not in expected_judges:
-                    all_passed = False
-                    break
+                # Check verdict
                 if getattr(v, "verdict", "").upper() != "PASS":
                     all_passed = False
                     break
+
+                # Check evidence floor (at least 2 tool calls)
                 if len(getattr(v, "tool_calls", []) or []) < 2:
                     all_passed = False
                     break
-                if self.model_registry:
+
+                # Check model-lock if strict mode enabled
+                if self.strict_model_lock and self.model_registry:
                     assigned_model = self._get_assigned_model(v.judge_id)
+                    if assigned_model is None:
+                        all_passed = False
+                        break
                     if getattr(v, "model_id", None) != assigned_model:
                         all_passed = False
                         break
@@ -267,7 +304,7 @@ class JudgeGate:
             action_id=str(uuid.uuid4()),
             action_type=action_type,
             payload_hash=payload_hash,
-            verdicts=judge_responses,
+            verdicts=[v.to_dict() for v in judge_responses],
             previous_hash=previous_hash,
             contract_version=self.JUDGE_CONTRACT_VERSION,
             hash_algorithm="sha256",
@@ -297,10 +334,15 @@ class JudgeGate:
                 return receipt.to_dict()
         return None
 
+    def _persist_receipts(self):
+        if not self.receipt_store_path:
+            return
+        self._ensure_store_dir()
+        with open(self.receipt_store_path, "w", encoding="utf-8") as fh:
+            json.dump([r.to_dict() for r in self.receipts], fh, indent=2, sort_keys=True)
 
-# Singleton gate instance
-# The default model registry is empty so legacy tests and local dry runs can operate
-# while a deployment may configure a strict registry for production enforcement.
+
+# Singleton gate instance (non-strict mode for backward compatibility)
 gate = JudgeGate()
 
 

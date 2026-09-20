@@ -24,6 +24,7 @@ class Receipt:
         metadata: Optional[dict] = None,
         contract_version: str = "amartie-judge-contract-v1",
         hash_algorithm: str = "sha256",
+        timestamp: Optional[str] = None,
     ):
         self.action_id = action_id
         self.action_type = action_type
@@ -33,7 +34,7 @@ class Receipt:
         self.metadata = metadata or {}
         self.contract_version = contract_version
         self.hash_algorithm = hash_algorithm
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = timestamp or datetime.now(timezone.utc).isoformat()
         self.hash = self._compute_hash()
 
     def _compute_hash(self) -> str:
@@ -51,8 +52,10 @@ class Receipt:
                 "timestamp": self.timestamp,
             },
             sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
         )
-        return hashlib.sha256(content.encode()).hexdigest()
+        return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
     def verify(self) -> bool:
         """Verify this receipt's hash and versioned contract are consistent."""
@@ -74,6 +77,23 @@ class Receipt:
             "hash": self.hash,
         }
 
+    @classmethod
+    def from_dict(cls, record: dict) -> "Receipt":
+        """Deserialize preserving the original timestamp and hash exactly."""
+        receipt = cls(
+            action_id=record["action_id"],
+            action_type=record["action_type"],
+            payload_hash=record["payload_hash"],
+            verdicts=record.get("verdicts", []),
+            previous_hash=record.get("previous_hash", ""),
+            metadata=record.get("metadata", {}),
+            contract_version=record.get("contract_version", "amartie-judge-contract-v1"),
+            hash_algorithm=record.get("hash_algorithm", "sha256"),
+            timestamp=record.get("timestamp"),
+        )
+        receipt.hash = record.get("hash", receipt.hash)
+        return receipt
+
 
 class ReceiptChain:
     """Hash-chained receipt ledger. Tamper-evident."""
@@ -83,9 +103,12 @@ class ReceiptChain:
         self.receipts: List[Receipt] = []
 
     def append(self, receipt: Receipt):
-        """Add a receipt to the chain."""
+        """Add a receipt to the chain, linking it to the previous."""
         if self.receipts:
+            # Set the link BEFORE computing the hash
             receipt.previous_hash = self.receipts[-1].hash
+            # Recompute hash now that previous_hash is set
+            receipt.hash = receipt._compute_hash()
         self.receipts.append(receipt)
 
     def verify_chain(self) -> bool:

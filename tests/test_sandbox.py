@@ -1,7 +1,6 @@
 # Tests for AMARTIE Sandbox Engine
-
 import pytest
-import os
+
 from amartie.sandbox import Sandbox, Snapshot, sandbox
 
 
@@ -24,7 +23,7 @@ class TestSandbox:
     def test_create_sandbox(self):
         sb = Sandbox()
         assert sb.baseline is None
-        assert len(sb.quarantine) == 0
+        assert sb.get_quarantine() == []
     
     def test_install(self):
         sb = Sandbox()
@@ -49,8 +48,9 @@ class TestSandbox:
         sb = Sandbox()
         item = {"id": "suspicious-1", "type": "unknown-file", "path": "/tmp/bad"}
         sb.quarantine(item)
-        assert len(sb.quarantine) == 1
-        assert sb.quarantine[0]["status"] == "pending_review"
+        quarantine = sb.get_quarantine()
+        assert len(quarantine) == 1
+        assert quarantine[0]["status"] == "pending_review"
     
     def test_review_quarantine(self):
         sb = Sandbox()
@@ -58,7 +58,7 @@ class TestSandbox:
         sb.quarantine(item)
         result = sb.review_quarantine("suspicious-1", "approved", "J1-TRUTH")
         assert result == True
-        assert sb.quarantine[0]["status"] == "approved"
+        assert sb.get_quarantine()[0]["status"] == "approved"
     
     def test_get_quarantine(self):
         sb = Sandbox()

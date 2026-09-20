@@ -1,5 +1,4 @@
 # Tests for AMARTIE Receipt Engine
-
 import pytest
 
 from amartie.receipt import Receipt, ReceiptChain
@@ -49,6 +48,66 @@ class TestReceipt:
                 hash_algorithm="sha1",
             )
 
+    def test_from_dict_preserves_timestamp(self):
+        r = Receipt(
+            action_id="test",
+            action_type="test",
+            payload_hash="test",
+            verdicts=[],
+            previous_hash="GENESIS",
+            timestamp="2026-09-18T12:00:00+00:00",
+        )
+        d = r.to_dict()
+        r2 = Receipt.from_dict(d)
+        assert r2.timestamp == "2026-09-18T12:00:00+00:00"
+        assert r2.verify() is True
+        assert r2.hash == r.hash
+
+    def test_from_dict_defaults_timestamp(self):
+        r = Receipt.from_dict({
+            "action_id": "test",
+            "action_type": "test",
+            "payload_hash": "test",
+        })
+        assert r.timestamp is not None
+
+    def test_payload_tamper_detectable(self):
+        r = Receipt(
+            action_id="test",
+            action_type="test",
+            payload_hash="original",
+            verdicts=[],
+        )
+        d = r.to_dict()
+        d["payload_hash"] = "modified"
+        r2 = Receipt.from_dict(d)
+        assert r2.verify() is False
+
+    def test_verdict_tamper_detectable(self):
+        r = Receipt(
+            action_id="test",
+            action_type="test",
+            payload_hash="test",
+            verdicts=[{"judge_id": "J1", "verdict": "PASS"}],
+        )
+        d = r.to_dict()
+        d["verdicts"][0]["verdict"] = "DISSENT"
+        r2 = Receipt.from_dict(d)
+        assert r2.verify() is False
+
+    def test_previous_hash_tamper_fails(self):
+        r = Receipt(
+            action_id="test",
+            action_type="test",
+            payload_hash="test",
+            verdicts=[],
+            previous_hash="GENESIS",
+        )
+        d = r.to_dict()
+        d["previous_hash"] = "FAKE"
+        r2 = Receipt.from_dict(d)
+        assert r2.verify() is False
+
 
 class TestReceiptChain:
     def test_create_chain(self):
@@ -89,3 +148,34 @@ class TestReceiptChain:
     def test_get_latest_hash_genesis(self):
         c = ReceiptChain("test")
         assert c.get_latest_hash() == "GENESIS"
+
+    def test_chain_append_links_correctly(self):
+        """Verify that appending receipts creates proper hash chain links."""
+        c = ReceiptChain("link-test")
+        r1 = Receipt("1", "test", "hash1", [], "GENESIS")
+        r2 = Receipt("2", "test", "hash2", [])
+        r3 = Receipt("3", "test", "hash3", [])
+        
+        c.append(r1)
+        c.append(r2)
+        c.append(r3)
+        
+        # r2 should link to r1
+        assert r2.previous_hash == r1.hash
+        # r3 should link to r2
+        assert r3.previous_hash == r2.hash
+        # Chain should be valid
+        assert c.verify_chain() is True
+
+    def test_chain_tamper_at_link_fails(self):
+        """Verify that tampering with a link in the chain is detected."""
+        c = ReceiptChain("tamper-test")
+        r1 = Receipt("1", "test", "hash1", [], "GENESIS")
+        r2 = Receipt("2", "test", "hash2", [])
+        
+        c.append(r1)
+        c.append(r2)
+        
+        # Tamper with r2's previous_hash
+        r2.previous_hash = "BROKEN"
+        assert c.verify_chain() is False
