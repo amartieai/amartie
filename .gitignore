@@ -1,0 +1,5 @@
+frames/
+*.mkv
+*.mp4
+HASHES.txt
+__pycache__/

@@ -1,0 +1,16 @@
+{
+  "action_minutes": 6,
+  "minutes_with_findings": 6,
+  "session_median_volume": 3.0,
+  "pattern_counts": {
+    "minute_absent": 4,
+    "removal_proof": 0,
+    "inverted_classification": 5,
+    "volume_spike": 3,
+    "spike_unclassified": 1,
+    "volume_inflation": 4,
+    "screen_price_divergence": 0
+  },
+  "conditional_on_action": "6/6 action minutes carry at least one anomaly finding; baseline median volume 3.0 from 53 quiet bars",
+  "summary": "5 proven sell minutes printed as up-volume with zero down-volume | 3 volume spikes >=5x session median at action minutes | 4 minutes where public volume was 2x+ the locally recorded screen volume"
+}

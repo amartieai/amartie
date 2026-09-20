@@ -1,0 +1,58 @@
+{
+  "ledger": [
+    {
+      "ts": "2026-01-05T01:59:52",
+      "side": "SELL",
+      "qty": 1,
+      "px": 105.37,
+      "screen": {
+        "screen_vol": 1
+      }
+    },
+    {
+      "ts": "2026-01-05T02:00:12",
+      "side": "SELL",
+      "qty": 4,
+      "px": 105.33,
+      "screen": {
+        "screen_vol": 5
+      }
+    },
+    {
+      "ts": "2026-01-05T02:37:52",
+      "side": "SELL",
+      "qty": 2,
+      "px": 105.25,
+      "screen": {
+        "screen_vol": 0
+      }
+    },
+    {
+      "ts": "2026-01-05T02:58:12",
+      "side": "SELL",
+      "qty": 5,
+      "px": 104.72,
+      "screen": {
+        "screen_vol": 2
+      }
+    },
+    {
+      "ts": "2026-01-05T03:07:32",
+      "side": "SELL",
+      "qty": 5,
+      "px": 105.46,
+      "screen": {
+        "screen_vol": 9
+      }
+    },
+    {
+      "ts": "2026-01-05T03:07:52",
+      "side": "SELL",
+      "qty": 5,
+      "px": 105.3,
+      "screen": {
+        "screen_vol": 9
+      }
+    }
+  ]
+}
