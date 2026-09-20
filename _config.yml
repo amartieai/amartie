@@ -1,4 +1,13 @@
 title: AMARTIE — Your AI, Verified
 description: Forensic audit of silent AI model substitution
-theme: minima
 markdown: kramdown
+permalink: /:year/:month/:day/:title
+collections:
+  posts:
+    output: true
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
