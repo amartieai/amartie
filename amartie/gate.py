@@ -89,6 +89,7 @@ class GateReceipt:
         payload_hash: str,
         verdicts: List[dict],
         previous_hash: str = "",
+        metadata: Optional[dict] = None,
         contract_version: str = JUDGE_CONTRACT_VERSION,
         hash_algorithm: str = "sha256",
         timestamp: Optional[str] = None,
@@ -98,6 +99,7 @@ class GateReceipt:
         self.payload_hash = payload_hash
         self.verdicts = verdicts
         self.previous_hash = previous_hash
+        self.metadata = metadata or {}
         self.contract_version = contract_version
         self.hash_algorithm = hash_algorithm
         self.timestamp = timestamp or datetime.now(timezone.utc).isoformat()
@@ -111,6 +113,7 @@ class GateReceipt:
                 "payload_hash": self.payload_hash,
                 "verdicts": self.verdicts,
                 "previous_hash": self.previous_hash,
+                "metadata": self.metadata,
                 "contract_version": self.contract_version,
                 "hash_algorithm": self.hash_algorithm,
                 "timestamp": self.timestamp,
@@ -137,6 +140,7 @@ class GateReceipt:
             "payload_hash": self.payload_hash,
             "verdicts": self.verdicts,
             "previous_hash": self.previous_hash,
+            "metadata": self.metadata,
             "contract_version": self.contract_version,
             "hash_algorithm": self.hash_algorithm,
             "timestamp": self.timestamp,
@@ -152,11 +156,14 @@ class GateReceipt:
             payload_hash=record["payload_hash"],
             verdicts=record.get("verdicts", []),
             previous_hash=record.get("previous_hash", ""),
+            metadata=record.get("metadata", {}),
             contract_version=record.get("contract_version", JUDGE_CONTRACT_VERSION),
             hash_algorithm=record.get("hash_algorithm", "sha256"),
             timestamp=record.get("timestamp"),
         )
-        receipt.hash = record.get("hash", receipt.hash)
+        if "hash" not in record:
+            raise ValueError("malformed receipt: missing stored hash")
+        receipt.hash = record["hash"]
         return receipt
 
 
@@ -320,8 +327,11 @@ class JudgeGate:
                     all_passed = False
                     break
 
-                # Check model-lock if strict mode enabled
-                if self.strict_model_lock and self.model_registry:
+                # Check model-lock if strict mode enabled.
+                # Strict means STRICT: an empty registry is a fail-closed
+                # condition, not a bypass — every judge must have an
+                # assignment and must have run it.
+                if self.strict_model_lock:
                     assigned_model = self._get_assigned_model(v.judge_id)
                     if assigned_model is None:
                         all_passed = False
@@ -341,6 +351,11 @@ class JudgeGate:
             payload_hash=payload_hash,
             verdicts=[v.to_dict() for v in judge_responses],
             previous_hash=previous_hash,
+            metadata={
+                "roster_valid": roster_valid,
+                "roster_reason": roster_reason,
+                "executed": all_passed,
+            },
             contract_version=self.JUDGE_CONTRACT_VERSION,
             hash_algorithm="sha256",
         )

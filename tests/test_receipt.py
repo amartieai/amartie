@@ -64,12 +64,52 @@ class TestReceipt:
         assert r2.hash == r.hash
 
     def test_from_dict_defaults_timestamp(self):
+        # a stored hash is REQUIRED (fail closed on missing integrity field)
         r = Receipt.from_dict({
             "action_id": "test",
             "action_type": "test",
             "payload_hash": "test",
+            "hash": Receipt(
+                action_id="test", action_type="test", payload_hash="test",
+                verdicts=[], previous_hash="",
+            ).hash,
         })
         assert r.timestamp is not None
+
+    def test_from_dict_missing_hash_fails_closed(self):
+        # review finding #5: a missing stored hash is malformed, never repaired
+        with pytest.raises(ValueError, match="missing stored hash"):
+            Receipt.from_dict({
+                "action_id": "test",
+                "action_type": "test",
+                "payload_hash": "test",
+            })
+
+    def test_metadata_is_hashed_and_serialized(self):
+        # review finding #1: metadata changes must break the hash
+        r1 = Receipt(action_id="a", action_type="t", payload_hash="p",
+                     verdicts=[], metadata={"k": "v1"})
+        r2 = Receipt(action_id="a", action_type="t", payload_hash="p",
+                     verdicts=[], metadata={"k": "v2"})
+        assert r1.hash != r2.hash
+        # metadata survives the round trip
+        r3 = Receipt.from_dict(r1.to_dict())
+        assert r3.metadata == {"k": "v1"}
+        assert r3.verify()
+
+    def test_metadata_tamper_detected(self):
+        r = Receipt(action_id="a", action_type="t", payload_hash="p",
+                    verdicts=[], metadata={"k": "v1"})
+        r.metadata["k"] = "tampered"
+        assert not r.verify()
+
+    def test_chain_genesis_link_enforced(self):
+        # review finding #4: first receipt must anchor to GENESIS
+        r = Receipt(action_id="a", action_type="t", payload_hash="p",
+                    verdicts=[], previous_hash="arbitrary-value")
+        chain = ReceiptChain()
+        chain.receipts.append(r)
+        assert not chain.verify_chain()
 
     def test_payload_tamper_detectable(self):
         r = Receipt(

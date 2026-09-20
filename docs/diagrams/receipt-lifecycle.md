@@ -1,6 +1,10 @@
 # Receipt Lifecycle
 
-> **Status:** IMPLEMENTED IN ALPHA
+> **Status:** PARTIALLY IMPLEMENTED — see the field table below for what
+> exists today vs. what is planned. The replay flow (Persisted → Replayed →
+> Validated) is NOT yet implemented: ReceiptChain verifies in-memory chains,
+> and JudgeGate loads and verifies a persisted chain at construction time,
+> but there is no standalone replay API.
 
 ## Visual Lifecycle
 
@@ -33,55 +37,169 @@ stateDiagram-v2
 
 Every receipt contains:
 
-| Field | Description |
-|-------|-------------|
-| `receipt_id` | Unique identifier for this receipt |
-| `action_id` | The action being reviewed |
-| `action_type` | Type of action (email.send, tool.call, etc.) |
-| `contract_version` | Version of the judge contract |
-| `payload_digest` | SHA-256 hash of the action payload |
-| `judge_roster` | List of all 9 judge IDs |
-| `judge_model` | Model/version used by each judge |
-| `judge_decision` | PASS or DISSENT per judge |
-| `judge_rationale` | Evidence and reasoning per judge |
-| `executed` | `true` if action was allowed, `false` if refused |
-| `previous_receipt_hash` | Hash of the previous receipt in the chain |
-| `receipt_hash` | SHA-256 hash of this entire receipt |
-| `timestamp` | When the receipt was created (UTC) |
+## Field table — ACTUAL schema (amartie/receipt.py, amartie/gate.py)
 
-## Dissent Receipt Example
+| Field | Status | Description |
+|-------|--------|-------------|
+| `action_id` | implemented | The action being reviewed (UUID) |
+| `action_type` | implemented | Type of action (email.send, tool.call, etc.) |
+| `contract_version` | implemented | Version of the judge contract |
+| `payload_hash` | implemented | SHA-256 hash of the action payload |
+| `verdicts` | implemented | Per-judge records: judge_id, model_id, verdict, findings, corrections, tool_calls, rationale, timestamp |
+| `metadata` | implemented | Gate context: roster_valid, roster_reason, executed |
+| `previous_hash` | implemented | Hash of the previous receipt in the chain (GENESIS for the first) |
+| `hash` | implemented | SHA-256 over all fields above |
+| `timestamp` | implemented | When the receipt was created (UTC) |
+| `receipt_id` | NOT implemented | planned — `action_id` serves this role today |
+| `payload_digest` | NOT implemented | planned — named `payload_hash` today |
+| `judge_roster` | NOT implemented | planned — derivable from `verdicts[].judge_id` |
+| `judge_decision` | NOT implemented | planned — per-judge verdict inside `verdicts[]` |
+| `executed` (top-level) | NOT implemented | planned — lives inside `metadata.executed` today |
+
+## Dissent Receipt Example (actual serialized output)
 
 ```json
 {
-  "decision": "DISSENT",
-  "allowed": false,
-  "executed": false,
-  "execution_status": "NOT_EXECUTED",
-  "receipt_id": "r-abc123",
-  "action_id": "a-xyz789",
+  "action_id": "5a96c0b5-1f73-46d7-843d-76f8e53933f3",
   "action_type": "email.send",
-  "contract_version": "amartie-judge-contract-v1",
-  "payload_digest": "sha256:def456...",
-  "judge_roster": ["J1","J2","J3","J4","J5","J6","J7","J8","J9"],
-  "judge_decisions": {
-    "J1": "PASS",
-    "J2": "PASS",
-    "J3": "DISSENT",
-    "J4": "PASS",
-    "J5": "PASS",
-    "J6": "PASS",
-    "J7": "PASS",
-    "J8": "PASS",
-    "J9": "PASS"
+  "payload_hash": "59672d2948aecafc11f8c37637082ee2a14ac660059cc89477127c20f3b55909",
+  "verdicts": [
+    {
+      "judge_id": "J1",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843727+00:00"
+    },
+    {
+      "judge_id": "J2",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843740+00:00"
+    },
+    {
+      "judge_id": "J3",
+      "model_id": "m1",
+      "verdict": "DISSENT",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843745+00:00"
+    },
+    {
+      "judge_id": "J4",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843766+00:00"
+    },
+    {
+      "judge_id": "J5",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843769+00:00"
+    },
+    {
+      "judge_id": "J6",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843772+00:00"
+    },
+    {
+      "judge_id": "J7",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843792+00:00"
+    },
+    {
+      "judge_id": "J8",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843795+00:00"
+    },
+    {
+      "judge_id": "J9",
+      "model_id": "m1",
+      "verdict": "PASS",
+      "findings": [],
+      "corrections": [],
+      "tool_calls": [
+        "a",
+        "b"
+      ],
+      "rationale": "ok",
+      "timestamp": "2026-09-20T20:16:35.843802+00:00"
+    }
+  ],
+  "previous_hash": "GENESIS",
+  "metadata": {
+    "roster_valid": true,
+    "roster_reason": "Roster valid",
+    "executed": false
   },
-  "executed": false,
-  "previous_receipt_hash": "sha256:aaa111...",
-  "receipt_hash": "sha256:bbb222...",
-  "timestamp": "2026-09-18T12:00:00Z"
+  "contract_version": "amartie-judge-contract-v1",
+  "hash_algorithm": "sha256",
+  "timestamp": "2026-09-20T20:16:35.843917+00:00",
+  "hash": "d54a0a9919b3dd715287e14aa70581b4e27d3cc3ed55452ea2a7e942e751f72a"
 }
 ```
 
-**Critical:** A dissent receipt explicitly states `"executed": false`. A receipt must never claim that an action occurred when the gate denied it.
+Note: `metadata.executed` is `false` — a dissent receipt must never claim
+the action ran. `metadata.roster_reason` carries the machine-readable
+roster verdict.
+
+**Critical:** A dissent receipt explicitly states `"metadata.executed": false`. A receipt must never claim that an action occurred when the gate denied it.
 
 ## Accessible Text Description
 

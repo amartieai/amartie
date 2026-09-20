@@ -47,6 +47,7 @@ class Receipt:
                 "payload_hash": self.payload_hash,
                 "verdicts": self.verdicts,
                 "previous_hash": self.previous_hash,
+                "metadata": self.metadata,
                 "contract_version": self.contract_version,
                 "hash_algorithm": self.hash_algorithm,
                 "timestamp": self.timestamp,
@@ -71,6 +72,7 @@ class Receipt:
             "payload_hash": self.payload_hash,
             "verdicts": self.verdicts,
             "previous_hash": self.previous_hash,
+            "metadata": self.metadata,
             "contract_version": self.contract_version,
             "hash_algorithm": self.hash_algorithm,
             "timestamp": self.timestamp,
@@ -91,7 +93,9 @@ class Receipt:
             hash_algorithm=record.get("hash_algorithm", "sha256"),
             timestamp=record.get("timestamp"),
         )
-        receipt.hash = record.get("hash", receipt.hash)
+        if "hash" not in record:
+            raise ValueError("malformed receipt: missing stored hash")
+        receipt.hash = record["hash"]
         return receipt
 
 
@@ -112,9 +116,14 @@ class ReceiptChain:
         self.receipts.append(receipt)
 
     def verify_chain(self) -> bool:
-        """Verify the entire chain is tamper-free."""
+        """Verify the entire chain is tamper-free.
+
+        The FIRST receipt must anchor to GENESIS — an arbitrary
+        previous_hash on the head of the chain is a break."""
         for i, receipt in enumerate(self.receipts):
             if not receipt.verify():
+                return False
+            if i == 0 and receipt.previous_hash != "GENESIS":
                 return False
             if i > 0 and receipt.previous_hash != self.receipts[i - 1].hash:
                 return False
