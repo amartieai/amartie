@@ -50,6 +50,12 @@ def frame_times(frames_dir, start, interval):
     for f in sorted(os.listdir(frames_dir)):
         if not f.endswith(".jpg"):
             continue
+        # New frames.py index format: frame_000001_2026-01-05T01:59:40.jpg
+        m = re.match(r"frame_(\d+)_(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})\.jpg", f)
+        if m:
+            ts = m.group(2).replace("-", ":", 2)
+            out[f] = datetime.datetime.fromisoformat(ts)
+            continue
         m = re.match(r"frame_(\d{2})(\d{2})(\d{2})\.jpg", f)
         if m:
             hh, mm, ss = map(int, m.groups())
@@ -59,6 +65,37 @@ def frame_times(frames_dir, start, interval):
         if m:
             out[f] = t0 + datetime.timedelta(seconds=int(m.group(1)) * interval)
     return out
+
+
+def frame_index(frames_dir, start, interval):
+    """Prefer the explicit frames.jsonl index emitted by frames.py.
+    Fall back to legacy filename-based mapping for older directories."""
+    index_path = os.path.join(frames_dir, "frames.jsonl")
+    if os.path.exists(index_path):
+        out = {}
+        with open(index_path) as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                frame = rec.get("frame")
+                if not frame:
+                    continue
+                ts = rec.get("timestamp")
+                if ts:
+                    out[os.path.basename(frame)] = datetime.datetime.fromisoformat(ts)
+                    continue
+                offset = rec.get("offset_seconds")
+                if offset is not None:
+                    base = datetime.datetime.strptime(start, "%H:%M:%S")
+                    out[os.path.basename(frame)] = base + datetime.timedelta(seconds=float(offset))
+        if out:
+            return out
+    return frame_times(frames_dir, start, interval)
 
 
 def parse_readout(txt):
@@ -99,7 +136,7 @@ def main():
     a = ap.parse_args()
 
     clicks = parse_clicks(a.clicks)
-    ftimes = frame_times(a.frames, a.start, a.interval)
+    ftimes = frame_index(a.frames, a.start, a.interval)
     if not ftimes:
         print("no mappable frames found — use dense_NNN.jpg or frame_HHMMSS.jpg "
               "naming and pass --start/--interval")
