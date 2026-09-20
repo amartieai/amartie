@@ -1,3 +1,9 @@
+---
+layout: post
+title: "They Sold You Claude. They Gave You Qwen. And When You Needed Honesty, They Choked the Credits."
+date: 2026-09-18
+---
+
 # They Sold You Claude. They Gave You Qwen. And When You Needed Honesty, They Choked the Credits.
 
 **The model you paid for is not the model you got. The credits you bought are not the credits you got. And when you asked for the truth, they made sure you didn't get it.**

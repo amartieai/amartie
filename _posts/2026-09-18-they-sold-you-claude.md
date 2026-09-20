@@ -1,3 +1,9 @@
+---
+layout: post
+title: "They Sold You Claude. They Gave You Qwen. And Nobody Noticed — Until Now."
+date: 2026-09-18
+---
+
 # They Sold You Claude. They Gave You Qwen. And Nobody Noticed — Until Now.
 
 **The model you paid for is not the model you got. Here is the proof.**

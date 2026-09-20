@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "date": "2026-09-18",
+    "title": "Your AI Was Swapped. You Just Don't Know It Yet.",
+    "url": "https://amartie.com/blog/2026-09-18-your-ai-was-swapped",
+    "source": "github.com/amartieai/amartie/_posts/2026-09-18-your-ai-was-swapped.md",
+    "status": "published"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "They Sold You Claude. They Gave You Qwen. And Nobody Noticed — Until Now.",
+    "url": "https://amartie.com/blog/2026-09-18-they-sold-you-claude",
+    "source": "github.com/amartieai/amartie/_posts/2026-09-18-they-sold-you-claude.md",
+    "status": "published"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "They Sold You Claude. They Gave You Qwen. And When You Needed Honesty, They Choked the Credits.",
+    "url": "https://amartie.com/blog/2026-09-18-they-sold-you-claude-throttled",
+    "source": "github.com/amartieai/amartie/_posts/2026-09-18-they-sold-you-claude-throttled.md",
+    "status": "published"
+  }
+]
