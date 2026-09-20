@@ -35,11 +35,13 @@ def main():
     if os.path.exists(manifest):
         with open(manifest) as f:
             for line in f:
-                parts = line.split()
+                # robust split: hash, then path = everything after the hash
+                # column up to the LAST two-space delimiter + timestamp
+                parts = line.rstrip("\n").split("  ", 2)
                 if len(parts) >= 2:
-                    seen[parts[1]] = parts[0]
+                    seen[parts[1].strip()] = parts[0]
 
-    now = datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     added = changed = 0
     entries = []
     for dirpath, _, files in os.walk(root):

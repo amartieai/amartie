@@ -50,8 +50,8 @@ class ReconcileTests(unittest.TestCase):
                              {}) if False else None
             # do it properly through the module
             from witness.reconcile import load_export
-            diff = reconcile(led, [("z_early.csv", load_export(early)),
-                                   ("a_late.csv", load_export(late))], {})
+            diff = reconcile(led, [("z_early.csv", load_export(early)[0]),
+                                   ("a_late.csv", load_export(late)[0])], {})
             pats = [f["pattern"] for m in diff["minutes"] for f in m["findings"]]
             self.assertIn("removal_proof", pats)
 
@@ -64,7 +64,7 @@ class ReconcileTests(unittest.TestCase):
             led = json.load(open(make_ledger(tmp)))["ledger"]
             from witness.reconcile import load_export
             bars = load_export(make_export(tmp, "x.csv", [
-                ("2026-01-05T01:59", 105.3, 105.4, 105.2, 105.3, 4, 4, 0)]))
+                ("2026-01-05T01:59", 105.3, 105.4, 105.2, 105.3, 4, 4, 0)]))[0]
             diff = reconcile(led, [("x.csv", bars)], {})
             self.assertEqual(len(diff["minutes"]), 1)
             self.assertEqual(len(diff["minutes"][0]["actions"]), 2)
@@ -80,7 +80,7 @@ class ReconcileTests(unittest.TestCase):
                  "px": 105.37, "screen": None}]}
             from witness.reconcile import load_export
             bars = load_export(make_export(tmp, "x.csv", [
-                ("2026-01-05T01:59", 105.3, 105.4, 105.2, 105.3, 99, 99, 0)]))
+                ("2026-01-05T01:59", 105.3, 105.4, 105.2, 105.3, 99, 99, 0)]))[0]
             diff = reconcile(ledger["ledger"], [("x.csv", bars)], {})
             pats = [f["pattern"] for m in diff["minutes"] for f in m["findings"]]
             self.assertNotIn("volume_inflation", pats)

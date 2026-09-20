@@ -61,10 +61,25 @@ python3 witness/reconcile.py ledger.json export_early.csv export_late.csv \
 python3 witness/grade.py diff.json --export export_late.csv --out verdict.json
 ```
 
-Every step appends a JSONL receipt (inputs, output hash, parameters,
-UTC timestamp — never overwritten). The hash manifest
-(`python3 witness/hash.py .`) is an append-only OBSERVATION HISTORY: a
-changed file gets a new dated line, so tampering and edits are both visible.
+Every step appends a JSONL receipt — never overwritten:
+- frames.py: recording SHA-256, extraction parameters, per-frame hashes
+- ledger.py: invocation receipt (clicks hash, frames.jsonl hash, every
+  referenced frame's hash, --start/--interval, output hash) + one receipt
+  per action
+- reconcile.py: hashes of ledger, every export, and the export-attempts
+  file; the diff itself carries a self-contained `sources` section
+- grade.py: hashes of the diff and the baseline export
+
+The hash manifest (`python3 witness/hash.py .`) is an append-only
+OBSERVATION HISTORY: a changed file gets a new dated line, so tampering
+and edits are both visible. It is a LOCAL observation log, not proof the
+log itself was not altered — for stronger custody, copy or sign the final
+manifest to an independent location.
+
+Receipts and HASHES.txt are deliberately gitignored so private evidence
+never lands in a public repo by accident. To archive a session's custody
+records, bundle them yourself: the receipts, HASHES.txt, frames.jsonl,
+ledger, diff, and verdict.
 
 ## Tests
 

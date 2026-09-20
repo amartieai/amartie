@@ -397,5 +397,18 @@
         }
       }
     ]
+  },
+  "sources": {
+    "ledger": {
+      "path": "examples/ledger_example.json",
+      "sha256": "9243c30a7a41ecbcd36985d54e7a04f6afcfff6e83580187901704837507d505"
+    },
+    "export_attempts": {
+      "path": "examples/export_attempts_example.jsonl",
+      "sha256": "6f0d44da016d9348095dafb8701fb95e4a1e1da58f6ec861755cffb0f6c9cd9b",
+      "records": 3,
+      "malformed": []
+    },
+    "duplicate_minutes": null
   }
 }

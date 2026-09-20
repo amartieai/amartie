@@ -18,7 +18,15 @@ timestamp is NEAREST the action timestamp, within half an interval.
 Actions with no frame inside the tolerance get screen=null and are
 reported — never silently matched to a far frame.
 """
-import argparse, datetime, json, os, re, subprocess, sys
+import argparse, datetime, hashlib, json, os, re, subprocess, sys
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def ocr(path, psm="3"):
@@ -162,7 +170,30 @@ def main():
         ledger.append(entry)
 
     json.dump({"ledger": ledger}, open(a.out, "w"), indent=2)
+
+    # invocation-level custody receipt: inputs, parameters, output hash
+    referenced = sorted({e["frame"] for e in ledger if e["frame"]})
+    invocation = {
+        "receipt": "ledger_invocation",
+        "created_at": datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "inputs": {
+            "clicks": {"path": a.clicks, "sha256": sha256_file(a.clicks)},
+            "frames_index": ({"path": os.path.join(a.frames, "frames.jsonl"),
+                              "sha256": sha256_file(os.path.join(a.frames, "frames.jsonl"))}
+                             if os.path.exists(os.path.join(a.frames, "frames.jsonl"))
+                             else None),
+            "referenced_frames": [{"frame": f,
+                                   "sha256": sha256_file(os.path.join(a.frames, f))}
+                                  for f in referenced],
+        },
+        "parameters": {"start": a.start, "interval": a.interval,
+                       "tolerance_s": tol, "ocr_tool": "tesseract"},
+        "output": {"path": a.out, "sha256": sha256_file(a.out)},
+        "action_count": len(ledger),
+    }
     with open(a.receipts, "a") as rf:  # append-only
+        rf.write(json.dumps(invocation) + "\n")
         for e in ledger:
             rf.write(json.dumps({"receipt": "action", **e}) + "\n")
 

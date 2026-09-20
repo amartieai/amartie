@@ -35,12 +35,18 @@ def sha256_file(path):
 
 
 def load_export(path):
+    """Load bars keyed by minute. Duplicate minutes are NOT silently
+    overwritten: the duplicate count is returned alongside the bars so it
+    can be recorded in the diff and receipt (finding #10)."""
     bars = {}
+    dups = []
     with open(path) as f:
-        for r in csv.DictReader(f):
+        for i, r in enumerate(csv.DictReader(f), 2):
             t = (r.get("time") or r.get("timestamp") or "")[:16]
             if not t:
                 continue
+            if t in bars:
+                dups.append({"line": i, "minute": t})
             bars[t] = {
                 "open": r.get("open"), "high": r.get("high"),
                 "low": r.get("low"), "close": r.get("close"),
@@ -48,7 +54,7 @@ def load_export(path):
                 "upvol": r.get("UpVol") or r.get("upvol"),
                 "dnvol": r.get("DnVol") or r.get("dnvol"),
             }
-    return bars
+    return bars, dups
 
 
 def fnum(x):
@@ -90,18 +96,22 @@ def detect_reclicks(actions, window_s=30, size_multiplier=1.0):
 def load_attempts(path):
     """export_attempts.jsonl: one per line
     {"ts": "...", "endpoint": "fills", "status": 200, "payload": "undefined",
-     "logged_out": true}"""
-    out = []
+     "logged_out": true}
+
+    Malformed lines are NEVER silently discarded: they are collected with
+    line numbers and reported in the diff and the receipt."""
+    out, malformed = [], []
     if path and os.path.exists(path):
         with open(path) as f:
-            for line in f:
+            for i, line in enumerate(f, 1):
                 line = line.strip()
-                if line:
-                    try:
-                        out.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        continue
-    return out
+                if not line:
+                    continue
+                try:
+                    out.append(json.loads(line))
+                except json.JSONDecodeError:
+                    malformed.append({"line": i, "error": "invalid JSON"})
+    return out, malformed
 
 
 def detect_export_anomaly(attempts, window_s=300):
@@ -135,6 +145,9 @@ def reconcile(ledger, exports, opts):
     """exports: list of (label, bars) in ARGUMENT ORDER (chronological pull order)."""
     order = {label: i for i, (label, _) in enumerate(exports)}
     action_minutes = sorted({e["ts"][:16] for e in ledger})
+
+    # duplicate-minute detection in exports (silent overwrite is not acceptable)
+    dup_report = opts.get("duplicate_minutes", {})
 
     # quiet baseline: exclude action minutes; use only the LAST export
     # (most complete late pull) to avoid double counting
@@ -240,24 +253,44 @@ def main():
     a = ap.parse_args()
 
     ledger = json.load(open(a.ledger))["ledger"]
-    exports = [(os.path.basename(p), load_export(p)) for p in a.exports]
+    loaded = [(os.path.basename(p), load_export(p)) for p in a.exports]
+    exports = [(label, bars) for label, (bars, _) in loaded]
+    dup_report = {label: dups for label, (_, dups) in loaded if dups}
+    attempts, malformed_attempts = load_attempts(a.export_attempts)
     opts = {"reclick_window": a.reclick_window,
             "price_divergence": a.price_divergence,
-            "attempts": load_attempts(a.export_attempts)}
+            "attempts": attempts}
     diff = reconcile(ledger, exports, opts)
     # record export hashes in the output
     for rec, path in zip(diff["exports"], a.exports):
         rec["sha256"] = sha256_file(path)
+    # self-contained sources section: ledger + attempts hashes live IN the diff
+    diff["sources"] = {
+        "ledger": {"path": a.ledger, "sha256": sha256_file(a.ledger)},
+        "export_attempts": (
+            {"path": a.export_attempts, "sha256": sha256_file(a.export_attempts),
+             "records": len(attempts),
+             "malformed": malformed_attempts}
+            if a.export_attempts and os.path.exists(a.export_attempts) else None),
+        "duplicate_minutes": dup_report or None,
+    }
 
     json.dump(diff, open(a.out, "w"), indent=2)
+    receipt_inputs = [{"path": p, "sha256": sha256_file(p)}
+                      for p in [a.ledger] + a.exports]
+    if a.export_attempts and os.path.exists(a.export_attempts):
+        receipt_inputs.append({"path": a.export_attempts,
+                               "sha256": sha256_file(a.export_attempts)})
     with open(a.receipts, "a") as rf:  # append-only
         rf.write(json.dumps({
             "receipt": "reconcile", "created_at": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             .replace(microsecond=0).isoformat() + "Z",
-            "inputs": [{"path": p, "sha256": sha256_file(p)}
-                       for p in [a.ledger] + a.exports],
+            "inputs": receipt_inputs,
             "output": a.out, "output_sha256": sha256_file(a.out),
             "parameters": {k: v for k, v in opts.items() if k != "attempts"},
+            "attempts": {"records": len(attempts),
+                         "malformed": malformed_attempts} if a.export_attempts else None,
+            "duplicate_minutes": dup_report or None,
             "schema_version": SCHEMA}) + "\n")
 
     flagged = sum(1 for m in diff["minutes"] if m["findings"])

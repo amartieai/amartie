@@ -8,7 +8,15 @@ and an index sidecar maps every frame to its timestamp and offset.
 --dense-window HH:MM:SS-HH:MM:SS runs a bounded SECOND extraction pass at
 --dense-every seconds. Only frames inside that window are decoded and kept.
 """
-import argparse, datetime, json, os, re, subprocess, sys
+import argparse, datetime, hashlib, json, os, re, subprocess, sys
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def parse_hms(s):
@@ -107,6 +115,28 @@ def main():
     with open(os.path.join(a.out, "frames.jsonl"), "a") as f:
         for rec in index:
             f.write(json.dumps(rec) + "\n")
+
+    # extraction custody receipt: recording hash, parameters, per-frame hashes
+    receipt = {
+        "receipt": "frames_invocation",
+        "created_at": datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "inputs": {"recording": {"path": a.recording,
+                                 "sha256": sha256_file(a.recording)}},
+        "parameters": {"every": a.every, "dense_every": a.dense_every,
+                       "dense_window": a.dense_window,
+                       "start_time": a.start_time},
+        "output": {"index": os.path.join(a.out, "frames.jsonl"),
+                   "index_sha256": sha256_file(os.path.join(a.out, "frames.jsonl")),
+                   "frame_count": len(index)},
+        "frames": [{"frame": rec["frame"],
+                    "offset_seconds": rec["offset_seconds"],
+                    "timestamp": rec.get("timestamp"),
+                    "sha256": sha256_file(os.path.join(a.out, rec["frame"]))}
+                   for rec in index],
+    }
+    with open(os.path.join(a.out, "frames_receipts.jsonl"), "a") as rf:
+        rf.write(json.dumps(receipt) + "\n")
 
     print(f"extracted {len(frames)} frames -> {a.out}/ (+ frames.jsonl index)")
     print(f"  dense window: {a.dense_window or 'none'}")
