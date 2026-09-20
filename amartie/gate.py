@@ -174,6 +174,7 @@ class JudgeGate:
     def __init__(self, receipt_store_path: Optional[str] = None, strict_model_lock: bool = False):
         self.receipt_chain: List[str] = []
         self.receipts: List[GateReceipt] = []
+        self._store_corrupted: bool = False
         self.round_cap = 4
         self.time_budget_per_judge = 1200
         self.gate_wide_budget = 900
@@ -190,6 +191,7 @@ class JudgeGate:
         self.receipt_store_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _load_receipts_from_disk(self):
+        """Load receipts from disk. Fail closed on any corruption."""
         if not self.receipt_store_path.exists():
             return
         try:
@@ -201,15 +203,40 @@ class JudgeGate:
         if not isinstance(data, list):
             return
 
+        if not data:
+            return
+
+        # Parse ALL records first. If ANY record fails to parse or verify,
+        # the entire store is treated as corrupted — fail closed.
+        loaded = []
         for record in data:
             try:
                 receipt = GateReceipt.from_dict(record)
             except (KeyError, TypeError, ValueError):
-                continue
+                # Corruption detected — fail closed, load nothing
+                self._store_corrupted = True
+                return
 
-            if receipt.verify():
-                self.receipts.append(receipt)
-                self.receipt_chain.append(receipt.hash)
+            if not receipt.verify():
+                # Tampering detected — fail closed, load nothing
+                self._store_corrupted = True
+                return
+
+            loaded.append(receipt)
+
+        # All records valid — verify chain links
+        for idx, receipt in enumerate(loaded):
+            if idx == 0:
+                if receipt.previous_hash != "GENESIS":
+                    self._store_corrupted = True
+                    return
+            else:
+                if receipt.previous_hash != loaded[idx - 1].hash:
+                    self._store_corrupted = True
+                    return
+
+        self.receipts = loaded
+        self.receipt_chain = [r.hash for r in loaded]
 
     def get_rotated_judge_id(self, logical_id: str, date: Optional[str] = None) -> str:
         """Daily rotating judge IDs. Prevents signature pre-computation."""
@@ -315,8 +342,15 @@ class JudgeGate:
         self._persist_receipts()
         return all_passed, receipt
 
+    @property
+    def store_corrupted(self) -> bool:
+        """True if the receipt store was detected as corrupted during load."""
+        return getattr(self, "_store_corrupted", False)
+
     def verify_chain_integrity(self) -> bool:
         """Verify the entire receipt chain is tamper-free."""
+        if self._store_corrupted:
+            return False
         if not self.receipts:
             return True
 

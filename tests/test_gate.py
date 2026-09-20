@@ -347,6 +347,61 @@ class TestJudgeGate:
         # Should not crash, should have empty receipts
         assert len(g.receipts) == 0
 
+    def test_corrupted_first_receipt_fails_closed(self, tmp_path):
+        """If the first receipt is corrupted, the entire store fails closed."""
+        g = self._make_gate(tmp_path)
+        verdicts = self._make_verdicts()
+        g.verify_action("t1", {"a": 1}, verdicts)
+        g.verify_action("t2", {"b": 2}, verdicts)
+
+        # Tamper with the FIRST receipt only
+        store = tmp_path / "receipts.json"
+        data = json.loads(store.read_text())
+        data[0]["hash"] = "tampered_first"
+        store.write_text(json.dumps(data))
+
+        # Reload — entire store should fail closed
+        g2 = self._make_gate(tmp_path)
+        assert g2.store_corrupted is True
+        assert len(g2.receipts) == 0
+        assert g2.verify_chain_integrity() is False
+
+    def test_corrupted_second_receipt_fails_closed(self, tmp_path):
+        """If any receipt is corrupted, the entire store fails closed."""
+        g = self._make_gate(tmp_path)
+        verdicts = self._make_verdicts()
+        g.verify_action("t1", {"a": 1}, verdicts)
+        g.verify_action("t2", {"b": 2}, verdicts)
+        g.verify_action("t3", {"c": 3}, verdicts)
+
+        # Tamper with the MIDDLE receipt
+        store = tmp_path / "receipts.json"
+        data = json.loads(store.read_text())
+        data[1]["hash"] = "tampered_middle"
+        store.write_text(json.dumps(data))
+
+        # Reload — entire store should fail closed
+        g2 = self._make_gate(tmp_path)
+        assert g2.store_corrupted is True
+        assert len(g2.receipts) == 0
+
+    def test_broken_chain_link_fails_closed(self, tmp_path):
+        """If chain links are broken, the store fails closed."""
+        g = self._make_gate(tmp_path)
+        verdicts = self._make_verdicts()
+        g.verify_action("t1", {"a": 1}, verdicts)
+        g.verify_action("t2", {"b": 2}, verdicts)
+
+        # Break the chain link
+        store = tmp_path / "receipts.json"
+        data = json.loads(store.read_text())
+        data[1]["previous_hash"] = "broken_link"
+        store.write_text(json.dumps(data))
+
+        g2 = self._make_gate(tmp_path)
+        assert g2.store_corrupted is True
+        assert len(g2.receipts) == 0
+
     def test_receipt_chain_tamper_detected(self, tmp_path):
         g = self._make_gate(tmp_path)
         verdicts = self._make_verdicts()
@@ -360,11 +415,11 @@ class TestJudgeGate:
         data[0]["hash"] = "tampered"
         store.write_text(json.dumps(data))
 
-        # Reload - corrupted receipt should be rejected, not loaded
+        # Reload — entire store should fail closed
         g2 = self._make_gate(tmp_path)
-        # Only the non-corrupted receipt should load
-        assert len(g2.receipts) < 2
-        assert g2.verify_chain_integrity() is True
+        assert g2.store_corrupted is True
+        assert len(g2.receipts) == 0
+        assert g2.verify_chain_integrity() is False
 
     def test_no_test_writes_to_home(self, tmp_path):
         """Verify no test writes to the user's real ~/.amartie."""
