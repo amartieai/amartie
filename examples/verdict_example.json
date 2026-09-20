@@ -1,16 +1,28 @@
 {
-  "action_minutes": 6,
-  "minutes_with_findings": 6,
-  "session_median_volume": 3.0,
+  "schema_version": 2,
+  "action_count": 6,
+  "action_minute_count": 5,
+  "minutes_with_findings": 5,
+  "quiet_baseline": {
+    "median_volume": 3.0,
+    "bars": 46,
+    "excluded_action_minutes": true
+  },
   "pattern_counts": {
-    "minute_absent": 4,
-    "removal_proof": 0,
-    "inverted_classification": 5,
+    "minute_absent": 3,
+    "removal_proof": 3,
+    "inverted_classification": 4,
     "volume_spike": 3,
     "spike_unclassified": 1,
     "volume_inflation": 4,
-    "screen_price_divergence": 0
+    "reclick_signature": 2,
+    "screen_price_divergence": 1,
+    "export_behavior_anomaly": 1
   },
-  "conditional_on_action": "6/6 action minutes carry at least one anomaly finding; baseline median volume 3.0 from 53 quiet bars",
-  "summary": "5 proven sell minutes printed as up-volume with zero down-volume | 3 volume spikes >=5x session median at action minutes | 4 minutes where public volume was 2x+ the locally recorded screen volume"
+  "conditional_on_action": {
+    "flagged_action_minutes": 5,
+    "total_action_minutes": 5,
+    "rate": 1.0
+  },
+  "summary": "3 action-minute bars present in early exports and absent from later pulls of the same feed | 4 proven sell minutes printed as up-volume with zero down-volume | 3 volume spikes >=5x quiet-median at action minutes | 1 spikes with zeroed classification | 4 minutes where public volume was 2x+ the locally recorded screen volume | 2 paired re-clicks inside the window | 1 minutes where the public print exceeded the screen's recorded range by the threshold | 1 export-attempt sequences with empty payloads and/or forced logouts (observed sequence only)"
 }

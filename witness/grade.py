@@ -1,14 +1,32 @@
 #!/usr/bin/env python3
-"""witness/grade.py — grade the seven-pattern anomaly from a reconcile diff.
+"""witness/grade.py — grade the anomaly patterns from a structured reconcile diff.
 
 The verdict logic is deliberately narrow: the anomaly claim is CONDITIONAL
-ON ACTION. The grader therefore needs quiet-minute baselines too — feed it
-the full export and it compares action minutes against the session's own
-quiet distribution.
+ON ACTION. Counts are derived from structured pattern ids (schema_version 2
+diffs), never from free-form strings. Actions and unique action minutes are
+counted separately.
 
-Usage: python3 witness/grade.py diff.json --export export_late.csv --out verdict.json
+Usage:
+  python3 witness/grade.py diff.json --export export_late.csv --out verdict.json
+
+--export is the BASELINE export (the most complete late pull). Quiet-minute
+baseline excludes action minutes.
 """
-import argparse, csv, json, statistics, sys
+import argparse, csv, datetime, hashlib, json, statistics, sys
+
+SCHEMA = 2
+PATTERNS = ("minute_absent", "removal_proof", "inverted_classification",
+            "volume_spike", "spike_unclassified", "volume_inflation",
+            "reclick_signature", "screen_price_divergence",
+            "export_behavior_anomaly")
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def fnum(x):
@@ -18,48 +36,37 @@ def fnum(x):
         return None
 
 
-def quiet_baseline(path):
-    bars = []
+def quiet_baseline(path, action_minutes):
+    """Median volume over NON-action minutes only."""
+    vols = []
     with open(path) as f:
         for r in csv.DictReader(f):
+            t = (r.get("time") or r.get("timestamp") or "")[:16]
+            if t in action_minutes:
+                continue
             v = fnum(r.get("Vol") or r.get("vol") or r.get("volume"))
-            if v is not None:
-                bars.append(v)
-    return bars
+            if v is not None and v > 0:
+                vols.append(v)
+    return vols
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("diff")
-    ap.add_argument("--export", required=True, help="full public export for baseline")
-    ap.add_argument("--out", default="verdict.json")
-    a = ap.parse_args()
+def grade(diff, baseline_vols):
+    counts = {p: 0 for p in PATTERNS}
+    minutes = diff.get("minutes", [])
+    action_minutes = [m["minute"] for m in minutes]
+    actions = sum(len(m.get("actions", [])) for m in minutes)
 
-    diff = json.load(open(a.diff))
-    baseline = quiet_baseline(a.export)
-    med = statistics.median([v for v in baseline if v > 0]) if baseline else None
+    for m in minutes:
+        for fnd in m.get("findings", []):
+            p = fnd.get("pattern")
+            if p in counts:
+                counts[p] += 1
+    for p in ("reclick_signature", "export_behavior_anomaly"):
+        counts[p] = len(diff.get("session_findings", {}).get(p, []))
 
-    counts = {"minute_absent": 0, "removal_proof": 0, "inverted_classification": 0,
-              "volume_spike": 0, "spike_unclassified": 0, "volume_inflation": 0,
-              "screen_price_divergence": 0}
-    for m in diff["minutes"]:
-        for f in m["findings"]:
-            for k in counts:
-                if f.startswith(k.upper().replace("_", " ").title()) or k in f.lower().replace(" ", "_"):
-                    counts[k] += 1
-                    break
+    flagged = sum(1 for m in minutes if m.get("findings"))
+    med = statistics.median(baseline_vols) if baseline_vols else None
 
-    n = len(diff["minutes"])
-    flagged = sum(1 for m in diff["minutes"] if m["findings"])
-    verdict = {
-        "action_minutes": n,
-        "minutes_with_findings": flagged,
-        "session_median_volume": med,
-        "pattern_counts": counts,
-        "conditional_on_action": None,
-        "summary": None,
-    }
-    # The honest verdict sentence
     lines = []
     if counts["removal_proof"]:
         lines.append(f"{counts['removal_proof']} action-minute bars present in early "
@@ -68,17 +75,63 @@ def main():
         lines.append(f"{counts['inverted_classification']} proven sell minutes printed "
                      f"as up-volume with zero down-volume")
     if counts["volume_spike"]:
-        lines.append(f"{counts['volume_spike']} volume spikes >=5x session median at "
+        lines.append(f"{counts['volume_spike']} volume spikes >=5x quiet-median at "
                      f"action minutes")
+    if counts["spike_unclassified"]:
+        lines.append(f"{counts['spike_unclassified']} spikes with zeroed classification")
     if counts["volume_inflation"]:
         lines.append(f"{counts['volume_inflation']} minutes where public volume was 2x+ "
                      f"the locally recorded screen volume")
-    verdict["summary"] = " | ".join(lines) if lines else "no anomalies graded"
-    verdict["conditional_on_action"] = (
-        f"{flagged}/{n} action minutes carry at least one anomaly finding; "
-        f"baseline median volume {med} from {len(baseline)} quiet bars"
-        if n else "no actions to grade")
+    if counts["reclick_signature"]:
+        lines.append(f"{counts['reclick_signature']} paired re-clicks inside the window")
+    if counts["screen_price_divergence"]:
+        lines.append(f"{counts['screen_price_divergence']} minutes where the public print "
+                     f"exceeded the screen's recorded range by the threshold")
+    if counts["export_behavior_anomaly"]:
+        lines.append(f"{counts['export_behavior_anomaly']} export-attempt sequences with "
+                     f"empty payloads and/or forced logouts (observed sequence only)")
+
+    return {
+        "schema_version": SCHEMA,
+        "action_count": actions,
+        "action_minute_count": len(minutes),
+        "minutes_with_findings": flagged,
+        "quiet_baseline": {"median_volume": med, "bars": len(baseline_vols),
+                           "excluded_action_minutes": True},
+        "pattern_counts": counts,
+        "conditional_on_action": {
+            "flagged_action_minutes": flagged,
+            "total_action_minutes": len(minutes),
+            "rate": round(flagged / len(minutes), 3) if minutes else None,
+        },
+        "summary": " | ".join(lines) if lines else "no anomalies graded",
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("diff")
+    ap.add_argument("--export", required=True,
+                    help="baseline public export (quiet minutes are taken from here)")
+    ap.add_argument("--out", default="verdict.json")
+    ap.add_argument("--receipts", default="grade_receipts.jsonl")
+    a = ap.parse_args()
+
+    diff = json.load(open(a.diff))
+    action_minutes = {m["minute"] for m in diff.get("minutes", [])}
+    baseline_vols = quiet_baseline(a.export, action_minutes)
+    verdict = grade(diff, baseline_vols)
+
     json.dump(verdict, open(a.out, "w"), indent=2)
+    with open(a.receipts, "a") as rf:  # append-only
+        rf.write(json.dumps({
+            "receipt": "grade",
+            "created_at": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+            .replace(microsecond=0).isoformat() + "Z",
+            "inputs": [{"path": p, "sha256": sha256_file(p)}
+                       for p in (a.diff, a.export)],
+            "output": a.out, "output_sha256": sha256_file(a.out),
+            "schema_version": SCHEMA}) + "\n")
     print(json.dumps(verdict, indent=2))
 
 

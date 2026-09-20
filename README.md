@@ -4,32 +4,30 @@ Prove what your own screen recorded vs what the public record claims, at the
 minutes YOU acted. No strategy, no predictions, no identifying data. The tool
 is a ruler, not a trader.
 
-## The anomaly pattern it grades
+## The anomaly patterns it grades
 
 On a dead, boring, barely-moving asset — overnight micro futures, median
 volume single digits per minute — the following cluster ONLY at the
 operator's own action minutes, never in the surrounding quiet hours:
 
-1. INVERTED VOLUME CLASSIFICATION: market sells printing as up-volume
+1. `inverted_classification` — market sells printing as up-volume
    (UpVol > 0, DnVol = 0 at proven sell minutes).
-2. VOLUME INFLATION: public volume 2x+ the locally recorded screen volume
-   at the same minute, excess classified in the direction adverse to the
-   operator's position.
-3. SPIKE-AND-PIN: 5x+ median volume bars with zero price follow-through on
-   the local feed, and/or classification columns zeroed (UpVol 0 / DnVol 0)
-   exactly at execution minutes.
-4. THE 20-SECOND RE-CLICK: adverse flip within seconds of entry, operator
-   re-clicks ~20s later at larger size — the frustration ladder, visible
-   as paired executions.
-5. THE VANISHING MINUTES: bars present in early data pulls, absent from
-   later pulls of the same feed — public-record minutes removed after the
-   fact, disproportionately covering action minutes.
-6. SCREEN-VS-PRINT PRICE DIVERGENCE: the public print claims highs/lows
-   double-digit points beyond anything the locally recorded screen showed
-   in the same minute, always adverse to the open position.
-7. EXPORT BLOCKING: the account's own trade/fill history export returning
-   empty payloads ("undefined") with repeated forced logouts clustered
-   around the download attempts.
+2. `volume_inflation` — public volume 2x+ the locally recorded screen
+   volume at the same minute.
+3. `volume_spike` / `spike_unclassified` — 5x+ quiet-median volume bars,
+   with classification columns zeroed (UpVol 0 / DnVol 0) at execution
+   minutes.
+4. `reclick_signature` — paired re-clicks inside a short window (default
+   30s), size change recorded but not required for the pairing.
+5. `removal_proof` / `minute_absent` — bars present in early data pulls,
+   absent from later pulls of the same feed (exports compared in ARGUMENT
+   order, not filename order).
+6. `screen_price_divergence` — the public print claims highs beyond the
+   screen's recorded range by a configurable threshold. Direction is
+   classified only when the action side is known.
+7. `export_behavior_anomaly` — repeated empty payloads and/or forced
+   logouts in the account's own export attempts (observed sequence only;
+   no causal claim).
 
 None of these alone proves intent. The tool's claim is narrower and harder:
 the anomaly is CONDITIONAL ON ACTION. Quiet minutes — thousands of them —
@@ -46,22 +44,39 @@ whole point.
 ## The pipeline
 
 ```
-# 1. Extract frames from your recording and OCR the tape + volume readouts
-python3 witness/frames.py session.mkv --out frames/ --every 20
+# 1. Extract timestamped frames from your recording
+python3 witness/frames.py session.mkv --out frames/ --every 20 \
+    --start-time 2026-01-05T01:58:43
 
 # 2. Log your executions (from broker toasts visible in the recording)
 #    clicks.txt: one per line  "2026-01-05T01:59:52 SELL 1 @ 105.37"
-python3 witness/ledger.py frames/ clicks.txt --out ledger.json
+python3 witness/ledger.py frames/ clicks.txt --start 01:58:43 --interval 20 \
+    --out ledger.json
 
-# 3. Reconcile against the public export(s)
-python3 witness/reconcile.py ledger.json export_early.csv export_late.csv --out diff.json
+# 3. Reconcile against the public export(s) — ARGUMENT ORDER = pull order
+python3 witness/reconcile.py ledger.json export_early.csv export_late.csv \
+    --out diff.json --export-attempts attempts.jsonl
 
-# 4. Grade the anomaly (all seven patterns, with counts and severity)
-python3 witness/grade.py diff.json --out verdict.json
+# 4. Grade the anomaly (baseline = the most complete late export)
+python3 witness/grade.py diff.json --export export_late.csv --out verdict.json
 ```
 
-Every step writes an append-only JSONL receipt. Hash everything
-(`witness/hash.py .`) before showing anyone anything.
+Every step appends a JSONL receipt (inputs, output hash, parameters,
+UTC timestamp — never overwritten). The hash manifest
+(`python3 witness/hash.py .`) is an append-only OBSERVATION HISTORY: a
+changed file gets a new dated line, so tampering and edits are both visible.
+
+## Tests
+
+```
+python3 -m unittest discover -s tests -v
+```
+
+12 tests lock down reconciliation (argument-order removal proof, minute
+aggregation, no-false-positive screen matching), grading (structured
+pattern IDs, actions vs minutes, unsupported patterns never counted),
+hashing (idempotent, changed-file observations, correct SHA-256), and the
+full E2E pipeline against `examples/`. CI runs them on every push.
 
 ## Anonymity law (read before publishing anything)
 

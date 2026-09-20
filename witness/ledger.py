@@ -2,13 +2,23 @@
 """witness/ledger.py — build the action ledger from OCR'd frames + broker toasts.
 
 Input:
-  frames/       — extracted frames (from frames.py)
+  frames/       — extracted frames (from frames.py), named dense_NNN.jpg
+                  (NNN * --interval seconds after --start) or frame_HHMMSS.jpg
   clicks.txt    — one execution per line:
                   "2026-01-05T01:59:52 SELL 1 @ 105.37"
+  --start       — recording start time (HH:MM:SS) for frame->time mapping
+  --interval    — seconds between frames (must match frames.py --every)
+
 Output:
-  ledger.json   — every action, timestamped, with screen context
+  ledger.json           — every action, timestamped, with screen context
+  ledger_receipts.jsonl — append-only receipt per action (never overwritten)
+
+Frame association: each action is matched to the frame whose derived
+timestamp is NEAREST the action timestamp, within half an interval.
+Actions with no frame inside the tolerance get screen=null and are
+reported — never silently matched to a far frame.
 """
-import argparse, json, os, re, subprocess, sys
+import argparse, datetime, json, os, re, subprocess, sys
 
 
 def ocr(path, psm="3"):
@@ -32,24 +42,50 @@ def parse_clicks(path):
     return clicks
 
 
-def screen_context(frames_dir, click_ts):
-    """Find the frame nearest the click and OCR its OHLC/volume row."""
-    # click minute in the frame numbering is caller's job; here we scan
-    # all frames for the click minute string and the Vol readout near it
-    hhmm = click_ts[11:16]
-    best = None
+def frame_times(frames_dir, start, interval):
+    """Map frame filename -> datetime. dense_NNN.jpg => NNN*interval seconds
+    after start; frame_HHMMSS.jpg => absolute clock time that day."""
+    t0 = datetime.datetime.strptime(start, "%H:%M:%S")
+    out = {}
     for f in sorted(os.listdir(frames_dir)):
         if not f.endswith(".jpg"):
             continue
-        txt = ocr(os.path.join(frames_dir, f))
-        if hhmm.replace(":", ":") in txt or True:
-            vol = re.search(r"Vol\.?\s*(\d+)", txt)
-            px = re.search(r"C\s?([\d,]{5,7})", txt)
-            if vol:
-                best = {"frame": f, "screen_vol": int(vol.group(1)),
-                        "screen_close": px.group(1) if px else None}
-                break
-    return best
+        m = re.match(r"frame_(\d{2})(\d{2})(\d{2})\.jpg", f)
+        if m:
+            hh, mm, ss = map(int, m.groups())
+            out[f] = t0.replace(hour=hh, minute=mm, second=ss)
+            continue
+        m = re.match(r"dense_(\d+)\.jpg", f)
+        if m:
+            out[f] = t0 + datetime.timedelta(seconds=int(m.group(1)) * interval)
+    return out
+
+
+def parse_readout(txt):
+    """Pull the OHLC row's close and Vol from OCR text (last match wins)."""
+    vol = None
+    for m in re.finditer(r"Vol\.?\s*(\d+)", txt):
+        vol = int(m.group(1))
+    close = None
+    for m in re.finditer(r"[C€CS]\s?([\d,]{4,8}(?:\.\d+)?)", txt):
+        v = m.group(1).replace(",", "")
+        try:
+            if 0.01 < float(v) < 10_000_000:
+                close = float(v)
+        except ValueError:
+            pass
+    return close, vol
+
+
+def nearest_frame(ftimes, action_dt, tolerance_s):
+    best, best_d = None, None
+    for f, t in ftimes.items():
+        d = abs((t - action_dt).total_seconds())
+        if best_d is None or d < best_d:
+            best, best_d = f, d
+    if best is None or best_d > tolerance_s:
+        return None, None
+    return best, best_d
 
 
 def main():
@@ -57,18 +93,50 @@ def main():
     ap.add_argument("frames")
     ap.add_argument("clicks")
     ap.add_argument("--out", default="ledger.json")
+    ap.add_argument("--receipts", default="ledger_receipts.jsonl")
+    ap.add_argument("--start", required=True, help="recording start HH:MM:SS")
+    ap.add_argument("--interval", type=int, default=20, help="seconds between frames")
     a = ap.parse_args()
+
     clicks = parse_clicks(a.clicks)
+    ftimes = frame_times(a.frames, a.start, a.interval)
+    if not ftimes:
+        print("no mappable frames found — use dense_NNN.jpg or frame_HHMMSS.jpg "
+              "naming and pass --start/--interval")
+        sys.exit(1)
+    tol = a.interval / 2 + 1
+
+    ocr_cache = {}
     ledger = []
     for c in clicks:
-        ctx = screen_context(a.frames, c["ts"])
+        adt = datetime.datetime.fromisoformat(c["ts"])
+        fname, delta = nearest_frame(ftimes, adt, tol)
         entry = dict(c)
-        entry["screen"] = ctx
+        entry["frame"] = fname
+        entry["frame_delta_s"] = round(delta, 1) if delta is not None else None
+        entry["screen"] = None
+        if fname:
+            if fname not in ocr_cache:
+                ocr_cache[fname] = ocr(os.path.join(a.frames, fname))
+            close, vol = parse_readout(ocr_cache[fname])
+            if vol is not None or close is not None:
+                entry["screen"] = {"screen_vol": vol, "screen_close": close,
+                                   "frame": fname, "frame_delta_s": entry["frame_delta_s"]}
         ledger.append(entry)
+
     json.dump({"ledger": ledger}, open(a.out, "w"), indent=2)
+    with open(a.receipts, "a") as rf:  # append-only
+        for e in ledger:
+            rf.write(json.dumps({"receipt": "action", **e}) + "\n")
+
+    matched = sum(1 for e in ledger if e["frame"])
+    screen = sum(1 for e in ledger if e["screen"])
     print(f"ledger: {len(ledger)} actions -> {a.out}")
+    print(f"  frames matched within {tol:.0f}s: {matched}/{len(ledger)}")
+    print(f"  screen context read: {screen}/{len(ledger)}")
     for e in ledger:
-        print(f"  {e['ts']} {e['side']} {e['qty']} @ {e['px']}")
+        print(f"  {e['ts']} {e['side']} {e['qty']} @ {e['px']}"
+              f"  frame={e['frame']} d={e['frame_delta_s']}s")
 
 
 if __name__ == "__main__":

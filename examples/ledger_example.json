@@ -6,7 +6,8 @@
       "qty": 1,
       "px": 105.37,
       "screen": {
-        "screen_vol": 1
+        "screen_vol": 1,
+        "screen_high": 105.4
       }
     },
     {

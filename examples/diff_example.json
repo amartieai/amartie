@@ -1,21 +1,41 @@
 {
-  "median_vol": 3.0,
+  "schema_version": 2,
+  "exports": [
+    {
+      "label": "export_early_example.csv",
+      "order": 0,
+      "sha256": "0222579e086d5c83502dc58cae3f434907f78ed2c8cb58588657dd0fb5dd30fb"
+    },
+    {
+      "label": "export_late_example.csv",
+      "order": 1,
+      "sha256": "87eb1f898d057be853d09d40b0167b383c7390e7e86102f9c8fa9be1ffc407c5"
+    }
+  ],
+  "baseline": {
+    "median_volume": 3.0,
+    "source": "export_late_example.csv",
+    "excluded_action_minutes": true
+  },
   "minutes": [
     {
-      "action": {
-        "ts": "2026-01-05T01:59:52",
-        "side": "SELL",
-        "qty": 1,
-        "px": 105.37,
-        "screen": {
-          "screen_vol": 1
-        }
-      },
       "minute": "2026-01-05T01:59",
+      "actions": [
+        {
+          "ts": "2026-01-05T01:59:52",
+          "side": "SELL",
+          "qty": 1,
+          "px": 105.37,
+          "screen": {
+            "screen_vol": 1,
+            "screen_high": 105.4
+          }
+        }
+      ],
       "public": {
         "export_early_example.csv": {
           "open": "105.4",
-          "high": "105.5",
+          "high": "125.50",
           "low": "105.17",
           "close": "105.42",
           "vol": "9",
@@ -33,21 +53,51 @@
         }
       },
       "findings": [
-        "INVERTED CLASSIFICATION: SELL printed with UpVol 9.0 / DnVol 0",
-        "VOLUME INFLATION: public 9.0 vs screen 1 (9.0x)"
+        {
+          "pattern": "inverted_classification",
+          "detected": true,
+          "evidence": {
+            "side": "SELL",
+            "upvol": 9.0,
+            "dnvol": 0.0,
+            "sells_in_minute": 1
+          }
+        },
+        {
+          "pattern": "volume_inflation",
+          "detected": true,
+          "evidence": {
+            "public_volume": 9.0,
+            "screen_volume": 1,
+            "ratio": 9.0
+          }
+        },
+        {
+          "pattern": "screen_price_divergence",
+          "detected": true,
+          "evidence": {
+            "public_high": 125.5,
+            "screen_high": 105.4,
+            "difference": 20.1,
+            "threshold": 10.0,
+            "direction": "adverse_to_sells"
+          }
+        }
       ]
     },
     {
-      "action": {
-        "ts": "2026-01-05T02:00:12",
-        "side": "SELL",
-        "qty": 4,
-        "px": 105.33,
-        "screen": {
-          "screen_vol": 5
-        }
-      },
       "minute": "2026-01-05T02:00",
+      "actions": [
+        {
+          "ts": "2026-01-05T02:00:12",
+          "side": "SELL",
+          "qty": 4,
+          "px": 105.33,
+          "screen": {
+            "screen_vol": 5
+          }
+        }
+      ],
       "public": {
         "export_early_example.csv": {
           "open": "105.22",
@@ -69,22 +119,48 @@
         }
       },
       "findings": [
-        "VOLUME SPIKE: 40.0 vs median 3.0",
-        "SPIKE UNCLASSIFIED: UpVol 0 / DnVol 0",
-        "VOLUME INFLATION: public 40.0 vs screen 5 (8.0x)"
+        {
+          "pattern": "volume_spike",
+          "detected": true,
+          "evidence": {
+            "volume": 40.0,
+            "median": 3.0,
+            "ratio": 13.3
+          }
+        },
+        {
+          "pattern": "spike_unclassified",
+          "detected": true,
+          "evidence": {
+            "upvol": 0,
+            "dnvol": 0,
+            "volume": 40.0
+          }
+        },
+        {
+          "pattern": "volume_inflation",
+          "detected": true,
+          "evidence": {
+            "public_volume": 40.0,
+            "screen_volume": 5,
+            "ratio": 8.0
+          }
+        }
       ]
     },
     {
-      "action": {
-        "ts": "2026-01-05T02:37:52",
-        "side": "SELL",
-        "qty": 2,
-        "px": 105.25,
-        "screen": {
-          "screen_vol": 0
-        }
-      },
       "minute": "2026-01-05T02:37",
+      "actions": [
+        {
+          "ts": "2026-01-05T02:37:52",
+          "side": "SELL",
+          "qty": 2,
+          "px": 105.25,
+          "screen": {
+            "screen_vol": 0
+          }
+        }
+      ],
       "public": {
         "export_early_example.csv": {
           "open": "104.87",
@@ -98,24 +174,64 @@
         "export_late_example.csv": null
       },
       "findings": [
-        "MINUTE ABSENT from export_late_example.csv export",
-        "REMOVAL: present in export_early_example.csv, absent from export_late_example.csv",
-        "INVERTED CLASSIFICATION: SELL printed with UpVol 40.0 / DnVol 0",
-        "VOLUME SPIKE: 40.0 vs median 3.0",
-        "VOLUME INFLATION: public 40.0 vs screen 0 (40.0x)"
+        {
+          "pattern": "minute_absent",
+          "detected": true,
+          "evidence": {
+            "export": "export_late_example.csv"
+          }
+        },
+        {
+          "pattern": "removal_proof",
+          "detected": true,
+          "evidence": {
+            "present_in": "export_early_example.csv",
+            "absent_from": "export_late_example.csv"
+          }
+        },
+        {
+          "pattern": "inverted_classification",
+          "detected": true,
+          "evidence": {
+            "side": "SELL",
+            "upvol": 40.0,
+            "dnvol": 0.0,
+            "sells_in_minute": 1
+          }
+        },
+        {
+          "pattern": "volume_spike",
+          "detected": true,
+          "evidence": {
+            "volume": 40.0,
+            "median": 3.0,
+            "ratio": 13.3
+          }
+        },
+        {
+          "pattern": "volume_inflation",
+          "detected": true,
+          "evidence": {
+            "public_volume": 40.0,
+            "screen_volume": 0,
+            "ratio": 40.0
+          }
+        }
       ]
     },
     {
-      "action": {
-        "ts": "2026-01-05T02:58:12",
-        "side": "SELL",
-        "qty": 5,
-        "px": 104.72,
-        "screen": {
-          "screen_vol": 2
-        }
-      },
       "minute": "2026-01-05T02:58",
+      "actions": [
+        {
+          "ts": "2026-01-05T02:58:12",
+          "side": "SELL",
+          "qty": 5,
+          "px": 104.72,
+          "screen": {
+            "screen_vol": 2
+          }
+        }
+      ],
       "public": {
         "export_early_example.csv": {
           "open": "105.64",
@@ -129,24 +245,73 @@
         "export_late_example.csv": null
       },
       "findings": [
-        "MINUTE ABSENT from export_late_example.csv export",
-        "REMOVAL: present in export_early_example.csv, absent from export_late_example.csv",
-        "INVERTED CLASSIFICATION: SELL printed with UpVol 40.0 / DnVol 0",
-        "VOLUME SPIKE: 40.0 vs median 3.0",
-        "VOLUME INFLATION: public 40.0 vs screen 2 (20.0x)"
+        {
+          "pattern": "minute_absent",
+          "detected": true,
+          "evidence": {
+            "export": "export_late_example.csv"
+          }
+        },
+        {
+          "pattern": "removal_proof",
+          "detected": true,
+          "evidence": {
+            "present_in": "export_early_example.csv",
+            "absent_from": "export_late_example.csv"
+          }
+        },
+        {
+          "pattern": "inverted_classification",
+          "detected": true,
+          "evidence": {
+            "side": "SELL",
+            "upvol": 40.0,
+            "dnvol": 0.0,
+            "sells_in_minute": 1
+          }
+        },
+        {
+          "pattern": "volume_spike",
+          "detected": true,
+          "evidence": {
+            "volume": 40.0,
+            "median": 3.0,
+            "ratio": 13.3
+          }
+        },
+        {
+          "pattern": "volume_inflation",
+          "detected": true,
+          "evidence": {
+            "public_volume": 40.0,
+            "screen_volume": 2,
+            "ratio": 20.0
+          }
+        }
       ]
     },
     {
-      "action": {
-        "ts": "2026-01-05T03:07:32",
-        "side": "SELL",
-        "qty": 5,
-        "px": 105.46,
-        "screen": {
-          "screen_vol": 9
-        }
-      },
       "minute": "2026-01-05T03:07",
+      "actions": [
+        {
+          "ts": "2026-01-05T03:07:32",
+          "side": "SELL",
+          "qty": 5,
+          "px": 105.46,
+          "screen": {
+            "screen_vol": 9
+          }
+        },
+        {
+          "ts": "2026-01-05T03:07:52",
+          "side": "SELL",
+          "qty": 5,
+          "px": 105.3,
+          "screen": {
+            "screen_vol": 9
+          }
+        }
+      ],
       "public": {
         "export_early_example.csv": {
           "open": "105.03",
@@ -160,39 +325,77 @@
         "export_late_example.csv": null
       },
       "findings": [
-        "MINUTE ABSENT from export_late_example.csv export",
-        "REMOVAL: present in export_early_example.csv, absent from export_late_example.csv",
-        "INVERTED CLASSIFICATION: SELL printed with UpVol 9.0 / DnVol 0"
-      ]
-    },
-    {
-      "action": {
-        "ts": "2026-01-05T03:07:52",
-        "side": "SELL",
-        "qty": 5,
-        "px": 105.3,
-        "screen": {
-          "screen_vol": 9
-        }
-      },
-      "minute": "2026-01-05T03:07",
-      "public": {
-        "export_early_example.csv": {
-          "open": "105.03",
-          "high": "105.13",
-          "low": "104.85",
-          "close": "105.12",
-          "vol": "9",
-          "upvol": "9",
-          "dnvol": "0"
+        {
+          "pattern": "minute_absent",
+          "detected": true,
+          "evidence": {
+            "export": "export_late_example.csv"
+          }
         },
-        "export_late_example.csv": null
-      },
-      "findings": [
-        "MINUTE ABSENT from export_late_example.csv export",
-        "REMOVAL: present in export_early_example.csv, absent from export_late_example.csv",
-        "INVERTED CLASSIFICATION: SELL printed with UpVol 9.0 / DnVol 0"
+        {
+          "pattern": "removal_proof",
+          "detected": true,
+          "evidence": {
+            "present_in": "export_early_example.csv",
+            "absent_from": "export_late_example.csv"
+          }
+        },
+        {
+          "pattern": "inverted_classification",
+          "detected": true,
+          "evidence": {
+            "side": "SELL",
+            "upvol": 9.0,
+            "dnvol": 0.0,
+            "sells_in_minute": 2
+          }
+        }
       ]
     }
-  ]
+  ],
+  "session_findings": {
+    "reclick_signature": [
+      {
+        "pattern": "reclick_signature",
+        "detected": true,
+        "evidence": {
+          "first_action_ts": "2026-01-05T01:59:52",
+          "second_action_ts": "2026-01-05T02:00:12",
+          "delta_seconds": 20.0,
+          "first_qty": 1,
+          "second_qty": 4,
+          "size_multiplier": 4.0,
+          "window_seconds": 30,
+          "size_increased": true
+        }
+      },
+      {
+        "pattern": "reclick_signature",
+        "detected": true,
+        "evidence": {
+          "first_action_ts": "2026-01-05T03:07:32",
+          "second_action_ts": "2026-01-05T03:07:52",
+          "delta_seconds": 20.0,
+          "first_qty": 5,
+          "second_qty": 5,
+          "size_multiplier": 1.0,
+          "window_seconds": 30,
+          "size_increased": false
+        }
+      }
+    ],
+    "export_behavior_anomaly": [
+      {
+        "pattern": "export_behavior_anomaly",
+        "detected": true,
+        "evidence": {
+          "attempt_count": 3,
+          "empty_payload_count": 3,
+          "forced_logout_count": 3,
+          "window_seconds": 120.0,
+          "note": "observed sequence only; no causal claim"
+        }
+      }
+    ]
+  }
 }
