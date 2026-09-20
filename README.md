@@ -2,9 +2,7 @@
 
 > **Receipts, not promises.**
 >
-> AMARTIE is an open-source, local-first AI action gate: an owner-facing studio proposes an action, nine judges verify it, and the action either produces a receipt and proceeds or produces a dissent receipt and is refused.
-
-[Try it locally](#try-it) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Issues](https://github.com/amartieai/amartie/issues)
+> AMARTIE is an open-source, local-first AI action gate: an owner-facing studio proposes an action, nine judges verify it, and the action either produces a receipt and proceeds or produces a dissent receipt and refuses.
 
 ## What it is—and is not
 
@@ -14,8 +12,7 @@ It is **not** a hosted security service, a guarantee that a provider cannot swap
 
 ## Try it
 
-For PowerShell and Command Prompt instructions, including virtual-environment
-activation and firewall guidance, see the [Windows setup guide](docs/WINDOWS_SETUP.md).
+For PowerShell and Command Prompt instructions, including virtual-environment activation and firewall guidance, see the [Windows setup guide](docs/WINDOWS_SETUP.md).
 
 ```bash
 git clone https://github.com/amartieai/amartie.git
@@ -37,7 +34,7 @@ Open <http://127.0.0.1:8715/visuals/cockpit.html>. Keep the server bound to loca
 
 ## v0.1: in and out
 
-**In:** gate protocol, nine-judge verification, unanimous PASS, model-lock, evidence floor, dissent receipts, hash calculation, forensic audit tools, local cockpit, and tests.
+**In:** gate protocol, nine-judge verification, unanimous PASS, seat-locked model assignments, evidence floor, dissent receipts, hash calculation, forensic audit tools, local cockpit, and tests.
 
 **Not yet in:** durable receipt-chain replay, production vault encryption, complete permission enforcement, a proven jail, hosted money or mail actions, or a public-bind deployment model.
 
