@@ -440,16 +440,36 @@ class TestJudgeGate:
         assert g.verify_chain_integrity() is False
 
     def test_unreadable_file_fails_closed(self, tmp_path):
-        """Unreadable file should set store_corrupted."""
+        """Unreadable file should set store_corrupted (platform-independent)."""
+        import unittest.mock
         store = tmp_path / "receipts.json"
         store.write_text("[]")
-        # Make file unreadable
-        store.chmod(0o000)
+        
+        # Mock the open function to simulate IOError
+        with unittest.mock.patch("builtins.open", side_effect=OSError("Permission denied")):
+            g = JudgeGate(receipt_store_path=str(store))
+            assert g.store_corrupted is True
+            assert len(g.receipts) == 0
+
+    def test_corrupted_store_refuses_new_actions(self, tmp_path):
+        """A gate initialized from a corrupted store must refuse new actions."""
+        store = tmp_path / "receipts.json"
+        # Write corrupted data
+        store.write_text("not valid json")
+        
         g = JudgeGate(receipt_store_path=str(store))
         assert g.store_corrupted is True
-        assert len(g.receipts) == 0
-        # Restore permissions for cleanup
-        store.chmod(0o644)
+        
+        verdicts = self._make_verdicts()
+        
+        # Attempt to verify an action on a corrupted store
+        with pytest.raises(RuntimeError, match="corrupted"):
+            g.verify_action("test", {"key": "value"}, verdicts)
+        
+        # Verify store was not overwritten (still contains the original corrupted data)
+        with open(store) as f:
+            content = f.read()
+        assert content == "not valid json"
 
     def test_no_test_writes_to_home(self, tmp_path):
         """Verify no test writes to the user's real ~/.amartie."""

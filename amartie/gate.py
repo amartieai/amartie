@@ -298,6 +298,10 @@ class JudgeGate:
         Returns:
             (passed, receipt): Whether the action passed and the receipt.
         """
+        # Fail closed: refuse new actions if the store is corrupted
+        if self._store_corrupted:
+            raise RuntimeError("Receipt store is corrupted; refusing new actions until repaired")
+
         # Validate roster
         roster_valid, roster_reason = self._validate_roster(judge_responses)
         all_passed = True
