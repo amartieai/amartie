@@ -421,6 +421,36 @@ class TestJudgeGate:
         assert len(g2.receipts) == 0
         assert g2.verify_chain_integrity() is False
 
+    def test_malformed_json_fails_closed(self, tmp_path):
+        """Malformed JSON should set store_corrupted, not silently return."""
+        store = tmp_path / "receipts.json"
+        store.write_text("not valid json {{{")
+        g = JudgeGate(receipt_store_path=str(store))
+        assert g.store_corrupted is True
+        assert len(g.receipts) == 0
+        assert g.verify_chain_integrity() is False
+
+    def test_non_list_json_root_fails_closed(self, tmp_path):
+        """JSON root that is not a list should set store_corrupted."""
+        store = tmp_path / "receipts.json"
+        store.write_text(json.dumps({"not": "a list"}))
+        g = JudgeGate(receipt_store_path=str(store))
+        assert g.store_corrupted is True
+        assert len(g.receipts) == 0
+        assert g.verify_chain_integrity() is False
+
+    def test_unreadable_file_fails_closed(self, tmp_path):
+        """Unreadable file should set store_corrupted."""
+        store = tmp_path / "receipts.json"
+        store.write_text("[]")
+        # Make file unreadable
+        store.chmod(0o000)
+        g = JudgeGate(receipt_store_path=str(store))
+        assert g.store_corrupted is True
+        assert len(g.receipts) == 0
+        # Restore permissions for cleanup
+        store.chmod(0o644)
+
     def test_no_test_writes_to_home(self, tmp_path):
         """Verify no test writes to the user's real ~/.amartie."""
         # The _make_gate helper uses tmp_path, not home

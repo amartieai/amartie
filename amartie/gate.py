@@ -198,9 +198,13 @@ class JudgeGate:
             with open(self.receipt_store_path, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
         except (json.JSONDecodeError, OSError):
+            # Malformed JSON or unreadable file — fail closed
+            self._store_corrupted = True
             return
 
         if not isinstance(data, list):
+            # Invalid structure — fail closed
+            self._store_corrupted = True
             return
 
         if not data:
