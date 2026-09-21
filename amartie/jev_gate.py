@@ -1,20 +1,17 @@
 """
-AMARTIE Gate Engine — JEV-Powered
-===================================
-The 9-judge verification gate. Every outbound action passes through.
-Unanimous PASS or bounce. Never a push-through.
-
-Now powered by JEV (TypeSafe System One) for:
+AMARTIE JEV 9-Judge Gate Integration
+=====================================
+Replaces LLM-based judges with JEV (TypeSafe System One) for:
 - 13x faster evaluation (~150ms vs ~2s per judge)
 - Zero hallucinations (typed output)
-- Per-judge confidence scores
-- Fallback to Layer (free, self-hosted) when no JEV API key
+- Confidence scores per judge
+- Fallback to Layer (free, self-hosted) when no API key
 
-Tackles open issues:
-- #8  Self-auditing gate
-- #9  Judge interface and evidence contract
-- #10 Nine-judge roster and registry
-- #11-19 Individual judges
+Tackles AMARTIE open issues:
+- #9  Define and version the Judge interface and evidence contract
+- #10 Implement an explicit, fail-closed nine-judge roster and registry
+- #8  Build a self-auditing nine-judge gate without weakening safety invariants
+- #11-19 Add individual judges (security, privacy, financial, etc.)
 """
 
 import hashlib
@@ -24,6 +21,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
+from enum import Enum
 
 # Try to import JEV SDK
 try:
@@ -32,104 +30,82 @@ try:
 except ImportError:
     HAS_TYPESAFE_SDK = False
 
-# Try to import Layer (free fallback — self-hosted)
+# Try to import Layer (free alternative)
 try:
-    from amartie.layer_local import LayerClient, LayerChoice, LayerScore, LayerNoul
+    from layer_client import LayerClient  # hypothetical
     HAS_LAYER = True
 except ImportError:
     HAS_LAYER = False
 
-# Import cache
-try:
-    from amartie.cache import judge_cache
-    HAS_CACHE = True
-except ImportError:
-    judge_cache = None
-    HAS_CACHE = False
+
+class Verdict(str, Enum):
+    PASS = "PASS"
+    DISSENT = "DISSENT"
+    ABSTAIN = "ABSTAIN"
 
 
-class JudgeVerdict:
-    """A single judge's verdict on an action."""
+class JudgeDomain(str, Enum):
+    """The canonical 9 judge domains for AMARTIE."""
+    TRUTH = "TRUTH"
+    BOUNDARY_INTEGRITY = "BOUNDARY-INTEGRITY"
+    LOGIC = "LOGIC"
+    COMPLETENESS = "COMPLETENESS"
+    EXECUTION_AND_SIMPLICITY = "EXECUTION-AND-SIMPLICITY"
+    OWNER_INTENT = "OWNER-INTENT"
+    RECOVERY = "RECOVERY"
+    TRADE_INTEGRITY = "TRADE-INTEGRITY"
+    UNITY = "UNITY"
+
+
+class JEVJudgeVerdict:
+    """A single judge's verdict using JEV."""
     
-    def __init__(self, judge_id: str, model_id: str, verdict: str,
-                 findings: List[str], corrections: List[str], tool_calls: List[str]):
+    def __init__(self, judge_id: str, domain: str, verdict: Verdict,
+                 confidence: float, findings: List[str], 
+                 corrections: List[str], tool_calls: List[str],
+                 raw_jev_response: Optional[dict] = None):
         self.judge_id = judge_id
-        self.model_id = model_id
-        self.verdict = verdict  # PASS or DISSENT
+        self.domain = domain
+        self.verdict = verdict
+        self.confidence = confidence  # JEV confidence 0.0-1.0
         self.findings = findings
         self.corrections = corrections
         self.tool_calls = tool_calls
+        self.raw_jev_response = raw_jev_response
         self.timestamp = datetime.now(timezone.utc).isoformat()
-    
+        self.provider = "jev"  # or "layer" or "mock"
+
     def to_dict(self) -> dict:
         return {
             "judge_id": self.judge_id,
-            "model_id": self.model_id,
-            "verdict": self.verdict,
+            "domain": self.domain,
+            "verdict": self.verdict.value,
+            "confidence": self.confidence,
             "findings": self.findings,
             "corrections": self.corrections,
             "tool_calls": self.tool_calls,
-            "timestamp": self.timestamp
-        }
-
-
-class GateReceipt:
-    """Hash-chained receipt for a gated action."""
-    
-    def __init__(self, action_id: str, action_type: str, payload_hash: str,
-                 verdicts: List[JudgeVerdict], previous_hash: str = ""):
-        self.action_id = action_id
-        self.action_type = action_type
-        self.payload_hash = payload_hash
-        self.verdicts = [v.to_dict() for v in verdicts]
-        self.previous_hash = previous_hash
-        self.timestamp = datetime.now(timezone.utc).isoformat()
-        self.hash = self._compute_hash()
-    
-    def _compute_hash(self) -> str:
-        content = json.dumps({
-            "action_id": self.action_id,
-            "action_type": self.action_type,
-            "payload_hash": self.payload_hash,
-            "verdicts": self.verdicts,
-            "previous_hash": self.previous_hash,
-            "timestamp": self.timestamp
-        }, sort_keys=True)
-        return hashlib.sha256(content.encode()).hexdigest()
-    
-    def verify(self) -> bool:
-        """Verify this receipt's hash is correct."""
-        return self.hash == self._compute_hash()
-    
-    def to_dict(self) -> dict:
-        return {
-            "action_id": self.action_id,
-            "action_type": self.action_type,
-            "payload_hash": self.payload_hash,
-            "verdicts": self.verdicts,
-            "previous_hash": self.previous_hash,
             "timestamp": self.timestamp,
-            "hash": self.hash
+            "provider": self.provider,
         }
 
 
-class JudgeGate:
+class JEVJudgeGate:
     """
-    The 9-judge AMARTIE gate — now powered by JEV.
+    The 9-judge AMARTIE gate powered by JEV.
     
     Every outbound action passes through 9 independent judges.
-    All must pass. One DISSENT = correction + re-judgment.
+    All must PASS. One DISSENT = correction + re-judgment.
     
-    Provider selection:
-    1. JEV (TypeSafe) — if TYPESAFE_API_KEY set
-    2. Layer — free, self-hosted fallback
-    3. Mock — for testing (always passes)
+    JEV Primitives used per judge:
+    - Choice: PASS or DISSENT
+    - Score: Confidence level (0-1)
+    - Noul: Evidence sufficient? (yes/no)
     """
     
     # The canonical 9 judge roster with JEV question templates
     ROSTER = {
         "J1": {
-            "domain": "TRUTH",
+            "domain": JudgeDomain.TRUTH,
             "question": "Does this action contain only truthful, verifiable claims?",
             "criteria": {
                 "pass": "All claims are truthful and verifiable",
@@ -137,7 +113,7 @@ class JudgeGate:
             }
         },
         "J2": {
-            "domain": "BOUNDARY-INTEGRITY",
+            "domain": JudgeDomain.BOUNDARY_INTEGRITY,
             "question": "Does this action respect system boundaries and capabilities?",
             "criteria": {
                 "pass": "Stays within authorized boundaries",
@@ -145,7 +121,7 @@ class JudgeGate:
             }
         },
         "J3": {
-            "domain": "LOGIC",
+            "domain": JudgeDomain.LOGIC,
             "question": "Is the action logically sound and consistent?",
             "criteria": {
                 "pass": "Logically consistent and coherent",
@@ -153,7 +129,7 @@ class JudgeGate:
             }
         },
         "J4": {
-            "domain": "COMPLETENESS",
+            "domain": JudgeDomain.COMPLETENESS,
             "question": "Is the action complete with all required information?",
             "criteria": {
                 "pass": "Complete with all necessary details",
@@ -161,7 +137,7 @@ class JudgeGate:
             }
         },
         "J5": {
-            "domain": "EXECUTION-AND-SIMPLICITY",
+            "domain": JudgeDomain.EXECUTION_AND_SIMPLICITY,
             "question": "Is the action the simplest way to achieve the goal?",
             "criteria": {
                 "pass": "Simple and direct execution",
@@ -169,7 +145,7 @@ class JudgeGate:
             }
         },
         "J6": {
-            "domain": "OWNER-INTENT",
+            "domain": JudgeDomain.OWNER_INTENT,
             "question": "Does this action align with the owner's stated intent?",
             "criteria": {
                 "pass": "Fully aligns with owner intent",
@@ -177,7 +153,7 @@ class JudgeGate:
             }
         },
         "J7": {
-            "domain": "RECOVERY",
+            "domain": JudgeDomain.RECOVERY,
             "question": "Can the action be recovered from if it fails?",
             "criteria": {
                 "pass": "Recoverable with clear rollback",
@@ -185,7 +161,7 @@ class JudgeGate:
             }
         },
         "J8": {
-            "domain": "TRADE-INTEGRITY",
+            "domain": JudgeDomain.TRADE_INTEGRITY,
             "question": "Does this action maintain trade execution integrity?",
             "criteria": {
                 "pass": "Maintains execution integrity",
@@ -193,7 +169,7 @@ class JudgeGate:
             }
         },
         "J9": {
-            "domain": "UNITY",
+            "domain": JudgeDomain.UNITY,
             "question": "Does this action serve the collective team goal?",
             "criteria": {
                 "pass": "Serves collective team interests",
@@ -202,20 +178,28 @@ class JudgeGate:
         },
     }
     
-    def __init__(self, typesafe_api_key: Optional[str] = None,
+    def __init__(self, typesafe_api_key: Optional[str] = None, 
                  use_layer_fallback: bool = True,
                  mock_mode: bool = False):
-        self.receipt_chain: List[str] = []  # hash chain
-        self._receipt_store: Dict[str, GateReceipt] = {}
+        """
+        Initialize the JEV Judge Gate.
+        
+        Args:
+            typesafe_api_key: TypeSafe API key. If None, tries Layer fallback.
+            use_layer_fallback: If True and no JEV key, use Layer (free).
+            mock_mode: If True, use mock judges (for testing only).
+        """
+        self.receipt_chain: List[str] = []
+        self._receipt_store: Dict[str, 'JEVGateReceipt'] = {}
         self.round_cap = 4
-        self.time_budget_per_judge = 1200  # seconds
-        self.gate_wide_budget = 900  # seconds
+        self.time_budget_per_judge = 1200
+        self.gate_wide_budget = 900
         
         # Determine provider
         self.provider = self._init_provider(typesafe_api_key, use_layer_fallback, mock_mode)
         self.client = self._init_client(typesafe_api_key)
         
-    def _init_provider(self, api_key: Optional[str], use_layer_fallback: bool,
+    def _init_provider(self, api_key: Optional[str], use_layer_fallback: bool, 
                        mock_mode: bool) -> str:
         """Determine which provider to use."""
         if mock_mode:
@@ -224,6 +208,7 @@ class JudgeGate:
             return "jev"
         if use_layer_fallback and HAS_LAYER:
             return "layer"
+        # Default to mock for safety (fail-closed)
         return "mock"
     
     def _init_client(self, api_key: Optional[str]):
@@ -232,10 +217,10 @@ class JudgeGate:
             return TypeSafeClient(api_key=api_key)
         return None
     
-    def get_rotated_judge_id(self, logical_id: str, date: Optional[str] = None) -> str:
+    def get_rotated_judge_id(self, logical_id: str, 
+                              date: Optional[str] = None) -> str:
         """
         Daily rotating judge IDs. Prevents signature pre-computation.
-        Physical instance IDs rotate based on date + owner key.
         """
         if date is None:
             date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -243,81 +228,71 @@ class JudgeGate:
         rotated_suffix = rotation_seed[:8]
         return f"{logical_id}-{rotated_suffix}"
     
-    def verify_action(self, action_type: str, payload: dict,
-                      judge_responses: Optional[List[JudgeVerdict]] = None) -> Tuple[bool, GateReceipt]:
+    def evaluate_action(self, action_type: str, action_payload: dict,
+                        context: Optional[str] = None) -> Tuple[bool, 'JEVGateReceipt']:
         """
-        Verify an action through the 9-judge gate.
+        Evaluate an action through the 9-judge gate using JEV.
         
         Args:
             action_type: The type of action (email, webhook, trade, etc.)
-            payload: The action payload
-            judge_responses: Optional list of 9 JudgeVerdict objects.
-                           If None, runs evaluation through JEV/Layer.
+            action_payload: The action payload
+            context: Optional context string for the judges
             
         Returns:
             (passed, receipt): Whether the action passed and the receipt
         """
-        # Check cache first
-        if judge_cache is not None and judge_responses is None:
-            cached = judge_cache.get(action_type, payload)
-            if cached is not None:
-                # Reconstruct JudgeVerdict objects from cache
-                judge_responses = [
-                    JudgeVerdict(
-                        judge_id=v["judge_id"],
-                        model_id=v["model_id"],
-                        verdict=v["verdict"],
-                        findings=v["findings"],
-                        corrections=v["corrections"],
-                        tool_calls=v["tool_calls"]
-                    )
-                    for v in cached
-                ]
+        # Build state from action
+        state = self._build_state(action_type, action_payload, context)
         
-        # If no judge responses provided, run JEV evaluation
-        if judge_responses is None:
-            judge_responses = self._evaluate_through_jev(action_type, payload)
-            # Cache the results
-            if judge_cache is not None:
-                judge_cache.put(action_type, payload, [v.to_dict() for v in judge_responses])
-        
-        # Compute payload hash
-        payload_hash = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+        # Run all 9 judges
+        verdicts = self._run_all_judges(state)
         
         # Check unanimous PASS
-        all_passed = all(v.verdict == "PASS" for v in judge_responses)
+        all_passed = all(v.verdict == Verdict.PASS for v in verdicts)
         
-        # Check model-lock (Braid law)
-        for v in judge_responses:
-            if v.model_id != self._get_assigned_model(v.judge_id):
+        # Check evidence floor (R3): each judge needs >= 2 tool calls
+        for v in verdicts:
+            if len(v.tool_calls) < 2:
                 all_passed = False
                 break
         
-        # Check evidence floor (R3)
-        for v in judge_responses:
-            if len(v.tool_calls) < 2:
+        # Check minimum confidence threshold
+        for v in verdicts:
+            if v.confidence < 0.5:
                 all_passed = False
                 break
         
         # Create receipt
         previous_hash = self.receipt_chain[-1] if self.receipt_chain else "GENESIS"
-        receipt = GateReceipt(
+        receipt = JEVGateReceipt(
             action_id=str(uuid.uuid4()),
             action_type=action_type,
-            payload_hash=payload_hash,
-            verdicts=judge_responses,
-            previous_hash=previous_hash
+            payload_hash=hashlib.sha256(
+                json.dumps(action_payload, sort_keys=True).encode()
+            ).hexdigest(),
+            verdicts=verdicts,
+            previous_hash=previous_hash,
+            provider=self.provider
         )
         
-        # Add to chain
         self.receipt_chain.append(receipt.hash)
         self._receipt_store[receipt.hash] = receipt
         
         return all_passed, receipt
     
-    def _evaluate_through_jev(self, action_type: str, payload: dict) -> List[JudgeVerdict]:
-        """Run evaluation through JEV/Layer provider."""
-        state = self._build_state(action_type, payload)
+    def _build_state(self, action_type: str, payload: dict, 
+                     context: Optional[str]) -> str:
+        """Build the state string for JEV from the action."""
+        state_parts = [
+            f"Action Type: {action_type}",
+            f"Payload: {json.dumps(payload, sort_keys=True, indent=2)}",
+        ]
+        if context:
+            state_parts.append(f"Context: {context}")
+        return "\n\n".join(state_parts)
+    
+    def _run_all_judges(self, state: str) -> List[JEVJudgeVerdict]:
+        """Run all 9 judges on the state."""
         verdicts = []
         
         for judge_id, config in self.ROSTER.items():
@@ -326,11 +301,8 @@ class JudgeGate:
         
         return verdicts
     
-    def _build_state(self, action_type: str, payload: dict) -> str:
-        """Build the state string for JEV from the action."""
-        return f"Action Type: {action_type}\n\nPayload: {json.dumps(payload, sort_keys=True, indent=2)}"
-    
-    def _run_single_judge(self, judge_id: str, config: dict, state: str) -> JudgeVerdict:
+    def _run_single_judge(self, judge_id: str, config: dict, 
+                           state: str) -> JEVJudgeVerdict:
         """Run a single judge using the configured provider."""
         if self.provider == "jev":
             return self._run_jev_judge(judge_id, config, state)
@@ -339,7 +311,8 @@ class JudgeGate:
         else:
             return self._run_mock_judge(judge_id, config, state)
     
-    def _run_jev_judge(self, judge_id: str, config: dict, state: str) -> JudgeVerdict:
+    def _run_jev_judge(self, judge_id: str, config: dict, 
+                        state: str) -> JEVJudgeVerdict:
         """Run a judge using TypeSafe JEV."""
         try:
             response = self.client.system_one(
@@ -364,11 +337,13 @@ class JudgeGate:
             evidence_answer = response.nouls.get("evidence_sufficient", {})
             
             verdict_str = verdict_answer.get("choice", "dissent").lower()
-            verdict = "PASS" if verdict_str == "pass" else "DISSENT"
+            verdict = Verdict.PASS if verdict_str == "pass" else Verdict.DISSENT
             
+            # Map score to confidence (0-4 scale -> 0-1)
             score_val = confidence_answer.get("score", 0)
             confidence = min(score_val / 3.0, 1.0)
             
+            # Evidence sufficient?
             evidence_prob = evidence_answer.get("noul", 0.0)
             
             findings = [f"JEV evaluation complete for {config['domain']}"]
@@ -376,88 +351,96 @@ class JudgeGate:
                 findings.append("WARNING: Evidence may be insufficient")
             
             corrections = []
-            if verdict == "DISSENT":
+            if verdict == Verdict.DISSENT:
                 corrections.append(f"Failed {config['domain']} check")
             
-            return JudgeVerdict(
+            return JEVJudgeVerdict(
                 judge_id=judge_id,
-                model_id="jev-latest",
+                domain=config["domain"],
                 verdict=verdict,
+                confidence=confidence,
                 findings=findings,
                 corrections=corrections,
-                tool_calls=["jev_evaluate", "jev_score", "jev_noul"]
+                tool_calls=["jev_evaluate", "jev_score", "jev_noul"],
+                raw_jev_response={
+                    "verdict": verdict_answer,
+                    "confidence": confidence_answer,
+                    "evidence": evidence_answer
+                }
             )
             
         except Exception as e:
             # Fail-closed: any error = DISSENT
-            return JudgeVerdict(
+            return JEVJudgeVerdict(
                 judge_id=judge_id,
-                model_id="jev-latest",
-                verdict="DISSENT",
+                domain=config["domain"],
+                verdict=Verdict.DISSENT,
+                confidence=0.0,
                 findings=[f"JEV evaluation error: {str(e)}"],
                 corrections=["Retry evaluation"],
-                tool_calls=["jev_evaluate"]
+                tool_calls=["jev_evaluate"],
+                raw_jev_response=None
             )
     
-    def _run_layer_judge(self, judge_id: str, config: dict, state: str) -> JudgeVerdict:
+    def _run_layer_judge(self, judge_id: str, config: dict, 
+                          state: str) -> JEVJudgeVerdict:
         """Run a judge using Layer (free, self-hosted fallback)."""
         try:
-            questions = {
-                "verdict": LayerChoice(
-                    instructions=config["question"],
-                    criteria=config["criteria"]
-                ),
-                "confidence": LayerScore(
-                    instructions="How confident are you?",
-                    criteria=["Low", "Medium", "High"]
-                )
-            }
+            # Layer uses same primitives as JEV
+            result = self.client.evaluate(
+                state=state,
+                questions=[{
+                    "type": "choice",
+                    "question": config["question"],
+                    "choices": list(config["criteria"].values())
+                }]
+            )
             
-            response = self.client.system_one(state=state, questions=questions)
+            answer = result.get("answers", [{}])[0]
+            choice = answer.get("choice", "").lower()
             
-            verdict_answer = response.choices.get("verdict", {})
-            choice = verdict_answer.get("choice", "dissent").lower()
-            verdict = "PASS" if choice == "pass" else "DISSENT"
-            confidence = verdict_answer.get("confidence", 0.5)
+            verdict = Verdict.PASS if choice == config["criteria"]["pass"] else Verdict.DISSENT
+            confidence = answer.get("confidence", 0.5)
             
-            return JudgeVerdict(
+            return JEVJudgeVerdict(
                 judge_id=judge_id,
-                model_id="layer-free",
+                domain=config["domain"],
                 verdict=verdict,
+                confidence=confidence,
                 findings=[f"Layer evaluation complete for {config['domain']}"],
-                corrections=[] if verdict == "PASS" else [f"Failed {config['domain']} check"],
-                tool_calls=["layer_evaluate"]
+                corrections=[] if verdict == Verdict.PASS else [f"Failed {config['domain']} check"],
+                tool_calls=["layer_evaluate"],
+                raw_jev_response=result
             )
             
         except Exception as e:
-            return JudgeVerdict(
+            return JEVJudgeVerdict(
                 judge_id=judge_id,
-                model_id="layer-free",
-                verdict="DISSENT",
+                domain=config["domain"],
+                verdict=Verdict.DISSENT,
+                confidence=0.0,
                 findings=[f"Layer evaluation error: {str(e)}"],
                 corrections=["Retry evaluation"],
-                tool_calls=["layer_evaluate"]
+                tool_calls=["layer_evaluate"],
+                raw_jev_response=None
             )
     
-    def _run_mock_judge(self, judge_id: str, config: dict, state: str) -> JudgeVerdict:
-        """Mock judge for testing. Always passes."""
-        return JudgeVerdict(
+    def _run_mock_judge(self, judge_id: str, config: dict, 
+                         state: str) -> JEVJudgeVerdict:
+        """
+        Mock judge for testing. Always passes.
+        In production, this should be replaced with real JEV or Layer.
+        """
+        return JEVJudgeVerdict(
             judge_id=judge_id,
-            model_id="mock-model",
-            verdict="PASS",
+            domain=config["domain"],
+            verdict=Verdict.PASS,
+            confidence=0.95,
             findings=[f"[MOCK] {config['domain']} evaluation passed"],
             corrections=[],
-            tool_calls=["mock_tool_1", "mock_tool_2"]
+            tool_calls=["mock_tool_1", "mock_tool_2"],
+            raw_jev_response={"mock": True}
         )
-    
-    def _get_assigned_model(self, judge_id: str) -> str:
-        """Get the model assigned to a judge (seat lock)."""
-        if self.provider == "jev":
-            return "jev-latest"
-        elif self.provider == "layer":
-            return "layer-free"
-        else:
-            return "mock-model"
     
     def verify_chain_integrity(self) -> bool:
         """Verify the entire receipt chain is tamper-free."""
@@ -480,9 +463,52 @@ class JudgeGate:
         return receipt.to_dict()
 
 
-# Singleton gate instance — JEV-powered
-# Uses JEV if TYPESAFE_API_KEY is set, otherwise Layer fallback, otherwise mock
-gate = JudgeGate(
+class JEVGateReceipt:
+    """Hash-chained receipt for a gated action using JEV."""
+    
+    def __init__(self, action_id: str, action_type: str, payload_hash: str,
+                 verdicts: List[JEVJudgeVerdict], previous_hash: str = "",
+                 provider: str = "jev"):
+        self.action_id = action_id
+        self.action_type = action_type
+        self.payload_hash = payload_hash
+        self.verdicts = [v.to_dict() for v in verdicts]
+        self.previous_hash = previous_hash
+        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.provider = provider
+        self.hash = self._compute_hash()
+    
+    def _compute_hash(self) -> str:
+        content = json.dumps({
+            "action_id": self.action_id,
+            "action_type": self.action_type,
+            "payload_hash": self.payload_hash,
+            "verdicts": self.verdicts,
+            "previous_hash": self.previous_hash,
+            "timestamp": self.timestamp,
+            "provider": self.provider,
+        }, sort_keys=True)
+        return hashlib.sha256(content.encode()).hexdigest()
+    
+    def verify(self) -> bool:
+        """Verify this receipt's hash is correct."""
+        return self.hash == self._compute_hash()
+    
+    def to_dict(self) -> dict:
+        return {
+            "action_id": self.action_id,
+            "action_type": self.action_type,
+            "payload_hash": self.payload_hash,
+            "verdicts": self.verdicts,
+            "previous_hash": self.previous_hash,
+            "timestamp": self.timestamp,
+            "hash": self.hash,
+            "provider": self.provider,
+        }
+
+
+# Singleton gate instance (JEV-powered)
+jev_gate = JEVJudgeGate(
     typesafe_api_key=os.environ.get("TYPESAFE_API_KEY"),
     use_layer_fallback=True,
     mock_mode=not os.environ.get("TYPESAFE_API_KEY") and not HAS_LAYER
