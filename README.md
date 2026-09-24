@@ -10,6 +10,10 @@ AMARTIE is an alpha verification and audit layer for AI tool actions. It verifie
 
 It is **not** a hosted security service, a guarantee that a provider cannot swap a model, a sandbox proven to contain every side effect, or production cryptography for secrets. Vault public-key encryption, persistent receipt replay, and complete OS-level permission enforcement are not finished in v0.1.
 
+## A real use case: Trade Witness
+
+AMARTIE's witness engine, pointed at the trading floor first — an always-on, hash-chained recorder that catches vanishing bars, volume spikes, and fill-time divergence, so any trader can see whether each execution was actually kosher. [Try Trade Witness](https://github.com/amartieai/trade-witness) → its own repo, one-command install.
+
 ## Try it
 
 For PowerShell and Command Prompt instructions, including virtual-environment activation and firewall guidance, see the [Windows setup guide](docs/WINDOWS_SETUP.md).
