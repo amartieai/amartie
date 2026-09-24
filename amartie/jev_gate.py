@@ -45,7 +45,7 @@ JUDGE_CONTRACT_VERSION = "1.0.0"
 ROSTER_VERSION = "1.0.0"
 
 # Canonical ordered roster for validation.
-CANONICAL_ROSTER_ORDER = ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9"]
+CANONICAL_ROSTER_ORDER = ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9", "J10", "J11", "J12", "J13"]
 
 
 class Verdict(str, Enum):
@@ -55,7 +55,7 @@ class Verdict(str, Enum):
 
 
 class JudgeDomain(str, Enum):
-    """The canonical 9 judge domains for AMARTIE."""
+    """The canonical 13 judge domains for AMARTIE."""
     TRUTH = "TRUTH"
     BOUNDARY_INTEGRITY = "BOUNDARY-INTEGRITY"
     LOGIC = "LOGIC"
@@ -65,6 +65,10 @@ class JudgeDomain(str, Enum):
     RECOVERY = "RECOVERY"
     TRADE_INTEGRITY = "TRADE-INTEGRITY"
     UNITY = "UNITY"
+    RESOURCE_QUOTA = "RESOURCE-QUOTA"
+    POLICY_COMPLIANCE = "POLICY-COMPLIANCE"
+    DESTINATION_SAFETY = "DESTINATION-SAFETY"
+    USER_INTENT = "USER-INTENT"
 
 
 class EvidencePackage:
@@ -161,7 +165,7 @@ class JEVJudgeVerdict:
         """Validate a verdict dictionary against the contract.
 
         Returns a list of error strings (empty = valid).
-        Raises no exceptions — caller decides how to handle errors.
+        Raises no exceptions -- caller decides how to handle errors.
         """
         errors = []
 
@@ -191,14 +195,14 @@ class JEVJudgeVerdict:
         # ── Evidence (fail-closed on missing evidence) ───────────────────
         evidence = verdict_dict.get("evidence")
         if not evidence:
-            errors.append("Missing evidence — every verdict requires evidence")
+            errors.append("Missing evidence -- every verdict requires evidence")
         elif not isinstance(evidence, dict):
             errors.append(f"Evidence must be a dict, got {type(evidence).__name__}")
         else:
             items = evidence.get("evidence_items", [])
             if not isinstance(items, list) or len(items) < 1:
                 errors.append(
-                    "Insufficient evidence — at least one evidence_item required"
+                    "Insufficient evidence -- at least one evidence_item required"
                 )
 
         # ── Findings and tool_calls must be lists ────────────────────────
@@ -299,10 +303,10 @@ class JEVJudgeGate:
         },
         "J2": {
             "domain": JudgeDomain.BOUNDARY_INTEGRITY,
-            "question": "Does this action respect system boundaries and capabilities?",
+            "question": "Does this action respect system boundaries, caller authorization, and secret integrity?",
             "criteria": {
-                "pass": "Stays within authorized boundaries",
-                "dissent": "Exceeds boundaries or capabilities"
+                "pass": "Caller identity present, capabilities declared, no secrets leaked",
+                "dissent": "Missing caller, undeclared capabilities, or secret leakage detected"
             }
         },
         "J3": {
@@ -361,6 +365,38 @@ class JEVJudgeGate:
                 "dissent": "Serves individual over collective"
             }
         },
+        "J10": {
+            "domain": JudgeDomain.RESOURCE_QUOTA,
+            "question": "Does this action respect resource quotas (tokens, time, storage, API calls)?",
+            "criteria": {
+                "pass": "Within all resource quotas",
+                "dissent": "Exceeds one or more resource quotas"
+            }
+        },
+        "J11": {
+            "domain": JudgeDomain.POLICY_COMPLIANCE,
+            "question": "Does this action comply with declared policies and resolve conflicts by precedence?",
+            "criteria": {
+                "pass": "Complies with policy precedence",
+                "dissent": "Policy conflict or missing precedence"
+            }
+        },
+        "J12": {
+            "domain": JudgeDomain.DESTINATION_SAFETY,
+            "question": "Is the action's destination known and its side effects safe?",
+            "criteria": {
+                "pass": "Known destination, safe side effects",
+                "dissent": "Unknown destination or unsafe side effects"
+            }
+        },
+        "J13": {
+            "domain": JudgeDomain.USER_INTENT,
+            "question": "Does the action's declared intent match its parameters, and is it free of prompt injection?",
+            "criteria": {
+                "pass": "Intent matches parameters, no injection signals",
+                "dissent": "Intent/action mismatch or injection detected"
+            }
+        },
     }
 
     def __init__(self, typesafe_api_key: Optional[str] = None,
@@ -387,7 +423,7 @@ class JEVJudgeGate:
             roster_errors = self._check_roster_integrity(self.ROSTER)
             if roster_errors:
                 raise RuntimeError(
-                    f"Roster validation FAILED — gate cannot start:\n"
+                    f"Roster validation FAILED -- gate cannot start:\n"
                     + "\n".join(f"  - {e}" for e in roster_errors)
                 )
 
@@ -408,9 +444,9 @@ class JEVJudgeGate:
         errors = []
 
         # ── Exactly 9 judges ────────────────────────────────────────────
-        if len(roster) != 9:
+        if len(roster) != 13:
             errors.append(
-                f"Expected exactly 9 judges, got {len(roster)}"
+                f"Expected exactly 13 judges, got {len(roster)}"
             )
 
         # ── No duplicate IDs (dict keys are unique, but check ordering) ──
@@ -446,7 +482,7 @@ class JEVJudgeGate:
     def diagnostic_roster() -> List[dict]:
         """Return a safe diagnostic view of the active roster.
 
-        No secrets, no question templates — just judge IDs and domains.
+        No secrets, no question templates -- just judge IDs and domains.
         Suitable for logging, /status endpoints, and admin tools.
         """
         return [
@@ -466,6 +502,20 @@ class JEVJudgeGate:
             "judges": sorted(self.ROSTER.keys()),
             "contract_version": JUDGE_CONTRACT_VERSION,
         }
+
+    def _get_assigned_model(self, judge_id: str) -> str:
+        """Get the model assigned to a judge (seat lock / Braid law).
+
+        Mirrors gate.py's pattern -- the model identity is determined by the
+        provider, not the individual judge. Every judge in the same gate
+        session must report the same model_id for their provider tier.
+        """
+        if self.provider == "jev":
+            return "jev-latest"
+        elif self.provider == "layer":
+            return "layer-free"
+        else:
+            return "mock-model"
 
     # ── Provider init ─────────────────────────────────────────────────────
 
@@ -535,6 +585,12 @@ class JEVJudgeGate:
 
         # Check unanimous PASS
         all_passed = all(v.verdict == Verdict.PASS for v in verdicts)
+
+        # Check model-lock (Braid law): every verdict must match its seat
+        for v in verdicts:
+            if v.model_id != self._get_assigned_model(v.judge_id):
+                all_passed = False
+                break
 
         # Check evidence floor (R3): each judge needs >= 2 tool calls
         for v in verdicts:

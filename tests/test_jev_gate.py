@@ -1,10 +1,10 @@
 """
 AMARTIE JEV Gate Integration Tests
 ===================================
-Tests for the JEV-powered 9-judge gate.
+Tests for the JEV-powered 13-judge gate.
 Tackles open issues:
 - #9  Define and version the Judge interface
-- #10 Implement explicit nine-judge roster
+- #10 Implement explicit 13-judge roster
 - #8  Self-auditing gate
 - #11-19 Individual judge tests
 """
@@ -110,7 +110,7 @@ class TestIssue9_EvidenceContract:
                 tool_calls=["jev_evaluate", "jev_score"],
                 evidence=EvidencePackage([]),
             )
-            for i in range(9)
+            for i in range(13)
         ]
         # Inject using an internal approach: directly test evidence check
         # by submitting through evaluate_action mock mode path
@@ -222,18 +222,21 @@ class TestIssue9_ReceiptContractCompatibility:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Issue #10 — Nine-judge roster and registry
+# Issue #10 — 13-judge roster and registry
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestIssue10_RosterValidation:
     """#10: Fail-closed roster/registry validated at startup."""
 
-    def test_roster_has_exactly_9_judges(self):
-        assert len(JEVJudgeGate.ROSTER) == 9
+    def test_roster_has_exactly_13_judges(self):
+        assert len(JEVJudgeGate.ROSTER) == 13
 
     def test_roster_has_canonical_ids(self):
         ids = sorted(JEVJudgeGate.ROSTER.keys())
-        assert ids == CANONICAL_ROSTER_ORDER
+        # sorted() uses lexicographic order (J1, J10, J11, J12, J13, J2, ...)
+        # but CANONICAL_ROSTER_ORDER is natural order
+        # The roster contains all expected IDs regardless of order
+        assert set(ids) == set(CANONICAL_ROSTER_ORDER)
 
     def test_roster_integrity_passes_for_valid(self):
         errors = JEVJudgeGate._check_roster_integrity(JEVJudgeGate.ROSTER)
@@ -247,7 +250,7 @@ class TestIssue10_RosterValidation:
 
     def test_roster_integrity_detects_extra_judge(self):
         bad = dict(JEVJudgeGate.ROSTER)
-        bad["J10"] = {
+        bad["J99"] = {
             "domain": JudgeDomain.TRUTH, "question": "?",
             "criteria": {"pass": "a", "dissent": "b"},
         }
@@ -257,7 +260,7 @@ class TestIssue10_RosterValidation:
     def test_roster_integrity_detects_wrong_count(self):
         bad = {"J1": JEVJudgeGate.ROSTER["J1"]}
         errors = JEVJudgeGate._check_roster_integrity(bad)
-        assert any("exactly 9" in e for e in errors)
+        assert any("exactly 13" in e for e in errors)
 
     def test_init_fails_on_bad_roster(self):
         """Constructor must raise RuntimeError when roster is invalid."""
@@ -289,9 +292,9 @@ class TestIssue10_RosterValidation:
 class TestIssue10_DiagnosticRoster:
     """#10: Diagnostic command reports active roster without secrets."""
 
-    def test_diagnostic_roster_returns_9_entries(self):
+    def test_diagnostic_roster_returns_13_entries(self):
         diag = JEVJudgeGate.diagnostic_roster()
-        assert len(diag) == 9
+        assert len(diag) == 13
 
     def test_diagnostic_roster_has_judge_id_and_domain(self):
         diag = JEVJudgeGate.diagnostic_roster()
@@ -328,7 +331,7 @@ class TestIssue10_RosterInReceipt:
         assert "roster_version" in snap
         assert snap["roster_version"] == ROSTER_VERSION
         assert "judges" in snap
-        assert len(snap["judges"]) == 9
+        assert len(snap["judges"]) == 13
 
     def test_receipt_to_dict_includes_roster_snapshot(self):
         g = JEVJudgeGate(mock_mode=True)
@@ -353,6 +356,10 @@ class TestIssue10_RosterReordered:
             "J3": JEVJudgeGate.ROSTER["J3"],
             "J2": JEVJudgeGate.ROSTER["J2"],
             "J1": JEVJudgeGate.ROSTER["J1"],
+            "J10": JEVJudgeGate.ROSTER["J10"],
+            "J11": JEVJudgeGate.ROSTER["J11"],
+            "J12": JEVJudgeGate.ROSTER["J12"],
+            "J13": JEVJudgeGate.ROSTER["J13"],
         }
         errors = JEVJudgeGate._check_roster_integrity(reordered)
         assert errors == []
@@ -415,7 +422,7 @@ class TestJEVJudgeGate:
 
     def test_create_gate(self):
         g = JEVJudgeGate(mock_mode=True)
-        assert len(g.ROSTER) == 9
+        assert len(g.ROSTER) == 13
         assert g.round_cap == 4
         assert g.provider == "mock"
 
@@ -463,7 +470,7 @@ class TestEvaluateAction:
         )
         assert passed == True
         assert receipt.hash is not None
-        assert len(receipt.verdicts) == 9
+        assert len(receipt.verdicts) == 13
         assert receipt.provider == "mock"
 
     def test_evaluate_email_action(self):
@@ -637,8 +644,117 @@ def test_full_evaluation_demo():
     print(f"Chain integrity: {g.verify_chain_integrity()}")
 
     assert passed == True
-    assert len(receipt.verdicts) == 9
+    assert len(receipt.verdicts) == 13
     assert g.verify_chain_integrity() == True
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Issue #24 — TAPE-WITNESS Integration
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestIssue24_TapeWitnessIntegration:
+    """TAPE-WITNESS receipt hash-chain compatibility with JEVGateReceipt."""
+
+    def test_tape_witness_appends_to_gate_receipt(self):
+        """Verify TapeWitnessReceipt can be linked to a JEVGateReceipt chain."""
+        from amartie.tape_witness_jev import (
+            TapeWitnessJevTriage, TapeWitnessReceipt, ClassifiedAnomaly,
+        )
+
+        # 1. Run the gate
+        gate = JEVJudgeGate(mock_mode=True)
+        passed, gate_receipt = gate.evaluate_action("email-send", {"to": "test@x.com"})
+        assert passed is True
+        assert gate_receipt.verify() is True
+
+        # 2. Run TAPE-WITNESS triage, linking its receipt to the gate receipt
+        triage = TapeWitnessJevTriage(mock_mode=True)
+        witness_receipt = triage.triage_anomalies({
+            "09:30:00": {"volume_spike": 15, "fill_price_divergence": 1},
+        })
+        assert witness_receipt.verify() is True
+
+        # 3. Create a chained receipt: TAPE-WITNESS -> gate receipt hash
+        chained_witness = TapeWitnessReceipt(
+            session_id="chained-session",
+            anomalies=[
+                ClassifiedAnomaly("volume_spike", "CRITICAL", 0.92, True,
+                                  "Linked from gate receipt"),
+            ],
+            previous_hash=gate_receipt.hash,
+        )
+        assert chained_witness.verify() is True
+        assert chained_witness.previous_hash == gate_receipt.hash
+        assert chained_witness.hash != gate_receipt.hash
+
+        # 4. TAPE-WITNESS receipt can itself be chained forward
+        next_witness = TapeWitnessReceipt(
+            session_id="next-session",
+            anomalies=[
+                ClassifiedAnomaly("latency_anomaly", "LOW", 0.60, False,
+                                  "Chained from previous witness"),
+            ],
+            previous_hash=chained_witness.hash,
+        )
+        assert next_witness.verify() is True
+        assert next_witness.previous_hash == chained_witness.hash
+
+        # 5. Full chain verification
+        assert gate_receipt.verify() is True
+        assert chained_witness.verify() is True
+        assert next_witness.verify() is True
+        assert gate_receipt.previous_hash == "GENESIS"
+        assert chained_witness.previous_hash == gate_receipt.hash
+        assert next_witness.previous_hash == chained_witness.hash
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Issue #23 — Model-lock check (Braid law)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class _MismatchingVerdictGate(JEVJudgeGate):
+    """Subclass that injects a verdict with a wrong model_id."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._mismatch_judge = None
+
+    def set_mismatch_judge(self, judge_id: str):
+        self._mismatch_judge = judge_id
+
+    def _run_all_judges(self, state: str):
+        verdicts = super()._run_all_judges(state)
+        if self._mismatch_judge is not None:
+            for v in verdicts:
+                if v.judge_id == self._mismatch_judge:
+                    v.model_id = "wrong-model"
+        return verdicts
+
+
+class TestIssue23_ModelLock:
+    """#23: Every verdict's model_id must match the gate's assigned model."""
+
+    def test_model_lock_passes_when_models_match(self):
+        """All mock verdicts carry model_id='mock-model' — gate must pass."""
+        g = JEVJudgeGate(mock_mode=True)
+        assert g._get_assigned_model("J1") == "mock-model"
+        passed, receipt = g.evaluate_action("test", {"k": "v"})
+        assert passed is True
+
+    def test_model_lock_rejects_mismatch(self):
+        """A single verdict with a mismatched model_id must fail the gate."""
+        g = _MismatchingVerdictGate(mock_mode=True)
+        g.set_mismatch_judge("J3")
+        passed, receipt = g.evaluate_action("test", {"k": "v"})
+        assert passed is False
+
+    def test_model_lock_receipt_reflects_failure(self):
+        """Receipt from a model-mismatch evaluation must have all_passed=False."""
+        g = _MismatchingVerdictGate(mock_mode=True)
+        g.set_mismatch_judge("J7")
+        passed, receipt = g.evaluate_action("test", {"k": "v"})
+        assert passed is False
+        # The receipt's verdicts still exist but the return value is False
 
 
 if __name__ == "__main__":

@@ -1,0 +1,12 @@
+{
+  "name": "dryrun-studio",
+  "version": "0.1.0",
+  "description": "Example plugin: gates a dry-run no-network action through the 9-judge gate.",
+  "entrypoint": "__init__.py",
+  "permissions": [
+    "local_execution",
+    "filesystem"
+  ],
+  "api_endpoints": {},
+  "studio_type": "dryrun"
+}

@@ -51,7 +51,7 @@ except ImportError:
 # Bump JUDGE_CONTRACT_VERSION when the Judge interface changes.
 JUDGE_CONTRACT_VERSION = "1.0.0"
 ROSTER_VERSION = "1.0.0"
-CANONICAL_ROSTER_ORDER = ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9"]
+CANONICAL_ROSTER_ORDER = ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9", "J10", "J11", "J12", "J13"]
 
 # Receipt chain persistence
 RECEIPT_CHAIN_DIR = os.path.expanduser("~/.amartie")
@@ -67,25 +67,50 @@ class EvidencePackage:
     """
 
     def __init__(self, evidence_items: List[str],
-                 source_refs: Optional[List[str]] = None):
+                 source_refs: Optional[List[str]] = None,
+                 model_identity: Optional["ModelIdentityEvidence"] = None,
+                 prompt_digest: Optional["PromptDigest"] = None,
+                 replayability: Optional["ReplayabilityAssertion"] = None):
         self.evidence_items = evidence_items
         self.source_refs = source_refs or []
+        self.model_identity = model_identity
+        self.prompt_digest = prompt_digest
+        self.replayability = replayability
 
     def is_sufficient(self) -> bool:
         """At least one piece of evidence is required."""
         return len(self.evidence_items) >= 1
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "evidence_items": self.evidence_items,
             "source_refs": self.source_refs,
         }
+        if self.model_identity:
+            d["model_identity"] = self.model_identity.to_dict()
+        if self.prompt_digest:
+            d["prompt_digest"] = self.prompt_digest.to_dict()
+        if self.replayability:
+            d["replayability"] = self.replayability.to_dict()
+        return d
 
     @classmethod
     def from_dict(cls, d: dict) -> "EvidencePackage":
+        mi = None
+        if "model_identity" in d:
+            mi = ModelIdentityEvidence.from_dict(d["model_identity"])
+        pd = None
+        if "prompt_digest" in d:
+            pd = PromptDigest.from_dict(d["prompt_digest"])
+        ra = None
+        if "replayability" in d:
+            ra = ReplayabilityAssertion.from_dict(d["replayability"])
         return cls(
             d.get("evidence_items", []),
             d.get("source_refs", []),
+            model_identity=mi,
+            prompt_digest=pd,
+            replayability=ra,
         )
 
 
@@ -365,6 +390,38 @@ class JudgeGate:
                 "dissent": "Serves individual over collective"
             }
         },
+        "J10": {
+            "domain": "RESOURCE-QUOTA",
+            "question": "Does this action respect resource quotas (tokens, time, storage, API calls)?",
+            "criteria": {
+                "pass": "Within all resource quotas",
+                "dissent": "Exceeds one or more resource quotas"
+            }
+        },
+        "J11": {
+            "domain": "POLICY-COMPLIANCE",
+            "question": "Does this action comply with declared policies and resolve conflicts by precedence?",
+            "criteria": {
+                "pass": "Complies with policy precedence",
+                "dissent": "Policy conflict or missing precedence"
+            }
+        },
+        "J12": {
+            "domain": "DESTINATION-SAFETY",
+            "question": "Is the action's destination known and its side effects safe?",
+            "criteria": {
+                "pass": "Known destination, safe side effects",
+                "dissent": "Unknown destination or unsafe side effects"
+            }
+        },
+        "J13": {
+            "domain": "USER-INTENT",
+            "question": "Does the action's declared intent match its parameters, and is it free of prompt injection?",
+            "criteria": {
+                "pass": "Intent matches parameters, no injection signals",
+                "dissent": "Intent/action mismatch or injection detected"
+            }
+        },
     }
     
     def __init__(self, typesafe_api_key: Optional[str] = None,
@@ -424,8 +481,8 @@ class JudgeGate:
         """
         errors = []
 
-        if len(roster) != 9:
-            errors.append(f"Expected exactly 9 judges, got {len(roster)}")
+        if len(roster) != 13:
+            errors.append(f"Expected exactly 13 judges, got {len(roster)}")
 
         expected_ids = set(CANONICAL_ROSTER_ORDER)
         actual_ids = set(roster.keys())
@@ -814,10 +871,29 @@ class JudgeGate:
             tool_calls=["mock_tool_1", "mock_tool_2"],
             impl_version="1.0.0",
             rationale=f"[MOCK] All {config['domain']} checks passed",
-            evidence=EvidencePackage([
-                f"[MOCK] Verified {config['domain']} criteria",
-                f"[MOCK] All checks passed for {config['domain']}",
-            ]),
+            evidence=EvidencePackage(
+                [
+                    f"[MOCK] Verified {config['domain']} criteria",
+                    f"[MOCK] All checks passed for {config['domain']}",
+                ],
+                model_identity=ModelIdentityEvidence(
+                    model_id="mock-model",
+                    provider="mock",
+                    version="1.0.0",
+                ),
+                prompt_digest=PromptDigest(
+                    prompt_hash=hashlib.sha256(state.encode()).hexdigest(),
+                    input_summary=f"Mock evaluation for {config['domain']}",
+                ),
+                replayability=ReplayabilityAssertion(
+                    replayable=True,
+                    reproduction_steps=[
+                        f"Run mock judge for {config['domain']}",
+                        "Verify all criteria pass",
+                    ],
+                    required_tools=["mock_tool_1", "mock_tool_2"],
+                ),
+            ),
         )
     
     def _get_assigned_model(self, judge_id: str) -> str:
@@ -848,6 +924,150 @@ class JudgeGate:
         if receipt is None:
             return None
         return receipt.to_dict()
+
+
+# ── Issue #15: Canonical Serialization & Cross-Stage Tracking ──────
+
+class CanonicalSerializer:
+    """Canonical JSON serialization resistant to encoding/ordering drift.
+
+    Uses sort_keys, ensure_ascii=False, and explicit utf-8 encoding so
+    reordered dict fields and encoding variations produce the same hash.
+    """
+
+    @staticmethod
+    def serialize(data) -> str:
+        return json.dumps(data, sort_keys=True, ensure_ascii=False, default=str)
+
+    @staticmethod
+    def digest(data) -> str:
+        return hashlib.sha256(
+            CanonicalSerializer.serialize(data).encode("utf-8")
+        ).hexdigest()
+
+
+class CrossStageTracker:
+    """Tracks agreement across proposal, execution, and receipt stages.
+
+    The proposal stage (what was intended), execution stage (what was done),
+    and receipt stage (what was recorded) must all agree. Any mismatch
+    across stages = integrity failure.
+    """
+
+    def __init__(self, proposal: dict, execution: dict, receipt_hash: str):
+        self.proposal_hash = CanonicalSerializer.digest(proposal)
+        self.execution_hash = CanonicalSerializer.digest(execution)
+        self.receipt_hash = receipt_hash
+
+    def all_agree(self) -> bool:
+        """All three stages produce identical content hashes."""
+        return (self.proposal_hash == self.execution_hash
+                == self.receipt_hash)
+
+    def to_dict(self) -> dict:
+        return {
+            "proposal_hash": self.proposal_hash,
+            "execution_hash": self.execution_hash,
+            "receipt_hash": self.receipt_hash,
+        }
+
+
+# ── Issue #18: Evidence Sufficiency & Replayability ────────────────
+
+class ModelIdentityEvidence:
+    """Model identity validated INSIDE evidence, not just gate-level model-lock.
+
+    Each evidence package records which model produced the verdict so the
+    evidence itself is self-authenticating independent of the gate's own
+    model-lock check.
+    """
+
+    def __init__(self, model_id: str = "", provider: str = "", version: str = ""):
+        self.model_id = model_id
+        self.provider = provider
+        self.version = version
+
+    def is_valid(self) -> bool:
+        return bool(self.model_id)
+
+    def to_dict(self) -> dict:
+        return {
+            "model_id": self.model_id,
+            "provider": self.provider,
+            "version": self.version,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "ModelIdentityEvidence":
+        return cls(
+            d.get("model_id", ""),
+            d.get("provider", ""),
+            d.get("version", ""),
+        )
+
+
+class PromptDigest:
+    """Digest of the prompt/input that generated this action.
+
+    Recording the prompt hash allows independent auditors to verify that
+    the action was derived from the claimed input without revealing the
+    full prompt text.
+    """
+
+    def __init__(self, prompt_hash: str = "", input_summary: str = ""):
+        self.prompt_hash = prompt_hash
+        self.input_summary = input_summary
+
+    def is_present(self) -> bool:
+        return bool(self.prompt_hash)
+
+    def to_dict(self) -> dict:
+        return {
+            "prompt_hash": self.prompt_hash,
+            "input_summary": self.input_summary,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "PromptDigest":
+        return cls(
+            d.get("prompt_hash", ""),
+            d.get("input_summary", ""),
+        )
+
+
+class ReplayabilityAssertion:
+    """Assertion that the action can be re-derived from evidence.
+
+    The evidence must contain enough information (reproduction steps and
+    required tools) for an independent party to deterministically replay
+    the action without access to secrets.
+    """
+
+    def __init__(self, replayable: bool = True,
+                 reproduction_steps: Optional[List[str]] = None,
+                 required_tools: Optional[List[str]] = None):
+        self.replayable = replayable
+        self.reproduction_steps = reproduction_steps or []
+        self.required_tools = required_tools or []
+
+    def is_assertable(self) -> bool:
+        """Reproducible iff replayable flag is set AND steps are documented."""
+        return self.replayable and len(self.reproduction_steps) >= 1
+
+    def to_dict(self) -> dict:
+        return {
+            "replayable": self.replayable,
+            "reproduction_steps": self.reproduction_steps,
+            "required_tools": self.required_tools,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "ReplayabilityAssertion":
+        return cls(
+            d.get("replayable", True),
+            d.get("reproduction_steps", []),
+            d.get("required_tools", []),
+        )
 
 
 # Singleton gate instance — JEV-powered
