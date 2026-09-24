@@ -19,12 +19,14 @@ class Vault:
     def __init__(self, vault_path: str = "~/.amartie/vault"):
         self.vault_path = vault_path
         self.contents: Dict[str, bytes] = {}  # Encrypted contents
+        self.key_hashes: Dict[str, str] = {}  # key hash per tool, for key check
         self.access_log: List[dict] = []
     
     def store(self, tool_name: str, tool_data: bytes, key_hash: str):
         """Store a tool in encrypted form."""
         # In production: encrypt with owner's public key
         self.contents[tool_name] = tool_data
+        self.key_hashes[tool_name] = key_hash
         self._log_access("store", tool_name, key_hash)
     
     def retrieve(self, tool_name: str, key_hash: str) -> Optional[bytes]:
@@ -33,14 +35,23 @@ class Vault:
             self._log_access("retrieve-miss", tool_name, key_hash)
             return None
         
+        if self.key_hashes.get(tool_name) != key_hash:
+            self._log_access("retrieve-miss", tool_name, key_hash)
+            return None
+        
         self._log_access("retrieve-hit", tool_name, key_hash)
         return self.contents[tool_name]
     
     def delete(self, tool_name: str, key_hash: str):
-        """Delete a tool from the vault."""
-        if tool_name in self.contents:
-            del self.contents[tool_name]
-            self._log_access("delete", tool_name, key_hash)
+        """Delete a tool from the vault (requires correct key)."""
+        if tool_name not in self.contents:
+            return
+        if self.key_hashes.get(tool_name) != key_hash:
+            self._log_access("retrieve-miss", tool_name, key_hash)
+            return
+        del self.contents[tool_name]
+        del self.key_hashes[tool_name]
+        self._log_access("delete", tool_name, key_hash)
     
     def _log_access(self, action: str, tool_name: str, key_hash: str):
         self.access_log.append({

@@ -67,7 +67,7 @@ class Sandbox:
     
     def __init__(self):
         self.baseline: Optional[Snapshot] = None
-        self.quarantine: List[dict] = []
+        self._quarantine: List[dict] = []
     
     def install(self):
         """Take baseline snapshot on install."""
@@ -103,11 +103,11 @@ class Sandbox:
         """Flag an unknown leftover for review."""
         item['quarantine_time'] = datetime.now(timezone.utc).isoformat()
         item['status'] = 'pending_review'
-        self.quarantine.append(item)
+        self._quarantine.append(item)
     
     def review_quarantine(self, item_id: str, verdict: str, reviewer: str):
         """Review a quarantined item."""
-        for item in self.quarantine:
+        for item in self._quarantine:
             if item.get('id') == item_id:
                 item['status'] = verdict
                 item['reviewer'] = reviewer
@@ -117,7 +117,7 @@ class Sandbox:
     
     def get_quarantine(self) -> List[dict]:
         """Get all quarantined items."""
-        return self.quarantine
+        return self._quarantine
 
 
 # Singleton sandbox
