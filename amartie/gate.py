@@ -47,43 +47,184 @@ except ImportError:
     judge_cache = None
     HAS_CACHE = False
 
+# ── Contract Version ──────────────────────────────────────────────────────────
+# Bump JUDGE_CONTRACT_VERSION when the Judge interface changes.
+JUDGE_CONTRACT_VERSION = "1.0.0"
+ROSTER_VERSION = "1.0.0"
+CANONICAL_ROSTER_ORDER = ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9"]
+
+# Receipt chain persistence
+RECEIPT_CHAIN_DIR = os.path.expanduser("~/.amartie")
+RECEIPT_CHAIN_PATH = os.path.join(RECEIPT_CHAIN_DIR, "receipt_chain.jsonl")
+CHAIN_VERSION = 1
+
+
+class EvidencePackage:
+    """Structured evidence backing a judge's verdict.
+
+    Every judge MUST supply at least one evidence item.
+    Empty evidence = fail-closed (gate rejects the verdict).
+    """
+
+    def __init__(self, evidence_items: List[str],
+                 source_refs: Optional[List[str]] = None):
+        self.evidence_items = evidence_items
+        self.source_refs = source_refs or []
+
+    def is_sufficient(self) -> bool:
+        """At least one piece of evidence is required."""
+        return len(self.evidence_items) >= 1
+
+    def to_dict(self) -> dict:
+        return {
+            "evidence_items": self.evidence_items,
+            "source_refs": self.source_refs,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "EvidencePackage":
+        return cls(
+            d.get("evidence_items", []),
+            d.get("source_refs", []),
+        )
+
 
 class JudgeVerdict:
-    """A single judge's verdict on an action."""
-    
+    """A single judge's verdict on an action.
+
+    Implements the versioned Judge interface contract (v1.0.0).
+    Every verdict carries:
+      - judge_id        logical judge identifier
+      - impl_version    version of this judge's implementation
+      - model_id        model identity that produced the verdict
+      - verdict         PASS or DISSENT
+      - evidence        structured EvidencePackage (must be non-empty)
+      - rationale       free-text explanation of the decision
+      - findings        factual observations
+      - corrections     corrective actions (if DISSENT)
+      - tool_calls      evidence of tool-use activity
+    """
+
+    CONTRACT_VERSION = JUDGE_CONTRACT_VERSION
+
     def __init__(self, judge_id: str, model_id: str, verdict: str,
-                 findings: List[str], corrections: List[str], tool_calls: List[str]):
+                 findings: List[str], corrections: List[str],
+                 tool_calls: List[str],
+                 impl_version: str = "1.0.0",
+                 rationale: str = "",
+                 evidence: Optional[EvidencePackage] = None):
         self.judge_id = judge_id
         self.model_id = model_id
         self.verdict = verdict  # PASS or DISSENT
         self.findings = findings
         self.corrections = corrections
         self.tool_calls = tool_calls
+        self.impl_version = impl_version
+        self.rationale = rationale
+        self.evidence = evidence or EvidencePackage([])
         self.timestamp = datetime.now(timezone.utc).isoformat()
     
     def to_dict(self) -> dict:
         return {
             "judge_id": self.judge_id,
             "model_id": self.model_id,
+            "impl_version": self.impl_version,
             "verdict": self.verdict,
+            "evidence": self.evidence.to_dict(),
+            "rationale": self.rationale,
             "findings": self.findings,
             "corrections": self.corrections,
             "tool_calls": self.tool_calls,
             "timestamp": self.timestamp
         }
 
+    @classmethod
+    def validate_verdict_dict(cls, verdict_dict: dict) -> List[str]:
+        """Validate a verdict dictionary against the contract.
+
+        Returns a list of error strings (empty = valid).
+        """
+        errors = []
+
+        required_fields = [
+            "judge_id", "verdict", "findings", "tool_calls",
+        ]
+        for field in required_fields:
+            if field not in verdict_dict:
+                errors.append(f"Missing required field: {field}")
+
+        if errors:
+            return errors
+
+        # Verdict value
+        v = verdict_dict.get("verdict")
+        if v not in ("PASS", "DISSENT"):
+            errors.append(f"Invalid verdict value: {v!r}")
+
+        # Evidence (fail-closed on missing evidence)
+        evidence = verdict_dict.get("evidence")
+        if not evidence:
+            errors.append("Missing evidence — every verdict requires evidence")
+        elif not isinstance(evidence, dict):
+            errors.append(f"Evidence must be a dict, got {type(evidence).__name__}")
+        else:
+            items = evidence.get("evidence_items", [])
+            if not isinstance(items, list) or len(items) < 1:
+                errors.append(
+                    "Insufficient evidence — at least one evidence_item required"
+                )
+
+        # List fields must be lists
+        for list_field in ("findings", "tool_calls", "corrections"):
+            val = verdict_dict.get(list_field)
+            if not isinstance(val, list):
+                errors.append(
+                    f"{list_field} must be a list, got {type(val).__name__}"
+                )
+
+        return errors
+
+    @staticmethod
+    def from_dict(d: dict) -> "JudgeVerdict":
+        evidence_dict = d.get("evidence", {})
+        if isinstance(evidence_dict, dict):
+            evidence = EvidencePackage(
+                evidence_dict.get("evidence_items", []),
+                evidence_dict.get("source_refs", []),
+            )
+        else:
+            evidence = EvidencePackage([])
+        v = JudgeVerdict(
+            judge_id=d["judge_id"],
+            model_id=d["model_id"],
+            verdict=d["verdict"],
+            findings=d.get("findings", []),
+            corrections=d.get("corrections", []),
+            tool_calls=d.get("tool_calls", []),
+            impl_version=d.get("impl_version", "1.0.0"),
+            rationale=d.get("rationale", ""),
+            evidence=evidence,
+        )
+        v.timestamp = d.get("timestamp", v.timestamp)
+        return v
+
 
 class GateReceipt:
     """Hash-chained receipt for a gated action."""
     
     def __init__(self, action_id: str, action_type: str, payload_hash: str,
-                 verdicts: List[JudgeVerdict], previous_hash: str = ""):
+                 verdicts: List[JudgeVerdict], previous_hash: str = "",
+                 contract_version: str = JUDGE_CONTRACT_VERSION,
+                 roster_snapshot: Optional[dict] = None):
         self.action_id = action_id
         self.action_type = action_type
         self.payload_hash = payload_hash
         self.verdicts = [v.to_dict() for v in verdicts]
         self.previous_hash = previous_hash
         self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.version = CHAIN_VERSION
+        self.contract_version = contract_version
+        self.roster_snapshot = roster_snapshot or {}
         self.hash = self._compute_hash()
     
     def _compute_hash(self) -> str:
@@ -93,7 +234,10 @@ class GateReceipt:
             "payload_hash": self.payload_hash,
             "verdicts": self.verdicts,
             "previous_hash": self.previous_hash,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
+            "version": self.version,
+            "contract_version": self.contract_version,
+            "roster_snapshot": self.roster_snapshot,
         }, sort_keys=True)
         return hashlib.sha256(content.encode()).hexdigest()
     
@@ -109,8 +253,29 @@ class GateReceipt:
             "verdicts": self.verdicts,
             "previous_hash": self.previous_hash,
             "timestamp": self.timestamp,
-            "hash": self.hash
+            "hash": self.hash,
+            "version": self.version,
+            "contract_version": self.contract_version,
+            "roster_snapshot": self.roster_snapshot,
         }
+
+    @staticmethod
+    def from_dict(d: dict) -> "GateReceipt":
+        verdicts = [JudgeVerdict.from_dict(v) for v in d.get("verdicts", [])]
+        r = GateReceipt(
+            action_id=d["action_id"],
+            action_type=d["action_type"],
+            payload_hash=d["payload_hash"],
+            verdicts=verdicts,
+            previous_hash=d.get("previous_hash", ""),
+            contract_version=d.get("contract_version", JUDGE_CONTRACT_VERSION),
+            roster_snapshot=d.get("roster_snapshot", {}),
+        )
+        # Override auto-generated fields with stored values
+        r.timestamp = d.get("timestamp", r.timestamp)
+        r.version = d.get("version", CHAIN_VERSION)
+        r.hash = d.get("hash", r.hash)
+        return r
 
 
 class JudgeGate:
@@ -204,17 +369,34 @@ class JudgeGate:
     
     def __init__(self, typesafe_api_key: Optional[str] = None,
                  use_layer_fallback: bool = True,
-                 mock_mode: bool = False):
+                 mock_mode: bool = False,
+                 validate_roster: bool = True,
+                 receipt_chain_path: Optional[str] = None):
         self.receipt_chain: List[str] = []  # hash chain
         self._receipt_store: Dict[str, GateReceipt] = {}
         self.round_cap = 4
         self.time_budget_per_judge = 1200  # seconds
         self.gate_wide_budget = 900  # seconds
-        
+
+        # ── Roster validation at startup ────────────────────────────────
+        if validate_roster:
+            roster_errors = self._check_roster_integrity(self.ROSTER)
+            if roster_errors:
+                raise RuntimeError(
+                    f"Roster validation FAILED — gate cannot start:\n"
+                    + "\n".join(f"  - {e}" for e in roster_errors)
+                )
+
         # Determine provider
         self.provider = self._init_provider(typesafe_api_key, use_layer_fallback, mock_mode)
         self.client = self._init_client(typesafe_api_key)
-        
+
+        # Allow per-instance override for test isolation
+        self._chain_path = receipt_chain_path or RECEIPT_CHAIN_PATH
+
+        # Load persisted receipt chain from disk (fail-closed on corruption)
+        self._load_chain_from_disk()
+
     def _init_provider(self, api_key: Optional[str], use_layer_fallback: bool,
                        mock_mode: bool) -> str:
         """Determine which provider to use."""
@@ -231,7 +413,144 @@ class JudgeGate:
         if self.provider == "jev" and api_key:
             return TypeSafeClient(api_key=api_key)
         return None
-    
+
+    # ── Roster validation ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _check_roster_integrity(roster: dict) -> List[str]:
+        """Check a roster dict for integrity issues.
+
+        Returns list of error strings (empty = valid).
+        """
+        errors = []
+
+        if len(roster) != 9:
+            errors.append(f"Expected exactly 9 judges, got {len(roster)}")
+
+        expected_ids = set(CANONICAL_ROSTER_ORDER)
+        actual_ids = set(roster.keys())
+
+        missing = expected_ids - actual_ids
+        unexpected = actual_ids - expected_ids
+
+        if missing:
+            errors.append(f"Missing judges: {sorted(missing)}")
+        if unexpected:
+            errors.append(f"Unexpected judges: {sorted(unexpected)}")
+
+        required_judge_fields = {"domain", "question", "criteria"}
+        for jid, cfg in roster.items():
+            missing_fields = required_judge_fields - set(cfg.keys())
+            if missing_fields:
+                errors.append(
+                    f"Judge {jid} missing fields: {sorted(missing_fields)}"
+                )
+            if "criteria" in cfg:
+                for sub in ("pass", "dissent"):
+                    if sub not in cfg["criteria"]:
+                        errors.append(
+                            f"Judge {jid} criteria missing '{sub}'"
+                        )
+
+        return errors
+
+    @staticmethod
+    def diagnostic_roster() -> List[dict]:
+        """Return a safe diagnostic view of the active roster.
+
+        No secrets, no question templates — just judge IDs and domains.
+        Suitable for logging, /status endpoints, and admin tools.
+        """
+        return [
+            {
+                "judge_id": jid,
+                "domain": cfg["domain"],
+            }
+            for jid, cfg in sorted(JudgeGate.ROSTER.items())
+        ]
+
+    def _build_roster_snapshot(self) -> dict:
+        """Build a compact roster snapshot for embedding in receipts."""
+        return {
+            "roster_version": ROSTER_VERSION,
+            "judges": sorted(self.ROSTER.keys()),
+            "contract_version": JUDGE_CONTRACT_VERSION,
+        }
+
+    @staticmethod
+    def _ensure_data_dir() -> str:
+        """Create ~/.amartie/ if it doesn't exist."""
+        os.makedirs(RECEIPT_CHAIN_DIR, exist_ok=True)
+        return RECEIPT_CHAIN_DIR
+
+    def _load_chain_from_disk(self) -> None:
+        """Load + validate receipt chain from JSONL on disk.
+        
+        Fail-closed: if the file is missing, empty, malformed, or any
+        receipt fails hash/chain verification, start with an empty chain.
+        """
+        self._ensure_data_dir()
+        if not os.path.isfile(self._chain_path):
+            return  # Fresh start, empty chain
+
+        try:
+            with open(self._chain_path, "r") as f:
+                lines = [line.strip() for line in f if line.strip()]
+
+            loaded_receipts = []
+            for line in lines:
+                data = json.loads(line)
+                receipt = GateReceipt.from_dict(data)
+                loaded_receipts.append(receipt)
+
+            # Verify every receipt's hash is self-consistent
+            for receipt in loaded_receipts:
+                if receipt.hash != receipt._compute_hash():
+                    return  # Tampered — fail closed to empty
+
+            # Verify chain linkage
+            chain_hashes = []
+            for idx, receipt in enumerate(loaded_receipts):
+                expected_prev = chain_hashes[idx - 1] if idx > 0 else "GENESIS"
+                if receipt.previous_hash != expected_prev:
+                    return  # Broken chain — fail closed to empty
+                chain_hashes.append(receipt.hash)
+
+            # All checks passed — populate in-memory state
+            self.receipt_chain = chain_hashes
+            for receipt in loaded_receipts:
+                self._receipt_store[receipt.hash] = receipt
+
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+            # Malformed file — fail closed to empty chain
+            self.receipt_chain = []
+            self._receipt_store = {}
+
+    def _append_receipt_to_disk(self, receipt: GateReceipt) -> None:
+        """Append one receipt as a JSON line."""
+        self._ensure_data_dir()
+        with open(self._chain_path, "a") as f:
+            f.write(json.dumps(receipt.to_dict(), sort_keys=True) + "\n")
+
+    def _build_fail_receipt(self, action_type: str, payload: dict,
+                             reason: str) -> GateReceipt:
+        """Build a receipt for a failed evaluation (contract violation, etc.)."""
+        previous_hash = (
+            self.receipt_chain[-1] if self.receipt_chain else "GENESIS"
+        )
+        payload_hash = hashlib.sha256(
+            json.dumps(payload, sort_keys=True).encode()
+        ).hexdigest()
+        return GateReceipt(
+            action_id=str(uuid.uuid4()),
+            action_type=action_type,
+            payload_hash=payload_hash,
+            verdicts=[],
+            previous_hash=previous_hash,
+            contract_version=JUDGE_CONTRACT_VERSION,
+            roster_snapshot=self._build_roster_snapshot(),
+        )
+
     def get_rotated_judge_id(self, logical_id: str, date: Optional[str] = None) -> str:
         """
         Daily rotating judge IDs. Prevents signature pre-computation.
@@ -280,7 +599,18 @@ class JudgeGate:
             # Cache the results
             if judge_cache is not None:
                 judge_cache.put(action_type, payload, [v.to_dict() for v in judge_responses])
-        
+
+        # ── Validate every verdict against the contract ─────────────────
+        for v in judge_responses:
+            v_dict = v.to_dict()
+            v_errors = JudgeVerdict.validate_verdict_dict(v_dict)
+            if v_errors:
+                return False, self._build_fail_receipt(
+                    action_type, payload,
+                    f"Contract violation for {v.judge_id}: "
+                    f"{'; '.join(v_errors)}"
+                )
+
         # Compute payload hash
         payload_hash = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
         
@@ -298,7 +628,13 @@ class JudgeGate:
             if len(v.tool_calls) < 2:
                 all_passed = False
                 break
-        
+
+        # Check evidence sufficiency (fail-closed on empty evidence)
+        for v in judge_responses:
+            if not v.evidence.is_sufficient():
+                all_passed = False
+                break
+
         # Create receipt
         previous_hash = self.receipt_chain[-1] if self.receipt_chain else "GENESIS"
         receipt = GateReceipt(
@@ -306,12 +642,17 @@ class JudgeGate:
             action_type=action_type,
             payload_hash=payload_hash,
             verdicts=judge_responses,
-            previous_hash=previous_hash
+            previous_hash=previous_hash,
+            contract_version=JUDGE_CONTRACT_VERSION,
+            roster_snapshot=self._build_roster_snapshot(),
         )
         
         # Add to chain
         self.receipt_chain.append(receipt.hash)
         self._receipt_store[receipt.hash] = receipt
+        
+        # Persist to disk
+        self._append_receipt_to_disk(receipt)
         
         return all_passed, receipt
     
@@ -385,9 +726,18 @@ class JudgeGate:
                 verdict=verdict,
                 findings=findings,
                 corrections=corrections,
-                tool_calls=["jev_evaluate", "jev_score", "jev_noul"]
+                tool_calls=["jev_evaluate", "jev_score", "jev_noul"],
+                impl_version="1.0.0",
+                rationale=(
+                    f"JEV assessed {config['domain']} "
+                    f"with confidence {confidence:.2f} "
+                    f"and evidence probability {evidence_prob:.2f}"
+                ),
+                evidence=EvidencePackage(
+                    [f"JEV noul evidence_sufficient={evidence_prob:.2f}"]
+                ),
             )
-            
+
         except Exception as e:
             # Fail-closed: any error = DISSENT
             return JudgeVerdict(
@@ -396,7 +746,10 @@ class JudgeGate:
                 verdict="DISSENT",
                 findings=[f"JEV evaluation error: {str(e)}"],
                 corrections=["Retry evaluation"],
-                tool_calls=["jev_evaluate"]
+                tool_calls=["jev_evaluate"],
+                impl_version="1.0.0",
+                rationale=f"JEV error: {str(e)}",
+                evidence=EvidencePackage([f"Error during evaluation: {str(e)}"]),
             )
     
     def _run_layer_judge(self, judge_id: str, config: dict, state: str) -> JudgeVerdict:
@@ -426,9 +779,17 @@ class JudgeGate:
                 verdict=verdict,
                 findings=[f"Layer evaluation complete for {config['domain']}"],
                 corrections=[] if verdict == "PASS" else [f"Failed {config['domain']} check"],
-                tool_calls=["layer_evaluate"]
+                tool_calls=["layer_evaluate"],
+                impl_version="1.0.0",
+                rationale=(
+                    f"Layer assessed {config['domain']} "
+                    f"with confidence {confidence:.2f}"
+                ),
+                evidence=EvidencePackage(
+                    [f"Layer evaluation for {config['domain']}"]
+                ),
             )
-            
+
         except Exception as e:
             return JudgeVerdict(
                 judge_id=judge_id,
@@ -436,9 +797,12 @@ class JudgeGate:
                 verdict="DISSENT",
                 findings=[f"Layer evaluation error: {str(e)}"],
                 corrections=["Retry evaluation"],
-                tool_calls=["layer_evaluate"]
+                tool_calls=["layer_evaluate"],
+                impl_version="1.0.0",
+                rationale=f"Layer error: {str(e)}",
+                evidence=EvidencePackage([f"Error during evaluation: {str(e)}"]),
             )
-    
+
     def _run_mock_judge(self, judge_id: str, config: dict, state: str) -> JudgeVerdict:
         """Mock judge for testing. Always passes."""
         return JudgeVerdict(
@@ -447,7 +811,13 @@ class JudgeGate:
             verdict="PASS",
             findings=[f"[MOCK] {config['domain']} evaluation passed"],
             corrections=[],
-            tool_calls=["mock_tool_1", "mock_tool_2"]
+            tool_calls=["mock_tool_1", "mock_tool_2"],
+            impl_version="1.0.0",
+            rationale=f"[MOCK] All {config['domain']} checks passed",
+            evidence=EvidencePackage([
+                f"[MOCK] Verified {config['domain']} criteria",
+                f"[MOCK] All checks passed for {config['domain']}",
+            ]),
         )
     
     def _get_assigned_model(self, judge_id: str) -> str:
