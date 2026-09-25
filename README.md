@@ -14,9 +14,7 @@ It is **not** a hosted security service, a guarantee that a provider cannot swap
 
 AMARTIE's witness engine, pointed at the trading floor first — an always-on, hash-chained recorder that catches vanishing bars, volume spikes, and fill-time divergence, so any trader can see whether each execution was actually kosher. [Try Trade Witness](https://github.com/amartieai/trade-witness) → its own repo, one-command install.
 
-## Try it
-
-For PowerShell and Command Prompt instructions, including virtual-environment activation and firewall guidance, see the [Windows setup guide](docs/WINDOWS_SETUP.md).
+## Try it (local only)
 
 ```bash
 git clone https://github.com/amartieai/amartie.git
@@ -26,19 +24,20 @@ pytest tests -v
 python amartie/server.py 8715
 ```
 
-Open <http://127.0.0.1:8715/visuals/cockpit.html>. Keep the server bound to localhost; do not expose it publicly.
+Bind `127.0.0.1` only. No cockpit file in this tree. Tests are the spec.
+Trade Witness: https://github.com/amartieai/trade-witness
 
 ## Start here
 
 1. Read the [architecture map](docs/ARCHITECTURE.md).
 2. Read the [security boundaries](SECURITY.md).
-3. Run the tests and try the local cockpit.
+3. Run the tests.
 4. Choose a labeled issue that matches your level.
 5. Comment on it to claim the work, then follow [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## v0.1: in and out
 
-**In:** gate protocol, nine-judge verification, unanimous PASS, seat-locked model assignments, evidence floor, dissent receipts, hash calculation, forensic audit tools, local cockpit, and tests.
+**In:** gate protocol, nine-judge verification, unanimous PASS, seat-locked model assignments, evidence floor, dissent receipts, hash calculation, forensic audit tools, local tests.
 
 **Not yet in:** durable receipt-chain replay, production vault encryption, complete permission enforcement, a proven jail, hosted money or mail actions, or a public-bind deployment model.
 
