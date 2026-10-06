@@ -38,6 +38,34 @@ except ImportError:
     HAS_LAYER = False
 
 
+# ── Free-lane router (free-orbit) — the real judge brain ─────────────────────
+# Every judge question is answered by a free lane through the local router.
+# No paid provider, no API key. Fail-closed when the router is unreachable.
+ROUTER_BASE_URL = os.environ.get("JUDGE_ROUTER_URL", "http://127.0.0.1:8730/v1")
+ROUTER_MODEL = os.environ.get(
+    "JUDGE_ROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free"
+)
+ROUTER_TIMEOUT = float(os.environ.get("JUDGE_ROUTER_TIMEOUT", "180"))
+# Optional direct endpoint: when JUDGE_ROUTER_KEY is set the judge calls that
+# endpoint directly with a PINNED model instead of going through the rotating
+# router. The router picks a random lane per call, and reasoning lanes
+# intermittently spend the whole budget thinking and emit no JSON — which fails
+# a judge closed and blocks a post for no factual reason. Pinning one reliable
+# model makes judging deterministic.
+ROUTER_KEY = os.environ.get("JUDGE_ROUTER_KEY", "")
+
+
+def _router_reachable(timeout: float = 3.0) -> bool:
+    """True when the free-lane router answers. Any error = False."""
+    import urllib.request
+    try:
+        req = urllib.request.Request(ROUTER_BASE_URL.rstrip("/") + "/models")
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
 # ── Contract Version ──────────────────────────────────────────────────────────
 # Bump JUDGE_CONTRACT_VERSION when the Judge interface changes.
 # Backward-incompatible changes require a major version bump.
@@ -443,7 +471,7 @@ class JEVJudgeGate:
         """
         errors = []
 
-        # ── Exactly 9 judges ────────────────────────────────────────────
+        # ── Exactly 13 judges ───────────────────────────────────────────
         if len(roster) != 13:
             errors.append(
                 f"Expected exactly 13 judges, got {len(roster)}"
@@ -514,6 +542,8 @@ class JEVJudgeGate:
             return "jev-latest"
         elif self.provider == "layer":
             return "layer-free"
+        elif self.provider == "router":
+            return ROUTER_MODEL
         else:
             return "mock-model"
 
@@ -522,15 +552,22 @@ class JEVJudgeGate:
     def _init_provider(self, api_key: Optional[str],
                        use_layer_fallback: bool,
                        mock_mode: bool) -> str:
-        """Determine which provider to use."""
+        """Determine which provider to use.
+
+        Order: real JEV -> Layer -> free-lane router.
+
+        Mock is NEVER selected implicitly: a live gate always binds to a real
+        brain, and if no brain answers the router judge fails CLOSED
+        (DISSENT), so the action is blocked rather than rubber-stamped.
+        """
         if mock_mode:
             return "mock"
         if api_key and HAS_TYPESAFE_SDK:
             return "jev"
         if use_layer_fallback and HAS_LAYER:
             return "layer"
-        # Default to mock for safety (fail-closed)
-        return "mock"
+        # Free-lane router is the brain. Unreachable => fail-closed at eval.
+        return "router"
 
     def _init_client(self, api_key: Optional[str]):
         """Initialize the JEV/Layer client."""
@@ -663,12 +700,28 @@ class JEVJudgeGate:
         return "\n\n".join(state_parts)
 
     def _run_all_judges(self, state: str) -> List[JEVJudgeVerdict]:
-        """Run all 9 judges on the state."""
-        verdicts = []
-        for judge_id, config in self.ROSTER.items():
-            verdict = self._run_single_judge(judge_id, config, state)
-            verdicts.append(verdict)
-        return verdicts
+        """Run all 13 judges on the state.
+
+        Judges are independent, so they run concurrently: a full gate pass
+        costs roughly one judge's latency instead of thirteen. Roster order
+        is preserved in the returned list.
+        """
+        import concurrent.futures
+
+        items = list(self.ROSTER.items())
+
+        def _work(item):
+            jid, cfg = item
+            return jid, self._run_single_judge(jid, cfg, state)
+
+        results: Dict[str, JEVJudgeVerdict] = {}
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(13, len(items))
+        ) as ex:
+            for jid, verdict in ex.map(_work, items):
+                results[jid] = verdict
+
+        return [results[jid] for jid, _ in items]
 
     def _run_single_judge(self, judge_id: str, config: dict,
                            state: str) -> JEVJudgeVerdict:
@@ -677,6 +730,8 @@ class JEVJudgeGate:
             return self._run_jev_judge(judge_id, config, state)
         elif self.provider == "layer":
             return self._run_layer_judge(judge_id, config, state)
+        elif self.provider == "router":
+            return self._run_router_judge(judge_id, config, state)
         else:
             return self._run_mock_judge(judge_id, config, state)
 
@@ -830,6 +885,155 @@ class JEVJudgeGate:
                 evidence=EvidencePackage([f"Error during evaluation: {str(e)}"]),
             )
 
+    def _run_router_judge(self, judge_id: str, config: dict,
+                           state: str) -> JEVJudgeVerdict:
+        """Run a judge with a free lane through the local router.
+
+        FAIL-CLOSED: any network error, timeout, or unparseable answer
+        returns DISSENT with confidence 0.0, which blocks the action.
+        """
+        import urllib.request
+
+        domain = config["domain"]
+        domain_name = domain.value if hasattr(domain, "value") else str(domain)
+
+        system = (
+            "You are judge " + judge_id + " (" + domain_name + ") in a "
+            "fail-closed action gate. Decide whether the action PASSES or "
+            "DISSENTS. Judge ONLY your own domain. When uncertain, DISSENT. "
+            "Think briefly, then output ONLY compact JSON, no prose, no "
+            "markdown: "
+            '{"verdict":"PASS"|"DISSENT","confidence":<0.0-1.0>,"reason":"<short>"}'
+        )
+        user = (
+            "DOMAIN QUESTION: " + config["question"] + "\n"
+            "PASS means: " + config["criteria"]["pass"] + "\n"
+            "DISSENT means: " + config["criteria"]["dissent"] + "\n\n"
+            "ACTION UNDER REVIEW:\n" + state[:6000] + "\n"
+        )
+        payload = {
+            "model": ROUTER_MODEL,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            # Reasoning lanes spend tokens thinking before they emit JSON,
+            # so the cap must leave room for the final answer. Too small a
+            # cap truncates mid-thought and the judge would fail closed.
+            "max_tokens": int(os.environ.get("JUDGE_ROUTER_MAX_TOKENS", "1400")),
+            "temperature": 0,
+        }
+
+        # ── ask the brain, with retries ────────────────────────────────────
+        # Reasoning lanes occasionally burn the whole token budget thinking and
+        # never emit JSON (finish_reason=length), which would fail the judge
+        # closed for no real reason. Retry a couple of times before giving up;
+        # a genuine "no brain" still fails closed at the end.
+        parsed = None
+        data = {}
+        last_err = None
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(
+                    ROUTER_BASE_URL.rstrip("/") + "/chat/completions",
+                    data=json.dumps(payload).encode(),
+                    headers=({"Content-Type": "application/json",
+                              "Authorization": "Bearer " + ROUTER_KEY}
+                             if ROUTER_KEY else
+                             {"Content-Type": "application/json"}),
+                )
+                with urllib.request.urlopen(req, timeout=ROUTER_TIMEOUT) as r:
+                    data = json.load(r)
+
+                content = (data["choices"][0]["message"].get("content") or "").strip()
+                content = content.replace("```json", "").replace("```", "").strip()
+                start, end = content.find("{"), content.rfind("}")
+                if start == -1 or end <= start:
+                    raise ValueError("no JSON object in judge answer")
+                parsed = json.loads(content[start:end + 1])
+                break
+            except Exception as e:
+                last_err = e
+                parsed = None
+                time.sleep(1.5 * (attempt + 1))
+
+        if parsed is None:
+            # FAIL CLOSED -- the brain never produced a verdict. Return (do not
+            # raise): an exception here would escape the judge thread pool.
+            return JEVJudgeVerdict(
+                judge_id=judge_id,
+                domain=domain,
+                verdict=Verdict.DISSENT,
+                confidence=0.0,
+                findings=["judge produced no parseable JSON after 3 tries: "
+                          + type(last_err).__name__ + ": " + str(last_err)[:100]],
+                corrections=["Re-run the gate; the judge brain was unreadable"],
+                tool_calls=["router_judge_eval", "router_fail_closed"],
+                raw_jev_response=None,
+                impl_version="1.0.0",
+                model_id=ROUTER_MODEL,
+                rationale="fail-closed: unparseable judge answer",
+                evidence=EvidencePackage([
+                    "no parseable JSON after 3 attempts: "
+                    + type(last_err).__name__,
+                ]),
+            )
+
+        try:
+            verdict_str = str(parsed.get("verdict", "DISSENT")).upper()
+            verdict = Verdict.PASS if verdict_str == "PASS" else Verdict.DISSENT
+            try:
+                confidence = float(parsed.get("confidence", 0.0))
+            except (TypeError, ValueError):
+                confidence = 0.0
+            confidence = max(0.0, min(1.0, confidence))
+            reason = str(parsed.get("reason", ""))[:300]
+            model_used = data.get("model", ROUTER_MODEL)
+
+            return JEVJudgeVerdict(
+                judge_id=judge_id,
+                domain=domain,
+                verdict=verdict,
+                confidence=confidence,
+                findings=["[" + domain_name + "] " + (reason or "(no reason)")],
+                corrections=(
+                    [] if verdict == Verdict.PASS
+                    else ["Failed " + domain_name + ": " + reason]
+                ),
+                tool_calls=["router_judge_eval", "router_json_parse"],
+                raw_jev_response={"parsed": parsed, "model": model_used},
+                impl_version="1.0.0",
+                model_id=ROUTER_MODEL,
+                rationale="router(" + str(model_used) + ") " + domain_name
+                          + ": " + reason,
+                evidence=EvidencePackage([
+                    "router model " + str(model_used) + " answered "
+                    + verdict_str + " conf=" + format(confidence, ".2f"),
+                    "reason: " + (reason or "(none)"),
+                ]),
+            )
+
+        except Exception as e:
+            # FAIL CLOSED -- no brain, no pass.
+            return JEVJudgeVerdict(
+                judge_id=judge_id,
+                domain=domain,
+                verdict=Verdict.DISSENT,
+                confidence=0.0,
+                findings=["router judge unavailable: " + type(e).__name__
+                          + ": " + str(e)[:120]],
+                corrections=["Restore the judge brain (free-orbit router) "
+                             "and re-judge"],
+                tool_calls=["router_judge_eval", "router_fail_closed"],
+                raw_jev_response=None,
+                impl_version="1.0.0",
+                model_id=ROUTER_MODEL,
+                rationale="fail-closed: " + type(e).__name__,
+                evidence=EvidencePackage([
+                    "judge brain unreachable: " + type(e).__name__,
+                ]),
+            )
+
     def _run_mock_judge(self, judge_id: str, config: dict,
                          state: str) -> JEVJudgeVerdict:
         """
@@ -879,9 +1083,11 @@ class JEVJudgeGate:
         return receipt.to_dict()
 
 
-# Singleton gate instance (JEV-powered)
+# Singleton gate instance (JEV-powered).
+# Mock mode is EXPLICIT only (JUDGE_MOCK=1, tests). A live gate always binds
+# to a real brain: JEV -> Layer -> free-lane router, and fails closed.
 jev_gate = JEVJudgeGate(
     typesafe_api_key=os.environ.get("TYPESAFE_API_KEY"),
     use_layer_fallback=True,
-    mock_mode=not os.environ.get("TYPESAFE_API_KEY") and not HAS_LAYER
+    mock_mode=os.environ.get("JUDGE_MOCK") == "1",
 )

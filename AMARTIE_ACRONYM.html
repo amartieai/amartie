@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMARTIE — Gate Architecture</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04050a; --ink:#e8ecf4; --dim:#6b7690;
+  --gold:#ffd166; --cyan:#4cc9ff; --green:#3fb950; --red:#f85149;
+  --purple:#bc8cff; --orange:#ff9f1c; --line:rgba(255,255,255,.06);
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(255,209,102,.04) 0%,transparent 100%),radial-gradient(ellipse 50% 50% at 80% 20%,rgba(76,201,255,.04) 0%,transparent 100%)}
+.wrap{max-width:1400px;margin:0 auto;padding:80px 32px;position:relative;z-index:1}
+.head{text-align:center;margin-bottom:100px}
+.head h1{font-family:'Georgia',serif;font-size:clamp(56px,8vw,96px);font-weight:400;letter-spacing:-.03em;line-height:1;margin-bottom:20px}
+.head h1 em{font-style:italic;color:var(--gold)}
+.head .tag{color:var(--dim);font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+
+/* Flow */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0}
+.node-row{display:flex;align-items:stretch;gap:0;width:100%;max-width:1100px}
+.node{flex:1;min-width:0;padding:28px 20px 24px;background:rgba(255,255,255,.015);border:1px solid var(--line);border-radius:0;position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all .3s cubic-bezier(.22,1,.36,1);overflow:hidden}
+.node:first-child{border-radius:20px 0 0 20px}
+.node:last-child{border-radius:0 20px 20px 0}
+.node:hover{background:rgba(255,255,255,.04);transform:translateY(-4px)}
+.node::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.node:nth-child(1)::before{background:linear-gradient(90deg,var(--gold),var(--orange))}
+.node:nth-child(2)::before{background:linear-gradient(90deg,var(--cyan),#2196f3)}
+.node:nth-child(3)::before{background:linear-gradient(90deg,var(--gold),var(--cyan))}
+.node:nth-child(4)::before{background:linear-gradient(90deg,var(--red),#ff6b6b)}
+.node:nth-child(5)::before{background:linear-gradient(90deg,var(--purple),var(--cyan))}
+.node:nth-child(6)::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.node:nth-child(7)::before{background:linear-gradient(90deg,var(--orange),var(--gold))}
+.node .letter{font-family:'SF Mono',Consolas,monospace;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
+.node:nth-child(1) .letter{color:var(--gold)}
+.node:nth-child(2) .letter{color:var(--cyan)}
+.node:nth-child(3) .letter{color:var(--gold)}
+.node:nth-child(4) .letter{color:var(--red)}
+.node:nth-child(5) .letter{color:var(--purple)}
+.node:nth-child(6) .letter{color:var(--green)}
+.node:nth-child(7) .letter{color:var(--orange)}
+.node .word{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;color:var(--ink)}
+.node .desc{font-size:11px;color:var(--dim);line-height:1.55;max-width:130px}
+.arrow{display:flex;align-items:center;justify-content:center;width:28px;flex-shrink:0;align-self:center}
+.arrow svg{width:28px;height:28px;fill:none;stroke:rgba(255,255,255,.12);stroke-width:1.5}
+.connector{width:100%;max-width:1100px;height:60px;position:relative;display:flex;align-items:flex-start;justify-content:center}
+.connector svg{width:100%;height:60px}
+.arrow-section{display:flex;align-items:center;justify-content:center;gap:0;margin:20px 0;width:100%;max-width:1100px}
+.arrow-seg{flex:1;display:flex;align-items:center;justify-content:center}
+.arrow-seg svg{width:100%;height:32px}
+.arrow-seg .mid{font-family:'SF Mono',Consolas,monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;padding:0 8px}
+
+/* Detail cards */
+.detail{width:100%;max-width:1100px;margin-top:40px;background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:20px;padding:48px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.detail .visual{display:flex;align-items:center;justify-content:center;min-height:280px}
+.detail .info h2{font-family:'Georgia',serif;font-size:42px;font-weight:400;margin-bottom:8px;letter-spacing:-.02em}
+.detail .info h2 em{font-style:italic;color:var(--gold)}
+.detail .info .sub{font-size:12px;color:var(--cyan);font-family:'SF Mono',Consolas,monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px}
+.detail .info p{font-size:14px;color:var(--dim);line-height:1.75;margin-bottom:24px;max-width:420px}
+.detail .info .specs{display:flex;flex-direction:column;gap:12px}
+.detail .info .spec{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--dim)}
+.detail .info .spec .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Bottom */
+.bottom-tag{text-align:center;margin-top:80px;padding-bottom:40px}
+.bottom-tag p{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em}
+.bottom-tag p em{color:var(--gold);font-style:normal}
+
+@media(max-width:900px){
+  .node-row{flex-wrap:wrap;gap:12px;justify-content:center}
+  .node{min-width:140px;flex:unset;border-radius:16px!important}
+  .node:first-child,.node:last-child{border-radius:16px!important}
+  .arrow{display:none}
+  .detail{grid-template-columns:1fr;gap:24px;padding:28px}
+  .detail .visual{min-height:180px}
+  .arrow-section{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head">
+  <h1>AMARTIE<em>.</em></h1>
+  <p class="tag">The Gate Architecture — Functional Flow</p>
+</div>
+<div class="flow">
+
+  <!-- Node row -->
+  <div class="node-row">
+    <div class="node"><span class="letter">A</span><span class="word">Activated</span><span class="desc">Gate armed and live. All nine seats filled.</span></div>
+    <div class="arrow"><svg viewBox="0 0 28 28"><path d="M4 14h20M18 8l6 6-6 6"/></svg></div>
+    <div class="node"><span class="letter">M</span><span class="word">Multi-Agent</span><span class="desc">Nine judges review. No single signer.</span></div>
+    <div class="arrow"><svg viewBox="0 0 28 28"><path d="M4 14h20M18 8l6 6-6 6"/></svg></div>
+    <div class="node"><span class="letter">A</span><span class="word">Accountability</span><span class="desc">SHA-256 hash-chained receipts. Tamper-proof.</span></div>
+    <div class="arrow"><svg viewBox="0 0 28 28"><path d="M4 14h20M18 8l6 6-6 6"/></svg></div>
+    <div class="node"><span class="letter">R</span><span class="word">Rejection</span><span class="desc">One dissent bounces. Four round cap.</span></div>
+    <div class="arrow"><svg viewBox="0 0 28 28"><path d="M4 14h20M18 8l6 6-6 6"/></svg></div>
+    <div class="node"><span class="letter">T</span><span class="word">Task</span><span class="desc">Payload hashed. Action scoped.</span></div>
+    <div class="arrow"><svg viewBox="0 0 28 28"><path d="M4 14h20M18 8l6 6-6 6"/></svg></div>
+    <div class="node"><span class="letter">I</span><span class="word">Intercepting</span><span class="desc">Outbound side effects caught at gate.</span></div>
+    <div class="arrow"><svg viewBox="0 0 28 28"><path d="M4 14h20M18 8l6 6-6 6"/></svg></div>
+    <div class="node"><span class="letter">E</span><span class="word">Embargo</span><span class="desc">Frozen until unanimous PASS.</span></div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connector">
+    <svg viewBox="0 0 1100 60" preserveAspectRatio="none">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0l10 5-10 5z" fill="rgba(255,255,255,.15)"/></marker>
+        <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgba(255,209,102,.3)"/><stop offset="50%" stop-color="rgba(76,201,255,.3)"/><stop offset="100%" stop-color="rgba(255,159,28,.3)"/></linearGradient>
+      </defs>
+      <line x1="50" y1="30" x2="1050" y2="30" stroke="url(#flowGrad)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+      <line x1="157" y1="22" x2="157" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="285" y1="22" x2="285" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="413" y1="22" x2="413" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="541" y1="22" x2="541" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="669" y1="22" x2="669" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="797" y1="22" x2="797" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="925" y1="22" x2="925" y2="38" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    </svg>
+  </div>
+
+  <!-- Flow labels -->
+  <div class="arrow-section">
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(255,209,102,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(255,209,102,.3)" stroke-width="1.5"/></svg></div>
+    <div class="arrow-seg"><span class="mid">intent → payload</span></div>
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(76,201,255,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(76,201,255,.3)" stroke-width="1.5"/></svg></div>
+    <div class="arrow-seg"><span class="mid">review → verdict</span></div>
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(255,209,102,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(255,209,102,.3)" stroke-width="1.5"/></svg></div>
+    <div class="arrow-seg"><span class="mid">log → anchor</span></div>
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(248,81,73,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(248,81,73,.3)" stroke-width="1.5"/></svg></div>
+    <div class="arrow-seg"><span class="mid">block or pass</span></div>
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(188,140,255,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(188,140,255,.3)" stroke-width="1.5"/></svg></div>
+    <div class="arrow-seg"><span class="mid">execute</span></div>
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(63,185,80,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(63,185,80,.3)" stroke-width="1.5"/></svg></div>
+    <div class="arrow-seg"><span class="mid">freeze → release</span></div>
+    <div class="arrow-seg"><svg viewBox="0 0 100 32"><line x1="10" y1="16" x2="90" y2="16" stroke="rgba(255,159,28,.2)" stroke-width="1" stroke-dasharray="3 3"/><path d="M85 12l8 6-8 6" fill="none" stroke="rgba(255,159,28,.3)" stroke-width="1.5"/></svg></div>
+  </div>
+
+  <!-- Card: Activated -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <defs><radialGradient id="actGlow" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(255,209,102,.4)"/><stop offset="50%" stop-color="rgba(255,209,102,.1)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
+        <circle cx="140" cy="140" r="80" fill="url(#actGlow)"/>
+        <circle cx="140" cy="140" r="50" fill="none" stroke="rgba(255,209,102,.3)" stroke-width="1" stroke-dasharray="4 4"><animateTransform attributeName="transform" type="rotate" from="0 140 140" to="360 140 140" dur="30s" repeatCount="indefinite"/></circle>
+        <circle cx="140" cy="140" r="35" fill="none" stroke="rgba(255,209,102,.5)" stroke-width="1.5"><animateTransform attributeName="transform" type="rotate" from="360 140 140" to="0 140 140" dur="20s" repeatCount="indefinite"/></circle>
+        <circle cx="140" cy="140" r="16" fill="rgba(255,209,102,.9)"><animate attributeName="r" values="14;18;14" dur="3s" repeatCount="indefinite"/></circle>
+        <circle cx="140" cy="60" r="4" fill="rgba(255,209,102,.6)"/><circle cx="190" cy="85" r="4" fill="rgba(255,209,102,.6)"/><circle cx="210" cy="140" r="4" fill="rgba(255,209,102,.6)"/><circle cx="190" cy="195" r="4" fill="rgba(255,209,102,.6)"/><circle cx="140" cy="220" r="4" fill="rgba(255,209,102,.6)"/><circle cx="90" cy="195" r="4" fill="rgba(255,209,102,.6)"/><circle cx="70" cy="140" r="4" fill="rgba(255,209,102,.6)"/><circle cx="90" cy="85" r="4" fill="rgba(255,209,102,.6)"/>
+        <text x="140" y="145" text-anchor="middle" fill="#04050a" font-size="11" font-weight="700" font-family="monospace">LIVE</text>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>A<em>ctivated</em></h2>
+      <div class="sub">Node 01 — Gate Armed</div>
+      <p>The gate is online and monitoring. All nine judge seats are filled with assigned models. No action passes without unanimous review. The core pulses when a task enters the pipeline.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--gold)"></div>Core energized</div>
+        <div class="spec"><div class="dot" style="background:var(--cyan)"></div>9 seats filled</div>
+        <div class="spec"><div class="dot" style="background:var(--green)"></div>Ready for intake</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Multi-Agent -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <circle cx="140" cy="140" r="90" fill="none" stroke="rgba(76,201,255,.08)" stroke-width="1"/>
+        <g fill="rgba(76,201,255,.8)">
+          <circle cx="140" cy="55" r="12"><animate attributeName="r" values="10;14;10" dur="4s" repeatCount="indefinite"/></circle>
+          <circle cx="205" cy="85" r="12"><animate attributeName="r" values="10;14;10" dur="4.5s" repeatCount="indefinite"/></circle>
+          <circle cx="225" cy="155" r="12"><animate attributeName="r" values="10;14;10" dur="5s" repeatCount="indefinite"/></circle>
+          <circle cx="195" cy="220" r="12"><animate attributeName="r" values="10;14;10" dur="3.5s" repeatCount="indefinite"/></circle>
+          <circle cx="140" cy="240" r="12"><animate attributeName="r" values="10;14;10" dur="4.2s" repeatCount="indefinite"/></circle>
+          <circle cx="85" cy="220" r="12"><animate attributeName="r" values="10;14;10" dur="4.8s" repeatCount="indefinite"/></circle>
+          <circle cx="55" cy="155" r="12"><animate attributeName="r" values="10;14;10" dur="3.8s" repeatCount="indefinite"/></circle>
+          <circle cx="75" cy="85" r="12"><animate attributeName="r" values="10;14;10" dur="4.3s" repeatCount="indefinite"/></circle>
+        </g>
+        <g stroke="rgba(76,201,255,.15)" stroke-width="1">
+          <line x1="140" y1="55" x2="205" y2="85"/><line x1="205" y1="85" x2="225" y2="155"/><line x1="225" y1="155" x2="195" y2="220"/><line x1="195" y1="220" x2="140" y2="240"/>
+          <line x1="140" y1="240" x2="85" y2="220"/><line x1="85" y1="220" x2="55" y2="155"/><line x1="55" y1="155" x2="75" y2="85"/><line x1="75" y1="85" x2="140" y2="55"/>
+        </g>
+        <circle cx="140" cy="155" r="20" fill="rgba(76,201,255,.1)" stroke="rgba(76,201,255,.4)" stroke-width="1.5"/>
+        <text x="140" y="160" text-anchor="middle" fill="var(--cyan)" font-size="10" font-weight="600" font-family="monospace">J1–J9</text>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>M<em>ulti-Agent</em></h2>
+      <div class="sub">Node 02 — Judge Mesh</div>
+      <p>Nine independent judges orbit the task. Each seat is model-locked — a judge cannot sign with a different model than assigned. No single point of failure. No silent substitution.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--cyan)"></div>Model-locked seats</div>
+        <div class="spec"><div class="dot" style="background:var(--green)"></div>Daily rotation</div>
+        <div class="spec"><div class="dot" style="background:var(--red)"></div>Unanimous required</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Accountability -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <g transform="translate(30,40)">
+          <rect x="0" y="0" width="220" height="60" rx="8" fill="rgba(255,209,102,.06)" stroke="rgba(255,209,102,.2)" stroke-width="1"/>
+          <text x="12" y="22" fill="var(--gold)" font-size="9" font-family="monospace" font-weight="600">sha256:a3f8...9c0d</text>
+          <text x="12" y="40" fill="var(--dim)" font-size="8" font-family="monospace">Action: Email blast · 31 recipients</text>
+          <text x="12" y="54" fill="var(--green)" font-size="8" font-family="monospace">9/9 PASS · VERIFIED</text>
+        </g>
+        <line x1="140" y1="105" x2="140" y2="125" stroke="rgba(255,209,102,.3)" stroke-width="1.5"/>
+        <g transform="translate(30,130)">
+          <rect x="0" y="0" width="220" height="60" rx="8" fill="rgba(255,209,102,.04)" stroke="rgba(255,209,102,.15)" stroke-width="1"/>
+          <text x="12" y="22" fill="rgba(255,209,102,.7)" font-size="9" font-family="monospace" font-weight="600">sha256:b7e2...4f1a</text>
+          <text x="12" y="40" fill="var(--dim)" font-size="8" font-family="monospace">Action: Calendar update · 3 events</text>
+          <text x="12" y="54" fill="var(--green)" font-size="8" font-family="monospace">9/9 PASS · VERIFIED</text>
+        </g>
+        <line x1="140" y1="195" x2="140" y2="215" stroke="rgba(255,209,102,.2)" stroke-width="1.5"/>
+        <g transform="translate(30,220)">
+          <rect x="0" y="0" width="220" height="40" rx="8" fill="rgba(255,209,102,.02)" stroke="rgba(255,209,102,.1)" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="110" y="24" text-anchor="middle" fill="var(--dim)" font-size="9" font-family="monospace">+ more receipts...</text>
+        </g>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>A<em>ccountability</em></h2>
+      <div class="sub">Node 03 — Hash-Chained Receipts</div>
+      <p>Every action produces a receipt. SHA-256 over canonical sorted JSON. Each receipt links to the previous. Tamper one character, the chain breaks. Stranger-verifiable.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--gold)"></div>SHA-256 canonical</div>
+        <div class="spec"><div class="dot" style="background:var(--cyan)"></div>Chain-linked</div>
+        <div class="spec"><div class="dot" style="background:var(--green)"></div>Replay verifiable</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Rejection -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <circle cx="140" cy="140" r="80" fill="none" stroke="rgba(248,81,73,.15)" stroke-width="2"/>
+        <line x1="80" y1="80" x2="80" y2="200" stroke="var(--red)" stroke-width="4" opacity=".7"/>
+        <line x1="120" y1="80" x2="120" y2="200" stroke="var(--red)" stroke-width="4" opacity=".7"/>
+        <line x1="160" y1="80" x2="160" y2="200" stroke="var(--red)" stroke-width="4" opacity=".7"/>
+        <line x1="200" y1="80" x2="200" y2="200" stroke="var(--red)" stroke-width="4" opacity=".7"/>
+        <circle cx="140" cy="140" r="28" fill="none" stroke="var(--red)" stroke-width="2.5"/>
+        <line x1="122" y1="122" x2="158" y2="158" stroke="var(--red)" stroke-width="3"/>
+        <line x1="158" y1="122" x2="122" y2="158" stroke="var(--red)" stroke-width="3"/>
+        <path d="M50 140 Q30 140 30 120 Q30 100 50 100" fill="none" stroke="rgba(248,81,73,.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="40" y="90" fill="var(--red)" font-size="9" font-family="monospace">BOUNCE</text>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>R<em>ejection</em></h2>
+      <div class="sub">Node 04 — The Barrier</div>
+      <p>One dissent refuses the action. The receipt is preserved as evidence — not deleted. Corrections can be re-judged up to four rounds. Endless retry is not allowed.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--red)"></div>1 dissent = bounce</div>
+        <div class="spec"><div class="dot" style="background:var(--orange)"></div>Round cap: 4</div>
+        <div class="spec"><div class="dot" style="background:var(--gold)"></div>Receipt preserved</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Task -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <rect x="55" y="90" width="170" height="100" rx="12" fill="rgba(188,140,255,.08)" stroke="rgba(188,140,255,.3)" stroke-width="1.5"/>
+        <text x="140" y="120" text-anchor="middle" fill="var(--purple)" font-size="10" font-family="monospace" font-weight="600">PAYLOAD</text>
+        <line x1="75" y1="132" x2="205" y2="132" stroke="rgba(188,140,255,.15)" stroke-width="1"/>
+        <text x="140" y="150" text-anchor="middle" fill="var(--dim)" font-size="9" font-family="monospace">{"action": "send",</text>
+        <text x="140" y="165" text-anchor="middle" fill="var(--dim)" font-size="9" font-family="monospace"> "to": "user@domain",</text>
+        <text x="140" y="180" text-anchor="middle" fill="var(--dim)" font-size="9" font-family="monospace"> "body": "..."}</text>
+        <rect x="70" y="205" width="140" height="28" rx="6" fill="rgba(188,140,255,.06)" stroke="rgba(188,140,255,.2)" stroke-width="1"/>
+        <text x="140" y="223" text-anchor="middle" fill="rgba(188,140,255,.6)" font-size="8" font-family="monospace">sha256: 7a3f...e9b2</text>
+        <path d="M140 50 L140 85" fill="none" stroke="rgba(188,140,255,.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="140" y="42" text-anchor="middle" fill="var(--dim)" font-size="9" font-family="monospace">incoming</text>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>T<em>ask</em></h2>
+      <div class="sub">Node 05 — Payload Intake</div>
+      <p>The action being proposed — email send, tool call, webhook, generation. The payload is SHA-256 hashed before review. What gets hashed is what gets judged. No bait-and-switch.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--purple)"></div>SHA-256 sorted JSON</div>
+        <div class="spec"><div class="dot" style="background:var(--cyan)"></div>Scope declared</div>
+        <div class="spec"><div class="dot" style="background:var(--green)"></div>Immutable after hash</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Intercepting -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <rect x="20" y="110" width="60" height="60" rx="12" fill="rgba(63,185,80,.08)" stroke="rgba(63,185,80,.3)" stroke-width="1.5"/>
+        <text x="50" y="145" text-anchor="middle" fill="var(--green)" font-size="9" font-family="monospace">STUDIO</text>
+        <rect x="200" y="110" width="60" height="60" rx="12" fill="rgba(63,185,80,.08)" stroke="rgba(63,140,80,.3)" stroke-width="1.5"/>
+        <text x="230" y="145" text-anchor="middle" fill="var(--green)" font-size="9" font-family="monospace">OUT</text>
+        <rect x="105" y="100" width="70" height="80" rx="14" fill="rgba(63,185,80,.15)" stroke="var(--green)" stroke-width="2"/>
+        <text x="140" y="135" text-anchor="middle" fill="var(--green)" font-size="11" font-family="monospace" font-weight="700">GATE</text>
+        <text x="140" y="152" text-anchor="middle" fill="var(--dim)" font-size="8" font-family="monospace">intercept</text>
+        <line x1="80" y1="140" x2="105" y2="140" stroke="rgba(63,185,80,.4)" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <line x1="175" y1="140" x2="200" y2="140" stroke="rgba(63,185,80,.4)" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <line x1="80" y1="165" x2="105" y2="165" stroke="rgba(248,81,73,.4)" stroke-width="1" stroke-dasharray="2 2"/>
+        <text x="92" y="178" text-anchor="middle" fill="var(--red)" font-size="7" font-family="monospace">blocked</text>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>I<em>ntercepting</em></h2>
+      <div class="sub">Node 06 — Interception Point</div>
+      <p>The gate sits between the studio and the outbound action. Every side effect is intercepted before it leaves. Nothing calls a provider before verify_action. The bot + data meet at this checkpoint.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--green)"></div>Pre-send interception</div>
+        <div class="spec"><div class="dot" style="background:var(--cyan)"></div>verify_action gate</div>
+        <div class="spec"><div class="dot" style="background:var(--red)"></div>No bypass path</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Embargo -->
+  <div class="detail">
+    <div class="visual">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <circle cx="140" cy="140" r="70" fill="none" stroke="rgba(255,159,28,.2)" stroke-width="2"/>
+        <circle cx="140" cy="140" r="55" fill="none" stroke="rgba(255,159,28,.1)" stroke-width="1" stroke-dasharray="3 3"/>
+        <line x1="140" y1="140" x2="140" y2="85" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 140 140" to="360 140 140" dur="12s" repeatCount="indefinite"/></line>
+        <line x1="140" y1="140" x2="185" y2="140" stroke="rgba(255,159,28,.5)" stroke-width="2" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 140 140" to="360 140 140" dur="4s" repeatCount="indefinite"/></line>
+        <circle cx="140" cy="140" r="5" fill="var(--orange)"/>
+        <g stroke="rgba(255,159,28,.3)" stroke-width="1.5"><line x1="140" y1="72" x2="140" y2="78"/><line x1="140" y1="202" x2="140" y2="208"/><line x1="72" y1="140" x2="78" y2="140"/><line x1="202" y1="140" x2="208" y2="140"/></g>
+        <text x="140" y="240" text-anchor="middle" fill="var(--orange)" font-size="10" font-family="monospace" font-weight="600">FROZEN</text>
+      </svg>
+    </div>
+    <div class="info">
+      <h2>E<em>mbargo</em></h2>
+      <div class="sub">Node 07 — Process Frozen</div>
+      <p>Until the gate clears, the action is frozen. No partial sends. No silent failover. No hidden swaps. The embargo lifts only on unanimous PASS. The clock runs until the verdict lands.</p>
+      <div class="specs">
+        <div class="spec"><div class="dot" style="background:var(--orange)"></div>Zero partial sends</div>
+        <div class="spec"><div class="dot" style="background:var(--red)"></div>No silent failover</div>
+        <div class="spec"><div class="dot" style="background:var(--green)"></div>Lifts on unanimous PASS</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-tag"><p>AMARTIE v0.1.0 — <em>Receipts, not promises.</em></p></div>
+
+</div>
+</body>
+</html>

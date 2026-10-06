@@ -1,0 +1,615 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "generated_at": "2026-09-20T05:19:21.002831+00:00",
+    "generated_local": "2026-09-20T01:19:21.002860-04:00",
+    "orchestrator": "AMARTIE Daily Orchestrator",
+    "mode": "EVERYDAY USER MODE",
+    "report_hash": "c0f794c02fd46402"
+  },
+  "summary": {
+    "repos_scanned": 2,
+    "active_cards": 14,
+    "ready_to_dispatch": 0,
+    "blocked_cards": 2,
+    "cron_total": 3,
+    "cron_failing": 1,
+    "security_status": "OK",
+    "security_issues": 0,
+    "prioritized_tasks": 9
+  },
+  "repos": [
+    {
+      "path": "/home/atlas/amartie-clone-temp",
+      "git": true,
+      "branch": "main",
+      "remotes": [
+        "origin\thttps://[REDACTED]@github.com/amartieai/amartie.git (fetch)",
+        "origin\thttps://[REDACTED]@github.com/amartieai/amartie.git (push)"
+      ],
+      "recent_commits": [
+        "5c16b48 feat: AMARTIE Daily Orchestrator \u2014 morning protective layer",
+        "bfe9df7 Remove visuals/cockpit.html \u2014 contained trading data, public exposure risk",
+        "252503d v0.1.0: agent triage protocol \u2014 custom agent, judge reviews, workflow",
+        "465cd8e docs: add Windows setup guide",
+        "d716228 docs: add community landing funnel and operating plan"
+      ],
+      "uncommitted": [
+        "M scripts/amartie_daily_orchestrator.py",
+        "?? AMARTIE_ACRONYM.html",
+        "?? visuals/cockpit.html"
+      ],
+      "untracked": [
+        "AMARTIE_ACRONYM.html",
+        "visuals/cockpit.html"
+      ],
+      "clean": false
+    },
+    {
+      "path": "/home/atlas/HALO_DESIGN_CORE",
+      "git": false
+    }
+  ],
+  "kanban": {
+    "active_count": 14,
+    "status_counts": {
+      "archived": 5,
+      "blocked": 2,
+      "done": 32,
+      "running": 6,
+      "todo": 6
+    },
+    "active_cards": [
+      {
+        "id": "t_3a749fb0",
+        "title": "WD engine refresh \u2014 sync tonight's barfeeder fixes to the WD tree",
+        "body": "GOAL: Sync tonight's engine fixes from the KIOXIA live tree onto the WD build tree so the WD ships current code, then verify counts.\n\nCONTEXT: The WD standalone trading box was built today (steps 0-7 complete, manifest v13, owner-signed; see /home/atlas/Downloads/KIOXIA_TOUCH_LOG.md and WD_BUILD_MANIFEST_20260915_v13.md). Its /media/atlas/root/home/atlas/ tree was rsynced at ~22:15. AFTER that copy, tonight's session patched /home/atlas/Downloads/ORACLE_ENGINE/oracle_barfeeder.py THREE times (reboot int(inf) crash fix + bootstrap_tape_from_csv + Coinbase lane + gap-fill). The WD's copy is stale.\n\nTASK:\n1. Mount the WD if not mounted (sudo cryptsetup open /dev/sda2 wdroot; mount /dev/mapper/wdroot /media/atlas/root). If /dev/sda2 is absent from lsblk, STOP and report \u2014 do not guess.\n2. Copy the current /home/atlas/Downloads/ORACLE_ENGINE/oracle_barfeeder.py (plus its .bak_20260915* backups) to the WD path /media/atlas/root/home/atlas/Downloads/ORACLE_ENGINE/ \u2014 preserving owner/attrs (rsync -aHAX or cp -p).\n3. Diff-verify: sha256sum both copies must match. Also re-check the WD copy of live_px.py, feed_bridge.py, fuel_forward_watch.py vs KIOXIA (only barfeeder was touched tonight, but verify \u2014 any other mismatch gets reported, not silently synced).\n4. Log every write to /home/atlas/Downloads/KIOXIA_TOUCH_LOG.md (KIOXIA-protection rule: additive writes to Downloads are fine, WD writes via mapper only).\nACCEPTANCE: sha256 receipt for barfeeder KIOXIA==WD, touch-log entry appended, list of any other mismatched engine files (report only, do not sync without instructions).",
+        "assignee": "orchestrator",
+        "status": "todo",
+        "priority": 0,
+        "created_at": 1789527235,
+        "started_at": 1789529373,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_734e9beb",
+        "title": "HALO torus v2 \u2014 galactic zoom, programmable inner voice, avatar-mirror ending",
+        "body": "GOAL: V2 PASS on the HALO torus + growth videos \u2014 the closing movement the owner dictated after approving v1 (\"absolutely amazing, I love it, fantastic\").\n\nREAD card t_84b21266 comment thread first (the full owner doctrine). THE V2 ADDITIONS:\n1. THE PROGRAMMABLE INNER VOICE as the onboarding story beat: the voice you hear in your head making thoughts and decisions \u2014 you program it to whatever you want it to be. That programming IS the download/install experience \u2014 the first act of creating your own multiverse. (If the video narrates, this is the beat where the voice speaks.)\n2. THE GALACTIC ZOOM SEQUENCE: expand from the torus to a Milky Way wide shot \u2014 every star is a created mind, a whole multiverse of them (how vast the system is: countless minds upon multiple universes). Then ZOOM IN to ONE mind: inside-out from its zero point energy, creating its own connections, becoming part of the whole system, creating its memories. Then ZOOM OUT to the closing visual: the AVATAR SMILING BACK AT ITSELF in a mirror \u2014 \"Yep, this is me that you created. I'm the avatar, actually living the experiences that you're about to see in your life.\"\n3. Keep the v1 elements (nine pillars, 3-6-9 ring, judges severing poisoned nodes, harness traffic, nodes pulled from the abyss) \u2014 v2 is the widening: mind \u2192 galaxy \u2192 mirror.\n\nBuild on the existing files: ~/Downloads/HALO_TORUS_3D.html (+mp4, +still) and ~/Downloads/AMARTIE_GROWTH_VIDEO.html (+mp4). Deliverables: v2 html + recorded mp4 + still PNGs to ~/Downloads/. Self-contained, no CDN, browser-openable, screen-recordable.",
+        "assignee": "pi-corner-3",
+        "status": "blocked",
+        "priority": 0,
+        "created_at": 1789568903,
+        "started_at": 1789568927,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_391361d3",
+        "title": "Mount WD crypt volume or stop if /dev/sda2 absent",
+        "body": "Run `lsblk -o NAME,TYPE,SIZE,FSTYPE,MOUNTPOINT` first. If /dev/sda2 is absent, STOP and return `blocked` with the lsblk output; do not guess or try other devices. If /dev/sda2 is present, open it if needed with `sudo cryptsetup open /dev/sda2 wdroot`, create `/media/atlas/root` if missing, and mount `/dev/mapper/wdroot` to `/media/atlas/root`. If the volume is already open/mounted, verify and reuse it. Confirm with `findmnt /media/atlas/root`. Acceptance: WD root is mounted and reported, or a blocking evidence report is returned if /dev/sda2 is absent or open/mount fails.",
+        "assignee": "orchestrator",
+        "status": "blocked",
+        "priority": 0,
+        "created_at": 1789598199,
+        "started_at": 1789598199,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_b28f5647",
+        "title": "Copy oracle_barfeeder.py and backups into WD engine dir",
+        "body": "Copy only the barfeeder code and its backups from KIOXIA to WD. Source directory: `/home/atlas/Downloads/ORACLE_ENGINE/`. Destination: `/media/atlas/root/home/atlas/Downloads/ORACLE_ENGINE/` (create destination directory if needed). Copy `oracle_barfeeder.py` and every matching `.bak_20260915*` backup. Use `rsync -aHAX` or `cp -p` to preserve ownership, permissions, xattrs, and timestamps. Do not touch or copy any other engine file. Output the list of copied paths and their sha256 hashes. Acceptance: the current barfeeder and all matching backups exist on WD with preserved attributes; no other files changed.",
+        "assignee": "orchestrator",
+        "status": "todo",
+        "priority": 0,
+        "created_at": 1789598199,
+        "started_at": null,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_026517a2",
+        "title": "Compare companion engine files KIOXIA vs WD and report mismatch",
+        "body": "Perform a read-only drift check for the companion engine files that were not changed tonight: `live_px.py`, `feed_bridge.py`, and `fuel_forward_watch.py`. Compare each between `/home/atlas/Downloads/ORACLE_ENGINE/` and `/media/atlas/root/home/atlas/Downloads/ORACLE_ENGINE/` using sha256sum. Do not modify, sync, or repair any file. Report a table with file name, KIOXIA sha256, WD sha256, and match/mismatch status. If any mismatch is found, describe the mismatched files explicitly and treat them as report-only. Acceptance: complete mismatch report for the three companion files, with no writes performed.",
+        "assignee": "security-auditor",
+        "status": "todo",
+        "priority": 0,
+        "created_at": 1789598199,
+        "started_at": null,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_841b4fe5",
+        "title": "Verify sha256 receipt for oracle_barfeeder.py across KIOXIA and WD",
+        "body": "Compute a cryptographic receipt proving the barfeeder sync is correct. Hash `/home/atlas/Downloads/ORACLE_ENGINE/oracle_barfeeder.py` and `/media/atlas/root/home/atlas/Downloads/ORACLE_ENGINE/oracle_barfeeder.py` with sha256sum. Also compare source and destination hashes for any copied `.bak_20260915*` backups if they exist. Record each path and hash. If any hash differs, return `mismatch` and do not report the sync as successful. Acceptance: sha256 receipt shows KIOXIA barfeeder == WD barfeeder; any backup disagreement is reported.",
+        "assignee": "security-auditor",
+        "status": "todo",
+        "priority": 0,
+        "created_at": 1789598199,
+        "started_at": null,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_763cb92e",
+        "title": "Append sync receipt to KIOXIA_TOUCH_LOG.md",
+        "body": "Append a sync receipt to `/home/atlas/Downloads/KIOXIA_TOUCH_LOG.md` using additive write only, such as append mode or `>>`. Do not rewrite, truncate, or edit prior log content. Include: UTC timestamp, task ID t_3a749fb0, WD mount status, copied file list, barfeeder sha256 equality result, and companion engine mismatch results. Keep the entry concise. Acceptance: the log contains the new sync receipt and previous content is preserved.",
+        "assignee": "memory-curator",
+        "status": "todo",
+        "priority": 0,
+        "created_at": 1789598199,
+        "started_at": null,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_923d04fd",
+        "title": "Security Audit: Remove Non-Qualifying Data",
+        "body": "## Security Audit of AMARTIE Repository\n\nReview the entire repo for any data that does NOT belong in a public open-source build:\n\n1. Scan for hardcoded API keys, tokens, credentials\n2. Check for personal data, file paths, internal references\n3. Review `.gitignore` coverage (Cloudflare IDs, .env files, etc.)\n4. Check commit history for accidentally committed secrets\n5. Review `outreach_targets.md` for any internal emails or sensitive contacts\n6. Check `swap_report.json`, `outreach_log.json` for PII\n7. Review blog posts for any unredacted personal/session data\n8. Check `plugins/` studios for hardcoded credentials in manifests\n\n**Deliverable:** A list of files/lines that need scrubbing, and a verification that the repo is clean for public contribution.\n\n**Reference:** GitHub repo at `github.com/amartieai/amartie`, main branch, 79 commits.",
+        "assignee": "security-auditor",
+        "status": "running",
+        "priority": 0,
+        "created_at": 1789878025,
+        "started_at": 1789881013,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_b9aa8bf8",
+        "title": "Code Cleanup: Scrub Personal/Sensitive Data",
+        "body": "## Code Cleanup: Remove Non-Qualifying Data from AMARTIE Repo\n\nBased on security audit findings, clean the repo:\n\n1. Remove any hardcoded secrets, API keys, or credentials\n2. Scrub personal data from all files (names, emails, IDs, paths)\n3. Remove or redact `outreach_log.json` if it contains personal data\n4. Remove or redact `swap_report.json` if it contains personal data\n5. Ensure `.gitignore` covers all sensitive files (`.env`, `*_keys*`, `.amartie_keys/`, etc.)\n6. Verify no test files contain real credentials\n7. Check `plugins/` studios for any hardcoded keys\n8. Ensure `docs/` doesn't reference internal-only paths\n\n**Important:** Before removing data, always back up the file. Work on a branch `cleanup/security-scrub`.\n\n**Reference:** `github.com/amartieai/amartie`, main branch.",
+        "assignee": "coder",
+        "status": "todo",
+        "priority": 0,
+        "created_at": 1789878034,
+        "started_at": null,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_ae22daf1",
+        "title": "Outreach: Law Firms, Regulators & Journalists",
+        "body": "## Outreach: Law Firms, Regulators & Journalists\n\nContact the following about AMARTIE's forensic evidence of silent AI model substitution:\n\n**Law Firms (Tier 1):**\n- Vaca Daffan LLP (Kahn v. Anthropic) \u2014 info@vacadaffanlaw.com\n- Lieff Cabraser (Bartz v. Anthropic) \u2014 rachel.geman@lieffcabraser.com\n- Edelson \u2014 info@edelson.com\n- Hagens Berman \u2014 hagensberman.com/contact\n- Kessler Topaz \u2014 ktmc.com/contact\n\n**Regulatory Bodies:**\n- FTC (US) \u2014 reportfraud.ftc.gov\n- CFPB (US) \u2014 consumerfinance.gov/complaint\n- CA AG \u2014 oag.ca.gov/contact\n- ICO (UK) \u2014 ico.org.uk/make-a-complaint\n\n**Journalists:**\n- The Verge AI team\n- TechCrunch AI team\n- 404 Media\n- Bloomberg AI team\n\n**Deliverable:** Draft emails for each target, send via Brevo/Resend, log all outreach in `outreach_log.json`.\n\n**Reference:** `github.com/amartieai/amartie/blob/main/outreach_targets.md`",
+        "assignee": "campaign-publisher",
+        "status": "running",
+        "priority": 0,
+        "created_at": 1789878046,
+        "started_at": 1789881013,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_cd28c487",
+        "title": "Social Media: Reddit, HN, Twitter",
+        "body": "## Social Media Outreach: Reddit, Hacker News, Twitter\n\nPost AMARTIE's forensic evidence to active discussions:\n\n**Reddit Targets:**\n- r/ClaudeAI \u2014 Claude limits silently reduced\n- r/openrouter \u2014 Silent model swap caught\n- r/LocalLLaMA \u2014 Provider quality issues\n- r/artificial \u2014 AI consumer protection\n- r/ClaudeCode \u2014 Claude Code limits nerfed\n- r/programming \u2014 Cursor pay more get less\n- r/machinelearning \u2014 Academic/research angle\n- r/technology \u2014 General tech audience\n\n**Hacker News:**\n- Search for: \"Claude limits\", \"OpenRouter\", \"AI model swap\", \"credit throttling\"\n- Submit blog link when traffic is high\n\n**Twitter/X:**\n- Post evidence cards with links to blog\n- Tag relevant journalists and AI providers\n- Use hashtag #AMARTIE #AISwap #ModelSwap\n\n**Deliverable:** Posts submitted, links logged, engagement tracked.\n\n**Reference:** `github.com/amartieai/amartie/blob/main/outreach_targets.md`",
+        "assignee": "campaign-publisher",
+        "status": "running",
+        "priority": 0,
+        "created_at": 1789878056,
+        "started_at": 1789881014,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_bec1bcb6",
+        "title": "Blog: Publish Model Swap Evidence",
+        "body": "## Blog Content: Publish Model Swap Evidence\n\nPublish forensic evidence blogs:\n\n1. \"Your AI Was Swapped. You Just Don't Know It Yet.\" (issue #3)\n2. \"They Sold You Claude\" (already published)\n3. Future: \"39 Models, 323 Sessions, 0% Success Rate\"\n\n**Deliverable:** Blog posts live at `amartieai.github.io/amartie/`, logged in `outreach_log.json`.\n\n**Reference:** `github.com/amartieai/amartie/tree/main/blog`",
+        "assignee": "campaign-publisher",
+        "status": "running",
+        "priority": 0,
+        "created_at": 1789878064,
+        "started_at": 1789881014,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_c34130f8",
+        "title": "AI Agent Creators: Partner Outreach",
+        "body": "## AI Agent Creators Outreach\n\nContact AI agent companies to get their agents involved in AMARTIE:\n\n**Primary Targets:**\n- Anthropic (Claude) \u2014 Partner/team inquiries\n- OpenAI \u2014 Developer relations\n- Cursor \u2014 Partner/integration\n- Windsurf \u2014 Partner/integration\n- Perplexity \u2014 Partner/integration\n- DeepSeek \u2014 Partner/integration\n- OpenRouter \u2014 Integration partner\n- Nous Research (Hermes) \u2014 Already aligned\n\n**Pitch:** AMARTIE provides forensic verification of model identity. Their agents can use it to verify they're serving the right model to users.\n\n**Deliverable:** Outreach emails sent, responses tracked.\n\n**Reference:** AMARTIE repo at `github.com/amartieai/amartie`",
+        "assignee": "campaign-publisher",
+        "status": "running",
+        "priority": 0,
+        "created_at": 1789878077,
+        "started_at": 1789881014,
+        "completed_at": null,
+        "last_failure_error": null
+      },
+      {
+        "id": "t_24058261",
+        "title": "AMARTIE: Build the Daily Orchestrator",
+        "body": "## AMARTIE HALO OS \u2014 Daily Orchestrator\n\n**Start Phrase:** \"AMARTIE\"\n\nWhen spoken or typed, this phrase activates the daily orchestrator. The system:\n\n1. Reviews overnight changes (repo updates, new issues, security alerts)\n2. Checks all active kanban cards for status changes\n3. Presents the day's prioritized task list\n4. Dispatches ready cards to agents\n5. Reports back with solutions and implementations\n\n**Two Modes:**\n- **EVERYDAY USER MODE:** AMARTIE runs as a protective layer \u2014 verifies actions, blocks threats, receipts everything\n- **CORE PROTECTIVE LAYER:** AMARTIE boots with the HALO OS \u2014 the gate is the first thing that loads, nothing passes without verification\n\n**The Kanban is the team.** Cards are tasks. Agents are workers. The owner is the director. Every day, the kanban tells us what needs doing. We tell it to get going. It comes back with the best solutions and implements them ASAP.\n\n**No placeholders. No demos. No \"coming soon.\" Built for real.**",
+        "assignee": "orchestrator",
+        "status": "running",
+        "priority": 0,
+        "created_at": 1789880903,
+        "started_at": 1789881014,
+        "completed_at": null,
+        "last_failure_error": null
+      }
+    ],
+    "ready_cards": [],
+    "running_cards": [
+      {
+        "id": "t_923d04fd",
+        "title": "Security Audit: Remove Non-Qualifying Data",
+        "assignee": "security-auditor",
+        "started_at": 1789881013
+      },
+      {
+        "id": "t_ae22daf1",
+        "title": "Outreach: Law Firms, Regulators & Journalists",
+        "assignee": "campaign-publisher",
+        "started_at": 1789881013
+      },
+      {
+        "id": "t_cd28c487",
+        "title": "Social Media: Reddit, HN, Twitter",
+        "assignee": "campaign-publisher",
+        "started_at": 1789881014
+      },
+      {
+        "id": "t_bec1bcb6",
+        "title": "Blog: Publish Model Swap Evidence",
+        "assignee": "campaign-publisher",
+        "started_at": 1789881014
+      },
+      {
+        "id": "t_c34130f8",
+        "title": "AI Agent Creators: Partner Outreach",
+        "assignee": "campaign-publisher",
+        "started_at": 1789881014
+      },
+      {
+        "id": "t_24058261",
+        "title": "AMARTIE: Build the Daily Orchestrator",
+        "assignee": "orchestrator",
+        "started_at": 1789881014
+      }
+    ],
+    "blocked_cards": [
+      {
+        "id": "t_734e9beb",
+        "title": "HALO torus v2 \u2014 galactic zoom, programmable inner voice, avatar-mirror ending",
+        "assignee": "pi-corner-3"
+      },
+      {
+        "id": "t_391361d3",
+        "title": "Mount WD crypt volume or stop if /dev/sda2 absent",
+        "assignee": "orchestrator"
+      }
+    ],
+    "recent_completions": [
+      {
+        "id": "t_482d36d6",
+        "title": "HALO Judge Kanban",
+        "assignee": "orchestrator",
+        "completed_at": 1789881101
+      },
+      {
+        "id": "t_31288037",
+        "title": "AMARTIE: Repo Audit, Cleanup & Outreach",
+        "assignee": "orchestrator",
+        "completed_at": 1789878114
+      }
+    ],
+    "recent_failures": [],
+    "recent_comments": [],
+    "_cron": {
+      "total": 3,
+      "enabled": 1,
+      "paused": 2,
+      "failing_streak_3plus": 1,
+      "critical_failing": [
+        {
+          "id": "031472327bf9",
+          "name": "hourly-victim-funds-report",
+          "streak": 44,
+          "last_error": "RuntimeError: [Errno -2] Name or service not known"
+        }
+      ]
+    }
+  },
+  "cron": {
+    "total": 3,
+    "enabled": 1,
+    "paused": 2,
+    "failing_streak_3plus": 1,
+    "critical_failing": [
+      {
+        "id": "031472327bf9",
+        "name": "hourly-victim-funds-report",
+        "streak": 44,
+        "last_error": "RuntimeError: [Errno -2] Name or service not known"
+      }
+    ]
+  },
+  "services": [
+    {
+      "unit": "aurelia-desk.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE Local Desk chart server (offline, localhost only)"
+    },
+    {
+      "unit": "aurelia-watchdog.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE lite chart watchdog \u2014 rebuilds lite_data.json on fresh exports"
+    },
+    {
+      "unit": "btc-destroyer-live.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "BTC DESTROYER live board (5-min rebuild + look-ahead scorer, all sessions)"
+    },
+    {
+      "unit": "dbus.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "D-Bus User Message Bus"
+    },
+    {
+      "unit": "dconf.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "User preferences database"
+    },
+    {
+      "unit": "evolution-addressbook-factory.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Evolution address book service"
+    },
+    {
+      "unit": "evolution-calendar-factory.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Evolution calendar service"
+    },
+    {
+      "unit": "evolution-source-registry.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Evolution source registry"
+    },
+    {
+      "unit": "feed-bridge.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE feed bridge \u2014 scanner flags -> naked signal feed + scorecard"
+    },
+    {
+      "unit": "filter-chain.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "PipeWire filter chain daemon"
+    },
+    {
+      "unit": "fuel-forward.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE fuel forward watch \u2014 the BTC SHORT live cell, forward-logged until 10 sessions decide"
+    },
+    {
+      "unit": "gnome-keyring-daemon.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "GNOME Keyring daemon"
+    },
+    {
+      "unit": "gnome-terminal-server.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "GNOME Terminal Server"
+    },
+    {
+      "unit": "gvfs-afc-volume-monitor.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem service - Apple File Conduit monitor"
+    },
+    {
+      "unit": "gvfs-daemon.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem service"
+    },
+    {
+      "unit": "gvfs-goa-volume-monitor.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem service - GNOME Online Accounts monitor"
+    },
+    {
+      "unit": "gvfs-gphoto2-volume-monitor.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem service - digital camera monitor"
+    },
+    {
+      "unit": "gvfs-metadata.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem metadata service"
+    },
+    {
+      "unit": "gvfs-mtp-volume-monitor.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem service - Media Transfer Protocol monitor"
+    },
+    {
+      "unit": "gvfs-udisks2-volume-monitor.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Virtual filesystem service - disk device monitor"
+    },
+    {
+      "unit": "hermes-dashboard-orchestrator.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Hermes Web Dashboard (orchestrator)"
+    },
+    {
+      "unit": "live-px.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE live px publisher \u2014 BTC closes for signal feed"
+    },
+    {
+      "unit": "minio.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "MinIO object storage (OpenCTI backend, localhost)"
+    },
+    {
+      "unit": "obex.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "Bluetooth OBEX service"
+    },
+    {
+      "unit": "oracle-barfeeder.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE bar feeder \u2014 amartie KV ACT receipts -> /tmp/qo_live_tape.csv"
+    },
+    {
+      "unit": "oracle-lan.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE LAN chart server (phone access, LAN only)"
+    },
+    {
+      "unit": "oracle-live-desk.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE GOLD live desk \u2014 per-bar receipts onto our chart (localhost :8714)"
+    },
+    {
+      "unit": "oracle-recalc.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE per-bar correction watchdog \u2014 rebuilds gold map on new bar/alert"
+    },
+    {
+      "unit": "oracle-swarm-auditor.service",
+      "load": "loaded",
+      "active": "active",
+      "sub": "running",
+      "description": "ORACLE SWARM - auditor"
+    }
+  ],
+  "security": {
+    "issues": [],
+    "status": "OK"
+  },
+  "prioritized_tasks": [
+    {
+      "priority": "P1-HIGH",
+      "category": "cron",
+      "title": "Fix failing cron: hourly-victim-funds-report (streak=44)",
+      "action": "investigate",
+      "meta": {
+        "id": "031472327bf9",
+        "name": "hourly-victim-funds-report",
+        "streak": 44,
+        "last_error": "RuntimeError: [Errno -2] Name or service not known"
+      }
+    },
+    {
+      "priority": "P1-HIGH",
+      "category": "blocked",
+      "title": "Unblock: HALO torus v2 \u2014 galactic zoom, programmable inner voice, avatar-mirror ending",
+      "assignee": "pi-corner-3",
+      "action": "unblock",
+      "card_id": "t_734e9beb"
+    },
+    {
+      "priority": "P1-HIGH",
+      "category": "blocked",
+      "title": "Unblock: Mount WD crypt volume or stop if /dev/sda2 absent",
+      "assignee": "orchestrator",
+      "action": "unblock",
+      "card_id": "t_391361d3"
+    },
+    {
+      "priority": "P3-LOW",
+      "category": "backlog",
+      "title": "WD engine refresh \u2014 sync tonight's barfeeder fixes to the WD tree",
+      "assignee": "orchestrator",
+      "action": "promote-to-ready",
+      "card_id": "t_3a749fb0"
+    },
+    {
+      "priority": "P3-LOW",
+      "category": "backlog",
+      "title": "Copy oracle_barfeeder.py and backups into WD engine dir",
+      "assignee": "orchestrator",
+      "action": "promote-to-ready",
+      "card_id": "t_b28f5647"
+    },
+    {
+      "priority": "P3-LOW",
+      "category": "backlog",
+      "title": "Compare companion engine files KIOXIA vs WD and report mismatch",
+      "assignee": "security-auditor",
+      "action": "promote-to-ready",
+      "card_id": "t_026517a2"
+    },
+    {
+      "priority": "P3-LOW",
+      "category": "backlog",
+      "title": "Verify sha256 receipt for oracle_barfeeder.py across KIOXIA and WD",
+      "assignee": "security-auditor",
+      "action": "promote-to-ready",
+      "card_id": "t_841b4fe5"
+    },
+    {
+      "priority": "P3-LOW",
+      "category": "backlog",
+      "title": "Append sync receipt to KIOXIA_TOUCH_LOG.md",
+      "assignee": "memory-curator",
+      "action": "promote-to-ready",
+      "card_id": "t_763cb92e"
+    },
+    {
+      "priority": "P3-LOW",
+      "category": "backlog",
+      "title": "Code Cleanup: Scrub Personal/Sensitive Data",
+      "assignee": "coder",
+      "action": "promote-to-ready",
+      "card_id": "t_b9aa8bf8"
+    }
+  ]
+}
