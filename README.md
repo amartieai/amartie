@@ -3,6 +3,11 @@
 > **Receipts, not promises.**
 >
 > AMARTIE is an open-source, local-first AI action gate: an owner-facing studio proposes an action, nine judges verify it, and the action either produces a receipt and proceeds or produces a dissent receipt and refuses.
+## Live now
+
+- [amartie.org](https://amartie.org) — the public house: the record, the scorecards, the kits
+- [The Raffi Record](https://amartie.org/raffi-case/) — "Raffi Case — Unbelievable Facts That Can't Be Ignored!"
+- [The Witness Stand](https://github.com/amartieai/witness-stand) — the judge for the judges · community: [r/TheWitnessStand](https://www.reddit.com/r/TheWitnessStand/) · [scorecard](https://amartie.org/stand-scorecard/)
 
 ## What it is—and is not
 
